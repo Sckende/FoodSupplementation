@@ -30,7 +30,6 @@ And what about extrems years ?
 ## Things to do
 
 * Enter and clean goose data for the 3 years
-* Qualification of lemming years (peak/intermediate/crash) - Done
 * Determine year category: which one is wet, wich one is dry (biblio !)
 * Think about habitat: mesic tundra, wetland, ... buffer area in wetland with high density of goose nests, ... for difference in predation risk by foxes
 * Obtain number of active fox dens at camp 2 between 2015-2017 (for predation index)
@@ -40,6 +39,7 @@ And what about extrems years ?
 * Logistic regression - Shaffer - or DSR in RMARK - Dinsmore -
 * Follow Zuur paper for rigour in analyses
 * Read the meta-analysis done on the supplementation et use them to buit a context and situate my own analyse in this lanscape - Understand, sometimes, experimentations did not work (Ruffino et al 2014, Boutin 1990, ...)
+*Food supplementation with GSGO goslings - Lindholm and Gauthier 1994
 
 ```{r cars}
 
