@@ -39,7 +39,7 @@ And what about extrems years ?
 * Logistic regression - Shaffer - or DSR in RMARK - Dinsmore -
 * Follow Zuur paper for rigour in analyses
 * Read the meta-analysis done on the supplementation et use them to buit a context and situate my own analyse in this lanscape - Understand, sometimes, experimentations did not work (Ruffino et al 2014, Boutin 1990, ...)
-*Food supplementation with GSGO goslings - Lindholm and Gauthier 1994
+* Food supplementation with GSGO goslings - Lindholm and Gauthier 1994
 
 ```{r cars}
 
