@@ -1,0 +1,47 @@
+---
+title: "Chapter 1 - Resource supplementation on geese nests"
+author: "Claire-Cécile Juhasz"
+date: "2 mars 2018"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+## Context
+
+Climate models predict an increase of summer air temperature and precipitation in Arctic tundra. These local climate modifications influence the resource avalaibility for geese during their breeding season, via an increase of primary production and water holes. We wanted to simulate these environmental modifications by supplementing in food and water, goose nests during summers 2015 to 2017. Moreover, we want to take account of lemming abundance, habitat type (mesic tundra vs. wetland) and year type (dry vs. wet). 
+
+## Questions
+
+Which are the effects of water and food supplementation on goose nesting success? In mesic tundra vs wetland? During dry year vs wet year?
+
+## Predictions
+1 - Goose nesting success increases with water supplementation.  
+  a - NS increase is more importante in mesic tundra than in wetland.  
+  b - NS increase is more importante during a dry year than a wet year.
+  
+  2 - Goose nesting success increases with food supplementation.  
+  a - NS increase is more importante in mesic tundra than in wetland.  
+  b - NS increase is more importante during a dry year than a wet year.  
+    
+And what about extrems years ?
+  
+## Things to do
+
+* Enter and clean goose data for the 3 years
+* Qualification of lemming years (peak/intermediate/crash) - Done
+* Determine year category: which one is wet, wich one is dry (biblio !)
+* Think about habitat: mesic tundra, wetland, ... buffer area in wetland with high density of goose nests, ... for difference in predation risk by foxes
+* Obtain number of active fox dens at camp 2 between 2015-2017 (for predation index)
+* Obtain number of active fox dens with pups at camp 2 between 2015-2017 (for predation index)
+* Relative humidity data? Could allow to compute a true temperature perceived (find paper)
+* Think about type of statistical analyses: data distribution, random effects, effective vs parameters number in the model, ... or PATH ANALYSES
+* Logistic regression - Shaffer - or DSR in RMARK - Dinsmore -
+* Follow Zuur paper for rigour in analyses
+* Read the meta-analysis done on the supplementation et use them to buit a context and situate my own analyse in this lanscape - Understand, sometimes, experimentations did not work (Ruffino et al 2014, Boutin 1990, ...)
+
+```{r cars}
+
+```
+
