@@ -29,7 +29,7 @@ And what about extrems years ?
   
 ## Things to do
 
-* Enter and clean goose data for the 3 years
+* Enter and clean goose data for the 4 years (including Nicolas data in 2005)
 * Determine year category: which one is wet, wich one is dry (biblio !)
 * Think about habitat: mesic tundra, wetland, ... buffer area in wetland with high density of goose nests, ... for difference in predation risk by foxes
 * Obtain number of active fox dens at camp 2 between 2015-2017 (for predation index)
