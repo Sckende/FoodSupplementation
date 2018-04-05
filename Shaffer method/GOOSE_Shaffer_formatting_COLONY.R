@@ -1,8 +1,12 @@
 #### Steps for the data formatting to use the Shaffer method ####
 ############ COLONY DATA ########
 
+
 # Load the initial data file of GSGO monitoring
-gsgo <- read.csv(“nestsucc.csv)
+setwd(dir = "/home/claire/Bureau")
+list.files()
+gsgo <- read.csv("NIDIFI 2017.csv")
+summary(gsgo)
 
 #### Variable treatment ####
 
@@ -42,7 +46,9 @@ gsgo$UTM.N[gsgo$UTM.N==0] <- NA
 
 #### Creation of a dataframe ####
 # Group necessary variables in a dataframe
-gsgo_df <- data.frame(year=gsgo$AN,site=gsgo$LOC,id=gsgo$ID,FirstFound=gsgo$DATEk,LastPresent=gsgo$DATEl,LastChecked=gsgo$DATEm,fate=gsgo$fate,habitat=gsgo$hab,ISSUE=gsgo$ISSUE,UTM.E=gsgo$UTM.E,UTM.N=gsgo$UTM.N)
+gsgo_df <- data.frame(year = gsgo$AN, site = gsgo$LOC, id = gsgo$NO, FirstFound = gsgo$DATEk, LastPresent = gsgo$DATEl, LastChecked = gsgo$DATEm, fate = gsgo$fate, habitat = gsgo$hab, ISSUE = gsgo$ISSUE, UTM.E = gsgo$UTM.E, UTM.N = gsgo$UTM.N)
+
+summary(gsgo_df)
 
 #### DATA VALIDATION ####
 # Remove nests with only one visit (FirstFound = LastChecked)
@@ -58,8 +64,8 @@ rm(FF.equals.LC)
 # Check for nest for wich FirstFound = LastPresent when no predation (THUS ZERO EXPOSURE DAYS)
 rownum <- 0
 for (i in 1:nrow(gsgo_df)){
-  if (is.na(gsgo_df$Fate[i])==FALSE) {
-    if (gsgo_df$FirstFound[i] == gsgo_df$LastPresent[i] & gsgo_df$Fate[i] == 0) {
+  if (is.na(gsgo_df$fate[i])==FALSE) {
+    if (gsgo_df$FirstFound[i] == gsgo_df$LastPresent[i] & gsgo_df$fate[i] == 0) {
       rownum <- cbind(rownum, i)
     }
   }
@@ -72,8 +78,8 @@ gsgo_df[rownum,]
 # Check for nests for which LastPresent != LastChecked when no predation (SHOULD NOT HAPPEN)
 rownum <- 0
 for (i in 1:nrow(gsgo_df)){
-  if (is.na(gsgo_df$Fate[i])==FALSE) {
-    if (gsgo_df$LastPresent[i] != gsgo_df$LastChecked[i] & gsgo_df$Fate[i] == 0) {
+  if (is.na(gsgo_df$fate[i])==FALSE) {
+    if (gsgo_df$LastPresent[i] != gsgo_df$LastChecked[i] & gsgo_df$fate[i] == 0) {
       rownum <- cbind(rownum, i)
     }
   }
@@ -87,8 +93,8 @@ gsgo_df[rownum,"ID"]
 # Check for nests for which LastPresent == LastChecked when there is predation (SHOULD NOT HAPPEN UNLESS TWO VISITS IN THE SAME DAY AND PREDATION IN THE SECOND VISIT)
 rownum <- 0
 for (i in 1:nrow(gsgo_df)){
-  if (is.na(gsgo_df$Fate[i])==FALSE) {
-    if (gsgo_df$LastPresent[i] == gsgo_df$LastChecked[i] & gsgo_df$Fate[i] == 1) {
+  if (is.na(gsgo_df$fate[i])==FALSE) {
+    if (gsgo_df$LastPresent[i] == gsgo_df$LastChecked[i] & gsgo_df$fate[i] == 1) {
       rownum <- cbind(rownum, i)
     }
   }
@@ -98,6 +104,7 @@ rownum <- rownum[-1]
 rownum
 if (length(rownum) > 0) gsgo_df <- data.frame(gsgo_df[-rownum,], row.names=NULL)
 
+##########################################################################here I am ###################
 #### Save file ####
 write.csv2(gsgo_df, file = "output/gsgo.csv", row.names = F)
 rm(temp_name,gsgotemp,temp,rownum,minyear,maxyear,i) # To remove objects from the environment
