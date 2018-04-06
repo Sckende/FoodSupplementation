@@ -104,10 +104,9 @@ rownum <- rownum[-1]
 rownum
 if (length(rownum) > 0) gsgo_df <- data.frame(gsgo_df[-rownum,], row.names=NULL)
 
-##########################################################################here I am ###################
+
 #### Save file ####
-write.csv2(gsgo_df, file = "output/gsgo.csv", row.names = F)
-rm(temp_name,gsgotemp,temp,rownum,minyear,maxyear,i) # To remove objects from the environment
+write.csv(gsgo_df, file = "output_gsgo.csv")
 
 #### FORMAT DATA FOR LOG-EXPOSURE METHOD ####
 # (SHAFFER 2004)
@@ -172,6 +171,8 @@ hist(shaffer$exposure)
 
 #### ADD VARIABLES ####
 shaffer$fyear <- as.factor(as.character(shaffer$year)) # Year as a factor
+
+######################################## HERE I AM ###############################
 # IMPORT VARIABLES
 covariates <- read.delim("csv/covariates.csv",sep=";")
 shaffer[names(covariates)[-1]] <- NA # creates new columns for covariates
