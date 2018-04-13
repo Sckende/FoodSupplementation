@@ -2,7 +2,7 @@
 
 require(RMark)
 getwd()
-setwd("/Users/nicolas/Documents/Claire/Doc doc doc !/R analysis/Data")
+setwd("//home/claire/OneDriveDoc/Doc doc doc/Ph.D. - ANALYSES/R analysis/Data")
 geese<-read.table("MARK1-2015.txt", h=T, sep="\t")
 
 summary(geese)
@@ -287,7 +287,7 @@ DSRHbt2$NS<-DSRHbt2$estimate^27;DSRHbt2#NS for nesting success=DSR^27
 
 ####################DONNÉES 2016####################
 getwd()
-setwd("/Users/nicolas/Documents/Claire/Doc doc doc !/R analysis/Data")
+setwd("/home/claire/OneDriveDoc/Doc doc doc/Ph.D. - ANALYSES/R analysis/Data")
 #Pour faire tourber ce script, le tableau de base doit contenir 9 variables - id, FirstFound (en JJ), LastPresent (en JJ), LastChecked (en JJ), Fate (= issue des nids), Freq (=1), hab (Wetland, Mesic ou NA), IniDate (en JJ), Inicode (= 1 à 5)
 
 

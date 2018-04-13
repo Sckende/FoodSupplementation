@@ -47,7 +47,7 @@
 require(RMark)
 
 getwd()
-setwd("/Users/nicolas/Documents/Claire/Doc doc doc !/R analysis/Data")
+setwd("/home/claire/OneDriveDoc/Doc doc doc/Ph.D. - ANALYSES/R analysis/Data")
 supp3<-read.table("MARK3-2015.txt", h=T, dec=",", sep="\t")
 str(supp3)
 dim(supp3)
@@ -126,7 +126,7 @@ with(data=Age.survival,points(Age,uclDSR,'l',lty=3))
 require(RMark)
 
 getwd()
-setwd("/Users/nicolas/Documents/Claire/Doc doc doc !/R analysis/Data")
+setwd("/home/claire/OneDriveDoc/Doc doc doc/Ph.D. - ANALYSES/R analysis/Data")
 supp4<-read.table("Mark4-2015.txt", h=T, dec=",", sep="\t")
 str(supp4)
 dim(supp4)
