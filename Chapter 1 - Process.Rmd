@@ -1,7 +1,7 @@
 ---
 title: "Chapter 1 - Resource supplementation on geese nests"
 author: "Claire-Cécile Juhasz"
-date: "2 mars 2018"
+date: "13 avril 2018"
 output: html_document
 ---
 
@@ -31,15 +31,18 @@ And what about extrems years ?
 
 * Enter and clean goose data for the 4 years (including Nicolas data in 2005)
 * Determine year category: which one is wet, wich one is dry (biblio !)
-* Think about habitat: mesic tundra, wetland, ... buffer area in wetland with high density of goose nests, ... for difference in predation risk by foxes
+* Think about habitat: mesic tundra, wetland, ... buffer area in wetland with high density of goose nests, ... for difference in predation risk by foxes and avian predator too
 * Obtain number of active fox dens at camp 2 between 2015-2017 (for predation index)
 * Obtain number of active fox dens with pups at camp 2 between 2015-2017 (for predation index)
 * Relative humidity data? Could allow to compute a true temperature perceived (find paper)
 * Think about type of statistical analyses: data distribution, random effects, effective vs parameters number in the model, ... or PATH ANALYSES
-* Logistic regression - Shaffer - or DSR in RMARK - Dinsmore -
 * Follow Zuur paper for rigour in analyses
 * Read the meta-analysis done on the supplementation et use them to buit a context and situate my own analyse in this lanscape - Understand, sometimes, experimentations did not work (Ruffino et al 2014, Boutin 1990, ...)
 * Food supplementation with GSGO goslings - Lindholm and Gauthier 1994
+
+## Things done
+* Understand and test the Cynthia script
+* Method choosen: DSR with MARK software and use
 
 ```{r cars}
 
