@@ -29,6 +29,7 @@ And what about extrems years ?
   
 ## Things to do
 
+* Voir structure de article de Lecomte et al 2009 pour la rédaction de l'article
 * Enter and clean goose data for the 4 years (including Nicolas data in 2005)
 * Determine year category: which one is wet, wich one is dry (biblio !)
 * Think about habitat: mesic tundra, wetland, ... buffer area in wetland with high density of goose nests, ... for difference in predation risk by foxes and avian predator too
@@ -37,8 +38,10 @@ And what about extrems years ?
 * Relative humidity data? Could allow to compute a true temperature perceived (find paper)
 * Think about type of statistical analyses: data distribution, random effects, effective vs parameters number in the model, ... or PATH ANALYSES
 * Follow Zuur paper for rigour in analyses
-* Read the meta-analysis done on the supplementation et use them to buit a context and situate my own analyse in this lanscape - Understand, sometimes, experimentations did not work (Ruffino et al 2014, Boutin 1990, ...)
+* Read the meta-analysis done on the supplementation et use them to built a context and situate my own analyse in this lanscape - Understand, sometimes, experimentations did not work (Ruffino et al 2014, Boutin 1990, ...)
+* Use papers which cite the Lecomte et al 2009 paper
 * Food supplementation with GSGO goslings - Lindholm and Gauthier 1994
+* Extract DSR values for each nests and put them in path analyses
 
 ## Things done
 * Understand and test the Cynthia script
