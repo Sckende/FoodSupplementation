@@ -7,11 +7,12 @@ geese<-read.table("MARK1-2015.txt", h=T, sep="\t")
 
 summary(geese)
 str(geese)
+dim(geese)
 #class(geese$id)
 
 # Treat dummy variables for habitat types as factors
-geese$WET=factor(geese$WET)
-geese$MES=factor(geese$MES)
+geese$WET <- factor(geese$WET)
+geese$MES <- factor(geese$MES)
 
 # Examine a summary of the dataset
 summary(geese)
@@ -22,20 +23,20 @@ summary(geese)
 # Write a function for evaluating a set of competing models
 #run.geese=function()
 #{# 1. A model of constant daily survival rate (DSR)
-Dot=mark(geese,nocc=38,model="Nest",model.parameters=list(S=list(formula=~1)))
+Dot <- mark(geese, nocc=38, model="Nest", model.parameters = list(S = list(formula = ~1)))
 # 2. DSR varies by habitat type - treats habitats as factors
 # and the output provides S-hats for each habitat type
-Hbt=mark(geese,nocc=38,model="Nest",model.parameters=list(S=list(formula=~WET+MES)), groups=c("WET","MES"))
+Hbt <- mark(geese, nocc=38, model="Nest", model.parameters = list(S = list(formula = ~WET+MES)), groups = c("WET","MES"))
 # 3. DSR varies with NestAge
-AgeGeese=mark(geese,nocc=38,model="Nest",model.parameters=list(S=list(formula=~NestAge)))
+AgeGeese <- mark(geese, nocc=38, model="Nest", model.parameters = list(S = list(formula = ~NestAge)))
 #4.DSR varie with NestAge and Habitat
-AgeHbt=mark(geese,nocc=38,model="Nest",model.parameters=list(S=list(formula=~NestAge+WET+MES)), groups=c("WET","MES"))
+AgeHbt <- mark(geese, nocc=38, model="Nest", model.parameters = list(S = list(formula = ~NestAge + WET + MES)), groups = c("WET","MES"))
 # Return model table and list of models
 #
 #  return(collect.models(table = T) )}
 
 # The next line runs the 3 models above
-geese.results=run.geese(model.)#création de 4 fichiers par modéles avec extensions .inp, .out, .vcv, .res
+geese.results <- run.geese(model.)#création de 4 fichiers par modéles avec extensions .inp, .out, .vcv, .res
 
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~#
 # Examine table of model-selection results #
@@ -310,8 +311,6 @@ for(i in x){
     r<-1
   FATEbis<-rbind(FATEbis,r)	}
 go$Fate<-FATEbis
-#go<-cbind(go, FATEbis)
-
 
 #Traitement des données et création des variables nécessaires pour les analyses
 go$IniDate<-as.numeric(as.character(go$IniDate))
