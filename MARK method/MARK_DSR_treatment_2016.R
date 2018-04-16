@@ -15,7 +15,7 @@ str(sup2016)
 dim(sup2016)
 summary(sup2016)
 
-#summary(subset(supp,FOOD=="1"& MES=="1"))#pour obtenir les effectifs dans les differents traitements et milieux
+## CORRECTIONS A APPORTER CAR AgeDay1 = -2
 
 #Attention ici la valeur de "nocc" varie selon le nombre d'occasion de capture, soit du premier au dernier jour du suivi, correspond au max de "LastChecked"
 nocc <- max(sup2016$LastChecked)
@@ -24,7 +24,7 @@ nocc <- max(sup2016$LastChecked)
 #run.expe=function ()
 #{
 # 1. A model of constant daily survival rate (DSR)
- Dot <- mark(sup2016, nocc = nocc, model = "Nest", model.parameters = list(S = list(formula = ~1)))
+Dot <- mark(sup2016, nocc = nocc, model = "Nest", model.parameters = list(S = list(formula = ~1)))
 
 # 2. DSR varies by experimentation type - treats experimentation as factors and the output provides S-expe for each experimentation type
 EXPE <- mark(supp, nocc = nocc, model = "Nest", model.parameters = list(S = list(formula = ~SUPPL)),groups = "SUPPL")
