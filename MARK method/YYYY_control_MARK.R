@@ -1,4 +1,4 @@
-setwd("/Users/nicolas/Documents/Claire/Doc doc doc !/R analysis/Data")
+setwd("//home/claire/OneDriveDoc/Doc doc doc/Ph.D. - ANALYSES/R analysis/Data")
 #Pour faire tourner ce script, le tableau de base doit contenir les données originelles issues de la base de données sur le suivi de nidification de la grande oie des neiges - Cf protocole d'extraction de données : "GOOSE-extrac_BDD.pdf"
 
 
@@ -82,72 +82,3 @@ g$LastChecked<-g$LastChecked-(FF-1)
 #--------------------------------#
 #correspond à l'âge du nid lors du premier jour du suivi de nids
 g$AgeDay1<-(g$AgeFound-g$FirstFound)+1
-
-#Modèles
-require(RMark)
-
-#Attention ici la valeur de "nocc" varie selon le nombre d'occasion de capture, soit du premier au dernier jour du suivi, correspond au max de "LastChecked"
-nocc<-max(g$LastChecked)
-
-Dot=mark(g,nocc=nocc,model="Nest",model.parameters=list(S=list(formula=~1)), delete = T)
-
-Hbt=mark(g,nocc=nocc,model="Nest",model.parameters=list(S=list(formula=~WET+MES)), groups=c("WET","MES"), delete = T) 
-
-Hbt1=mark(g,nocc=nocc,model="Nest",model.parameters=list(S=list(formula=~hab)), groups = "hab", delete = T) 
-
-AgeGeese=mark(g,nocc=nocc,model="Nest",model.parameters=list(S=list(formula=~NestAge)), delete = T)
-
-AgeHbt=mark(g,nocc=nocc,model="Nest",model.parameters=list(S=list(formula=~NestAge+WET)), groups="WET", delete = T)
-
-AgeHbt1 = mark(g, nocc = nocc, model = "Nest", model.parameters = list(S = list(formula = ~ NestAge + hab)), groups = "hab", delete = T)
-
-
-#####Plot of results#####
-#AgeHbt
-# Build design matrix with ages of interest
-fc=find.covariates(AgeHbt,g);fc
-fc$value[1:nrow(fc)]=rep(1:(nrow(fc)/2),2) # assign 1:74 to 1st 74 ligns
-design=fill.covariates(AgeHbt,fc);design # fill design matrix with values
-
-# extract 1st 74 rows of output
-Age.survival=compute.real(AgeHbt,design=design)[1:nrow(fc),];Age.survival
-
-# insert covariate columns
-Age.survival=cbind(design[1:nrow(fc),2],Age.survival);Age.survival
-HAB<-c(rep("WET",(nrow(fc)/2)),rep("MES",(nrow(fc)/2)))
-Age.survival<-cbind(HAB,Age.survival)
-
-
-
-colnames(Age.survival)=c("HAB","Age","DSR","seDSR","lclDSR","uclDSR")
-
-Age.survival<-Age.survival[,-7];Age.survival # view estimates of DSR for each age
-
-#to calculate the NS for each habitat
-#WETLAND
-DSRwet<-Age.survival[Age.survival$HAB=="WET",]
-NSwet<-prod(DSRwet$DSR[c(1:27)]);NSwet
-
-#MESIC
-DSRmes<-Age.survival[Age.survival$HAB=="MES",]
-NSmes<-prod(DSRmes$DSR[c(1:27)]);NSmes
-
-# Plot results
-require(plotrix)
-par(mfrow=c(2,1))
-with(data=Age.survival,plot(Age[HAB=="MES"],DSR[HAB=="MES"],'l',ylim=c(min(Age.survival$lclDSR),1),
-  main =paste(c("Daily survival nest with age nest & mesic habitat- CONTROL", unique(g$AN))),
-  xlab = "Age of nests",ylab=paste(c("DSR",unique(g$AN)))))
-grid()
-axis.break(axis=2,breakpos=min(Age.survival$lclDSR)+0.005,style='slash')
-with(data=Age.survival,points(Age[HAB=="MES"],lclDSR[HAB=="MES"],'l',lty=3))
-with(data=Age.survival,points(Age[HAB=="MES"],uclDSR[HAB=="MES"],'l',lty=3))
-
-with(data=Age.survival,plot(Age[HAB=="WET"],DSR[HAB=="WET"],'l',ylim=c(min(Age.survival$lclDSR),1),
-  main = paste(c("Daily survival nest with age nest & wetland habitat - CONTROL - ", unique(g$AN))),
-  xlab = "Age of nests", ylab=paste(c("DSR",unique(g$AN)))))
-grid()
-axis.break(axis=2,breakpos=min(Age.survival$lclDSR)+0.005,style='slash')
-with(data=Age.survival,points(Age[HAB=="WET"],lclDSR[HAB=="WET"],'l',lty=3))
-with(data=Age.survival,points(Age[HAB=="WET"],uclDSR[HAB=="WET"],'l',lty=3))
-
