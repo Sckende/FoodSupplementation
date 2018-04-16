@@ -1,180 +1,451 @@
-{\rtf1\ansi\ansicpg1252\cocoartf1404\cocoasubrtf470
-{\fonttbl\f0\fswiss\fcharset0 Helvetica;}
-{\colortbl;\red255\green255\blue255;}
-\margl1440\margr1440\vieww10800\viewh8400\viewkind0
-\pard\tx566\tx1133\tx1700\tx2267\tx2834\tx3401\tx3968\tx4535\tx5102\tx5669\tx6236\tx6803\pardirnatural\partightenfactor0
+{\rtf1\ansi\deff3\adeflang1025
+{\fonttbl{\f0\froman\fprq2\fcharset0 Times New Roman;}{\f1\froman\fprq2\fcharset2 Symbol;}{\f2\fswiss\fprq2\fcharset0 Arial;}{\f3\froman\fprq2\fcharset0 Liberation Serif{\*\falt Times New Roman};}{\f4\fswiss\fprq2\fcharset0 Liberation Sans{\*\falt Arial};}{\f5\froman\fprq2\fcharset0 Helvetica{\*\falt Arial};}{\f6\fnil\fprq2\fcharset0 WenQuanYi Micro Hei;}{\f7\fnil\fprq2\fcharset0 Lohit Devanagari;}{\f8\fnil\fprq0\fcharset128 Lohit Devanagari;}}
+{\colortbl;\red0\green0\blue0;\red0\green0\blue255;\red0\green255\blue255;\red0\green255\blue0;\red255\green0\blue255;\red255\green0\blue0;\red255\green255\blue0;\red255\green255\blue255;\red0\green0\blue128;\red0\green128\blue128;\red0\green128\blue0;\red128\green0\blue128;\red128\green0\blue0;\red128\green128\blue0;\red128\green128\blue128;\red192\green192\blue192;\red0\green170\blue173;}
+{\stylesheet{\s0\snext0\nowidctlpar\hyphpar0\cf0\kerning1\dbch\af6\langfe2052\dbch\af7\afs24\alang1081\loch\f3\hich\af3\fs24\lang3084 Normal;}
+{\s15\sbasedon0\snext16\sb240\sa120\keepn\dbch\af6\dbch\af7\afs28\loch\f4\fs28 Titre;}
+{\s16\sbasedon0\snext16\sl276\slmult1\sb0\sa140 Corps de texte;}
+{\s17\sbasedon16\snext17\sl276\slmult1\sb0\sa140\dbch\af8 Liste;}
+{\s18\sbasedon0\snext18\sb120\sa120\noline\i\dbch\af8\afs24\ai\fs24 L\u233\'e9gende;}
+{\s19\sbasedon0\snext19\noline\dbch\af8 Index;}
+}{\*\generator LibreOffice/6.0.2.1$Linux_X86_64 LibreOffice_project/00m0$Build-1}{\info{\creatim\yr0\mo0\dy0\hr0\min0}{\revtim\yr2018\mo4\dy5\hr11\min46}{\printim\yr0\mo0\dy0\hr0\min0}}{\*\userprops}\deftab720
+\viewscale140
+{\*\pgdsctbl
+{\pgdsc0\pgdscuse451\pgwsxn12240\pghsxn15840\marglsxn1440\margrsxn1440\margtsxn1440\margbsxn1440\pgdscnxt0 Style par d\u233\'e9faut;}}
+\formshade{\*\pgdscno0}\paperh15840\paperw12240\margl1440\margr1440\margt1440\margb1440\sectd\sbknone\sectunlocked1\pgndec\pgwsxn12240\pghsxn15840\marglsxn1440\margrsxn1440\margtsxn1440\margbsxn1440\ftnbj\ftnstart1\ftnrstcont\ftnnar\aenddoc\aftnrstcont\aftnstart1\aftnnrlc
+{\*\ftnsep\chftnsep}\pgndec\pard\plain \s0\nowidctlpar\hyphpar0\cf0\kerning1\dbch\af6\langfe2052\dbch\af7\afs24\alang1081\loch\f3\hich\af3\fs24\lang3084\tx566\tx1133\tx1700\tx2267\tx2834\tx3401\tx3968\tx4535\tx5102\tx5669\tx6236\tx6803{\cf1\rtlch \ltrch\loch\fs24\loch\f5\hich\af5
+read.csv(\u8220\'93nestsucc.csv)}
+\par \pard\plain \s0\nowidctlpar\hyphpar0\cf0\kerning1\dbch\af6\langfe2052\dbch\af7\afs24\alang1081\loch\f3\hich\af3\fs24\lang3084\tx566\tx1133\tx1700\tx2267\tx2834\tx3401\tx3968\tx4535\tx5102\tx5669\tx6236\tx6803\cf1\rtlch \ltrch\loch\fs24\loch\f5\hich\af5
 
-\f0\fs24 \cf0 read.csv(\'93nestsucc.csv)\
-\
-#ISSUE : Nest fate 0:excluded, 1:Success, 2:Abandonment, 3:Destroyed, 5:Unknown\
-gsgo <- subset(gsgo, ISSUE != 0) # Remove excluded nests\
-\
-# Remove experimental nests 1995-97 (N=53)\
-gsgo <- subset(gsgo,NEST.TYPE != "Experimental - thermometer egg")\
-\
-# Categorize ISSUE in FATE (0:Success, 1:Destroyed or NA:Unknown)\
-for (i in 1:nrow(gsgo)) \{\
-  if (gsgo$ISSUE[i] == 1) \{gsgo$fate[i] <- 0\} # Successful nests\
-  else \{\
-    if (gsgo$ISSUE[i] == 3) \{gsgo$fate[i] <- 1\} # Destroyed nests\
-    else \{\
-      if (gsgo$ISSUE[i] == 2|gsgo$ISSUE[i] == 5) \{gsgo$fate[i] <- NA\} # No predation for unknown fate nests or abandonned eggs\
-      else \{gsgo$fate[i] <- NA\}\
-    \}\
-  \}\
-\}\
-  \
-# Habitat - Categorize habitat "Humide" vs "Mesique"\
-levels(gsgo$HABITAT)\
-gsgo$hab[gsgo$HABITAT=="H"|gsgo$HABITAT=="Wetland"] <- "Humide"\
-gsgo$hab[gsgo$HABITAT=="H-M"|gsgo$HABITAT=="HM"|gsgo$HABITAT=="M-H"|\
-          gsgo$HABITAT=="MH"|gsgo$HABITAT=="Wetland/mesic"|gsgo$HABITAT=="Riparian"] <- "Humide"\
-gsgo$hab[gsgo$HABITAT=="M"|gsgo$HABITAT=="Mesic"|gsgo$HABITAT=="M "|gsgo$HABITAT=="M-P"] <- "Mesique"\
-gsgo$hab[gsgo$HABITAT=="N/A"] <- NA\
-\
-# COORDINATES - REPLACE ZEROS BY NAs\
-gsgo$UTM.E[gsgo$UTM.E==0] <- NA\
-gsgo$UTM.N[gsgo$UTM.N==0] <- NA\
-\
-# GROUP IN A DATA FRAME\
-gsgo_df <- data.frame(year=gsgo$AN,site=gsgo$LOC,id=gsgo$ID,FirstFound=gsgo$DATEk,LastPresent=gsgo$DATEl,LastChecked=gsgo$DATEm,fate=gsgo$fate,habitat=gsgo$hab,ISSUE=gsgo$ISSUE,UTM.E=gsgo$UTM.E,UTM.N=gsgo$UTM.N)\
-\
-# DATA VALIDATION ####\
-\
-# Remove nests with only one visit (FirstFound = LastChecked)\
-FF.equals.LC <- 0\
-for (i in 1:nrow(gsgo_df))\{\
-  if (gsgo_df$FirstFound[i] == gsgo_df$LastChecked[i]) FF.equals.LC <- c(FF.equals.LC,i)\
-\}\
-FF.equals.LC <- FF.equals.LC[-1]\
-if (length(FF.equals.LC) > 0) gsgo_df <- gsgo_df[-FF.equals.LC,]\
-row.names(gsgo_df) <- NULL\
-rm(FF.equals.LC)\
-\
-### CHECK FOR NEST FOR WHICH FIRSTFOUND = LASTPRESENT WHEN NO PREDATION \
-### (THUS ZERO EXPOSURE DAYS)\
-rownum <- 0\
-for (i in 1:nrow(gsgo_df))\{\
-  if (is.na(gsgo_df$Fate[i])==FALSE) \{\
-    if (gsgo_df$FirstFound[i] == gsgo_df$LastPresent[i] & gsgo_df$Fate[i] == 0) \{\
-      rownum <- cbind(rownum, i)\
-    \}\
-  \}\
-\}\
-colnames(rownum) <- NULL\
-rownum <- rownum[-1]\
-rownum\
-gsgo_df[rownum,]\
-\
-### CHECK FOR NESTS FOR WHICH LASTPRESENT != LASTCHECKED WHEN NO PREDATION\
-### (SHOULD NOT HAPPEN)\
-rownum <- 0\
-for (i in 1:nrow(gsgo_df))\{\
-  if (is.na(gsgo_df$Fate[i])==FALSE) \{\
-    if (gsgo_df$LastPresent[i] != gsgo_df$LastChecked[i] & gsgo_df$Fate[i] == 0) \{\
-      rownum <- cbind(rownum, i)\
-    \}\
-  \}\
-\}\
-colnames(rownum) <- NULL\
-rownum <- rownum[-1]\
-rownum\
-gsgo_df[rownum,"ID"]\
-\
-# REMOVE INVALID NESTS\
-# CHECK FOR NESTS FOR WHICH LASTPRESENT == LASTCHECKED WHEN THERE IS PREDATION\
-# (SHOULD NOT HAPPEN UNLESS TWO VISITS IN THE SAME DAY AND PREDATION IN THE SECOND VISIT)\
-rownum <- 0\
-for (i in 1:nrow(gsgo_df))\{\
-  if (is.na(gsgo_df$Fate[i])==FALSE) \{\
-    if (gsgo_df$LastPresent[i] == gsgo_df$LastChecked[i] & gsgo_df$Fate[i] == 1) \{\
-      rownum <- cbind(rownum, i)\
-    \}\
-  \}\
-\}\
-colnames(rownum) <- NULL\
-rownum <- rownum[-1]\
-rownum\
-if (length(rownum) > 0) gsgo_df <- data.frame(gsgo_df[-rownum,], row.names=NULL)\
-\
-# SAVE FILE ####\
-write.csv2(gsgo_df, file = "output/gsgo.csv", row.names = F)\
-write.csv2(gsgo_df, file = "output/gsgo.csv", row.names = F)\
-rm(temp_name,gsgotemp,temp,rownum,minyear,maxyear,i)\
-\
-# FORMAT DATA FOR LOG-EXPOSURE METHOD ####\
-# (SHAFFER 2004)\
-# For each nest, create one or more visit intervals depending on nest fate\
-# Output: a list that will then be converted in a dataframe\
-ID.list <- list("list",length(unique(gsgo_df$id)))\
-for (i in 1:length(unique(gsgo_df$id))) \{\
-  if (gsgo_df$fate[i]==0|is.na(gsgo_df$fate[i])) nr <- 1\
-  if (is.na(gsgo_df$fate[i])==F) \{\
-    if (gsgo_df$fate[i]==1) nr <- 2\
-  \}\
-  ID.list[[i]] <- data.frame(id=rep(gsgo_df$id[i],nr),\
-                             year=rep(gsgo_df$year[i],nr),\
-                             site=rep(gsgo_df$site[i],nr),\
-                             exposure=rep(0,nr), survive=rep(0,nr),\
-                             UTM.E=rep(gsgo_df$UTM.E[i],nr),\
-                             UTM.N=rep(gsgo_df$UTM.N[i],nr),\
-                             habitat=rep(gsgo_df$habitat[i],nr))\
-  ID.list[[i]]$issue <- gsgo_df$ISSUE[i]\
-  # If nest success or unknown fate -> Create only one nest interval between FirstPresent and LastPresent\
-  if (gsgo_df$fate[i]== 0|is.na(gsgo_df$fate[i])) \{\
-    ID.list[[i]]$survive <- 1\
-    ID.list[[i]]$exposure <- gsgo_df$LastPresent[i] - gsgo_df$FirstFound[i]\
-  \}  \
-  # If nest failure -> Create two visit intervals:\
-  #  First interval: between FirstFound and LastPresent\
-  #  Second interval: between LastPresent and LastChecked\
-  if (is.na(gsgo_df$fate[i])==F) \{\
-    if (gsgo_df$fate[i]== 1) \{\
-      ID.list[[i]]$survive[1] <- 1\
-      ID.list[[i]]$survive[2] <- 0\
-      ID.list[[i]]$exposure[1] <- gsgo_df$LastPresent[i] - gsgo_df$FirstFound[i]\
-      ID.list[[i]]$exposure[2] <- gsgo_df$LastChecked[i] - gsgo_df$LastPresent[i]\
-    \}\
-  \}\
-\}\
-rm(nr)\
-\
-# Create empty dataframe to store data in ID.list\
-shaffer <- data.frame(id=as.character(),year=as.integer(),\
-                      site=as.character(), exposure=as.numeric(), survive=as.integer(),\
-                      UTM.E=as.numeric(),UTM.N=as.numeric(),habitat=as.character(),\
-                      issue=as.character())\
-# Merge together data in ID.list in one dataframe\
-for (i in 1:length(ID.list)) \{\
-  if (is.null(nrow(ID.list[[i]]))==FALSE) \{\
-    if (nrow(ID.list[[i]]) > 0) shaffer <- rbind(shaffer, ID.list[[i]])\
-  \}\
-\}\
-# In this dataframe named "shaffer", there is one or two lines per nest\
-# Each line for a nest represent a nest visit interval during which nest fate did not change\
-# For each line, the exposure time represent the number of days in the nest visit interval\
-# For each line, the survive variable indicates the nest fate at the end of the interval\
-#   survive = 1 means the nest survived at the end of the nest visit interval\
-#   survive = 0 means the nest did not survive at the end of the nest visit interval\
-# One line for successful nest or nest with unknown fate and two lines for \
-\
-# REMOVE LINES WITHOUT EXPOSURE TIME (WITHOUT MONITORING, EXPOSURE == 0 or NA)\
-shaffer <- shaffer[shaffer$exposure>0,]\
-shaffer <- shaffer[is.na(shaffer$exposure)==F,]\
-hist(shaffer$exposure)\
-\
-# ADD VARIABLES ####\
-shaffer$fyear <- as.factor(as.character(shaffer$year)) # Year as a factor\
-# IMPORT VARIABLES\
-covariates <- read.delim("csv/covariates.csv",sep=";")\
-shaffer[names(covariates)[-1]] <- NA # creates new columns for covariates\
-for (i in 2:length(names(covariates)))\{\
-  for (j in 1:length(covariates[,"Year"]))\{\
-    shaffer[,names(covariates)[i]][shaffer$year == covariates[,"Year"][j]] <- covariates[,names(covariates)[i]][covariates$Year == covariates[,"Year"][j]]\
-  \}\
-\}\
-rm(ID.list,i,j)\
-row.names(shaffer) <- NULL\
-\
-# SAVE FILE ####\
+\par \pard\plain \s0\nowidctlpar\hyphpar0\cf0\kerning1\dbch\af6\langfe2052\dbch\af7\afs24\alang1081\loch\f3\hich\af3\fs24\lang3084\tx566\tx1133\tx1700\tx2267\tx2834\tx3401\tx3968\tx4535\tx5102\tx5669\tx6236\tx6803{\cf1\rtlch \ltrch\loch\fs24\loch\f5\hich\af5
+#ISSUE - Nest fate 0:excluded, 1:Success, 2:Abandonment, 3:Destroyed, 5:Unknown}
+\par \pard\plain \s0\nowidctlpar\hyphpar0\cf0\kerning1\dbch\af6\langfe2052\dbch\af7\afs24\alang1081\loch\f3\hich\af3\fs24\lang3084\tx566\tx1133\tx1700\tx2267\tx2834\tx3401\tx3968\tx4535\tx5102\tx5669\tx6236\tx6803{\cf1\rtlch \ltrch\loch\fs24\loch\f5\hich\af5
+gsgo <- subset(gsgo, }{\cf1\highlight10\rtlch \ltrch\loch\fs24\loch\f5\hich\af5
+ISSUE}{\cf1\rtlch \ltrch\loch\fs24\loch\f5\hich\af5
+ != 0) # Remove excluded nests}
+\par \pard\plain \s0\nowidctlpar\hyphpar0\cf0\kerning1\dbch\af6\langfe2052\dbch\af7\afs24\alang1081\loch\f3\hich\af3\fs24\lang3084\tx566\tx1133\tx1700\tx2267\tx2834\tx3401\tx3968\tx4535\tx5102\tx5669\tx6236\tx6803\cf1\rtlch \ltrch\loch\fs24\loch\f5\hich\af5
+
+\par \pard\plain \s0\nowidctlpar\hyphpar0\cf0\kerning1\dbch\af6\langfe2052\dbch\af7\afs24\alang1081\loch\f3\hich\af3\fs24\lang3084\tx566\tx1133\tx1700\tx2267\tx2834\tx3401\tx3968\tx4535\tx5102\tx5669\tx6236\tx6803{\cf1\rtlch \ltrch\loch\fs24\loch\f5\hich\af5
+# }{\cf1\rtlch \ltrch\loch\fs24\loch\f5\hich\af5
+NEST.TYPE - }{\cf1\rtlch \ltrch\loch\fs24\loch\f5\hich\af5
+Remove experimental nests 1995-97 (N=53)}
+\par \pard\plain \s0\nowidctlpar\hyphpar0\cf0\kerning1\dbch\af6\langfe2052\dbch\af7\afs24\alang1081\loch\f3\hich\af3\fs24\lang3084\tx566\tx1133\tx1700\tx2267\tx2834\tx3401\tx3968\tx4535\tx5102\tx5669\tx6236\tx6803{\cf1\rtlch \ltrch\loch\fs24\loch\f5\hich\af5
+gsgo <- subset(gsgo,}{\cf1\highlight10\rtlch \ltrch\loch\fs24\loch\f5\hich\af5
+NEST.TYPE}{\cf1\rtlch \ltrch\loch\fs24\loch\f5\hich\af5
+ != "Experimental - thermometer egg")}
+\par \pard\plain \s0\nowidctlpar\hyphpar0\cf0\kerning1\dbch\af6\langfe2052\dbch\af7\afs24\alang1081\loch\f3\hich\af3\fs24\lang3084\tx566\tx1133\tx1700\tx2267\tx2834\tx3401\tx3968\tx4535\tx5102\tx5669\tx6236\tx6803\cf1\rtlch \ltrch\loch\fs24\loch\f5\hich\af5
+
+\par \pard\plain \s0\nowidctlpar\hyphpar0\cf0\kerning1\dbch\af6\langfe2052\dbch\af7\afs24\alang1081\loch\f3\hich\af3\fs24\lang3084\tx566\tx1133\tx1700\tx2267\tx2834\tx3401\tx3968\tx4535\tx5102\tx5669\tx6236\tx6803{\cf1\rtlch \ltrch\loch\fs24\loch\f5\hich\af5
+# }{\cf1\rtlch \ltrch\loch\fs24\loch\f5\hich\af5
+ISSUE - }{\cf1\rtlch \ltrch\loch\fs24\loch\f5\hich\af5
+Categorize ISSUE in FATE (0:Success, 1:Destroyed or NA:Unknown)}
+\par \pard\plain \s0\nowidctlpar\hyphpar0\cf0\kerning1\dbch\af6\langfe2052\dbch\af7\afs24\alang1081\loch\f3\hich\af3\fs24\lang3084\tx566\tx1133\tx1700\tx2267\tx2834\tx3401\tx3968\tx4535\tx5102\tx5669\tx6236\tx6803{\cf1\rtlch \ltrch\loch\fs24\loch\f5\hich\af5
+for (i in 1:nrow(gsgo)) \{}
+\par \pard\plain \s0\nowidctlpar\hyphpar0\cf0\kerning1\dbch\af6\langfe2052\dbch\af7\afs24\alang1081\loch\f3\hich\af3\fs24\lang3084\tx566\tx1133\tx1700\tx2267\tx2834\tx3401\tx3968\tx4535\tx5102\tx5669\tx6236\tx6803{\cf1\rtlch \ltrch\fs24\loch\f5\hich\af5
+  }{\cf1\rtlch \ltrch\loch\fs24\loch\f5\hich\af5
+if (gsgo$}{\cf1\highlight10\rtlch \ltrch\loch\fs24\loch\f5\hich\af5
+ISSUE}{\cf1\rtlch \ltrch\loch\fs24\loch\f5\hich\af5
+[i] == 1) \{gsgo$fate[i] <- 0\} # Successful nests}
+\par \pard\plain \s0\nowidctlpar\hyphpar0\cf0\kerning1\dbch\af6\langfe2052\dbch\af7\afs24\alang1081\loch\f3\hich\af3\fs24\lang3084\tx566\tx1133\tx1700\tx2267\tx2834\tx3401\tx3968\tx4535\tx5102\tx5669\tx6236\tx6803{\cf1\rtlch \ltrch\fs24\loch\f5\hich\af5
+  }{\cf1\rtlch \ltrch\loch\fs24\loch\f5\hich\af5
+else \{}
+\par \pard\plain \s0\nowidctlpar\hyphpar0\cf0\kerning1\dbch\af6\langfe2052\dbch\af7\afs24\alang1081\loch\f3\hich\af3\fs24\lang3084\tx566\tx1133\tx1700\tx2267\tx2834\tx3401\tx3968\tx4535\tx5102\tx5669\tx6236\tx6803{\cf1\rtlch \ltrch\fs24\loch\f5\hich\af5
+    }{\cf1\rtlch \ltrch\loch\fs24\loch\f5\hich\af5
+if (gsgo$}{\cf1\highlight10\rtlch \ltrch\loch\fs24\loch\f5\hich\af5
+ISSUE}{\cf1\rtlch \ltrch\loch\fs24\loch\f5\hich\af5
+[i] == 3) \{gsgo$fate[i] <- 1\} # Destroyed nests}
+\par \pard\plain \s0\nowidctlpar\hyphpar0\cf0\kerning1\dbch\af6\langfe2052\dbch\af7\afs24\alang1081\loch\f3\hich\af3\fs24\lang3084\tx566\tx1133\tx1700\tx2267\tx2834\tx3401\tx3968\tx4535\tx5102\tx5669\tx6236\tx6803{\cf1\rtlch \ltrch\fs24\loch\f5\hich\af5
+    }{\cf1\rtlch \ltrch\loch\fs24\loch\f5\hich\af5
+else \{}
+\par \pard\plain \s0\nowidctlpar\hyphpar0\cf0\kerning1\dbch\af6\langfe2052\dbch\af7\afs24\alang1081\loch\f3\hich\af3\fs24\lang3084\tx566\tx1133\tx1700\tx2267\tx2834\tx3401\tx3968\tx4535\tx5102\tx5669\tx6236\tx6803{\cf1\rtlch \ltrch\fs24\loch\f5\hich\af5
+      }{\cf1\rtlch \ltrch\loch\fs24\loch\f5\hich\af5
+if (gsgo$}{\cf1\highlight10\rtlch \ltrch\loch\fs24\loch\f5\hich\af5
+ISSUE}{\cf1\rtlch \ltrch\loch\fs24\loch\f5\hich\af5
+[i] == 2|gsgo$}{\cf1\highlight10\rtlch \ltrch\loch\fs24\loch\f5\hich\af5
+ISSUE}{\cf1\rtlch \ltrch\loch\fs24\loch\f5\hich\af5
+[i] == 5) \{gsgo$fate[i] <- NA\} # No predation for unknown fate nests or abandonned eggs}
+\par \pard\plain \s0\nowidctlpar\hyphpar0\cf0\kerning1\dbch\af6\langfe2052\dbch\af7\afs24\alang1081\loch\f3\hich\af3\fs24\lang3084\tx566\tx1133\tx1700\tx2267\tx2834\tx3401\tx3968\tx4535\tx5102\tx5669\tx6236\tx6803{\cf1\rtlch \ltrch\fs24\loch\f5\hich\af5
+      }{\cf1\rtlch \ltrch\loch\fs24\loch\f5\hich\af5
+else \{gsgo$fate[i] <- NA\}}
+\par \pard\plain \s0\nowidctlpar\hyphpar0\cf0\kerning1\dbch\af6\langfe2052\dbch\af7\afs24\alang1081\loch\f3\hich\af3\fs24\lang3084\tx566\tx1133\tx1700\tx2267\tx2834\tx3401\tx3968\tx4535\tx5102\tx5669\tx6236\tx6803{\cf1\rtlch \ltrch\fs24\loch\f5\hich\af5
+    }{\cf1\rtlch \ltrch\loch\fs24\loch\f5\hich\af5
+\}}
+\par \pard\plain \s0\nowidctlpar\hyphpar0\cf0\kerning1\dbch\af6\langfe2052\dbch\af7\afs24\alang1081\loch\f3\hich\af3\fs24\lang3084\tx566\tx1133\tx1700\tx2267\tx2834\tx3401\tx3968\tx4535\tx5102\tx5669\tx6236\tx6803{\cf1\rtlch \ltrch\fs24\loch\f5\hich\af5
+  }{\cf1\rtlch \ltrch\loch\fs24\loch\f5\hich\af5
+\}}
+\par \pard\plain \s0\nowidctlpar\hyphpar0\cf0\kerning1\dbch\af6\langfe2052\dbch\af7\afs24\alang1081\loch\f3\hich\af3\fs24\lang3084\tx566\tx1133\tx1700\tx2267\tx2834\tx3401\tx3968\tx4535\tx5102\tx5669\tx6236\tx6803{\cf1\rtlch \ltrch\loch\fs24\loch\f5\hich\af5
+\}}
+\par \pard\plain \s0\nowidctlpar\hyphpar0\cf0\kerning1\dbch\af6\langfe2052\dbch\af7\afs24\alang1081\loch\f3\hich\af3\fs24\lang3084\tx566\tx1133\tx1700\tx2267\tx2834\tx3401\tx3968\tx4535\tx5102\tx5669\tx6236\tx6803{\cf1\rtlch \ltrch\fs24\loch\f5\hich\af5
+  }
+\par \pard\plain \s0\nowidctlpar\hyphpar0\cf0\kerning1\dbch\af6\langfe2052\dbch\af7\afs24\alang1081\loch\f3\hich\af3\fs24\lang3084\tx566\tx1133\tx1700\tx2267\tx2834\tx3401\tx3968\tx4535\tx5102\tx5669\tx6236\tx6803{\cf1\rtlch \ltrch\loch\fs24\loch\f5\hich\af5
+# H}{\cf1\rtlch \ltrch\loch\fs24\loch\f5\hich\af5
+ABITAT}{\cf1\rtlch \ltrch\loch\fs24\loch\f5\hich\af5
+ - Categorize habitat "Humide" vs "Mesique"}
+\par \pard\plain \s0\nowidctlpar\hyphpar0\cf0\kerning1\dbch\af6\langfe2052\dbch\af7\afs24\alang1081\loch\f3\hich\af3\fs24\lang3084\tx566\tx1133\tx1700\tx2267\tx2834\tx3401\tx3968\tx4535\tx5102\tx5669\tx6236\tx6803{\cf1\rtlch \ltrch\loch\fs24\loch\f5\hich\af5
+levels(gsgo$}{\cf1\highlight10\rtlch \ltrch\loch\fs24\loch\f5\hich\af5
+HABITAT}{\cf1\rtlch \ltrch\loch\fs24\loch\f5\hich\af5
+)}
+\par \pard\plain \s0\nowidctlpar\hyphpar0\cf0\kerning1\dbch\af6\langfe2052\dbch\af7\afs24\alang1081\loch\f3\hich\af3\fs24\lang3084\tx566\tx1133\tx1700\tx2267\tx2834\tx3401\tx3968\tx4535\tx5102\tx5669\tx6236\tx6803{\cf1\rtlch \ltrch\loch\fs24\loch\f5\hich\af5
+gsgo$hab[gsgo$HABITAT=="H"|gsgo$HABITAT=="Wetland"] <- "Humide"}
+\par \pard\plain \s0\nowidctlpar\hyphpar0\cf0\kerning1\dbch\af6\langfe2052\dbch\af7\afs24\alang1081\loch\f3\hich\af3\fs24\lang3084\tx566\tx1133\tx1700\tx2267\tx2834\tx3401\tx3968\tx4535\tx5102\tx5669\tx6236\tx6803{\cf1\rtlch \ltrch\loch\fs24\loch\f5\hich\af5
+gsgo$hab[gsgo$HABITAT=="H-M"|gsgo$HABITAT=="HM"|gsgo$HABITAT=="M-H"|}
+\par \pard\plain \s0\nowidctlpar\hyphpar0\cf0\kerning1\dbch\af6\langfe2052\dbch\af7\afs24\alang1081\loch\f3\hich\af3\fs24\lang3084\tx566\tx1133\tx1700\tx2267\tx2834\tx3401\tx3968\tx4535\tx5102\tx5669\tx6236\tx6803{\cf1\rtlch \ltrch\fs24\loch\f5\hich\af5
+          }{\cf1\rtlch \ltrch\loch\fs24\loch\f5\hich\af5
+gsgo$HABITAT=="MH"|gsgo$HABITAT=="Wetland/mesic"|gsgo$HABITAT=="Riparian"] <- "Humide"}
+\par \pard\plain \s0\nowidctlpar\hyphpar0\cf0\kerning1\dbch\af6\langfe2052\dbch\af7\afs24\alang1081\loch\f3\hich\af3\fs24\lang3084\tx566\tx1133\tx1700\tx2267\tx2834\tx3401\tx3968\tx4535\tx5102\tx5669\tx6236\tx6803{\cf1\rtlch \ltrch\loch\fs24\loch\f5\hich\af5
+gsgo$hab[gsgo$HABITAT=="M"|gsgo$HABITAT=="Mesic"|gsgo$HABITAT=="M "|gsgo$HABITAT=="M-P"] <- "Mesique"}
+\par \pard\plain \s0\nowidctlpar\hyphpar0\cf0\kerning1\dbch\af6\langfe2052\dbch\af7\afs24\alang1081\loch\f3\hich\af3\fs24\lang3084\tx566\tx1133\tx1700\tx2267\tx2834\tx3401\tx3968\tx4535\tx5102\tx5669\tx6236\tx6803{\cf1\rtlch \ltrch\loch\fs24\loch\f5\hich\af5
+gsgo$hab[gsgo$HABITAT=="N/A"] <- NA}
+\par \pard\plain \s0\nowidctlpar\hyphpar0\cf0\kerning1\dbch\af6\langfe2052\dbch\af7\afs24\alang1081\loch\f3\hich\af3\fs24\lang3084\tx566\tx1133\tx1700\tx2267\tx2834\tx3401\tx3968\tx4535\tx5102\tx5669\tx6236\tx6803\cf1\rtlch \ltrch\loch\fs24\loch\f5\hich\af5
+
+\par \pard\plain \s0\nowidctlpar\hyphpar0\cf0\kerning1\dbch\af6\langfe2052\dbch\af7\afs24\alang1081\loch\f3\hich\af3\fs24\lang3084\tx566\tx1133\tx1700\tx2267\tx2834\tx3401\tx3968\tx4535\tx5102\tx5669\tx6236\tx6803{\cf1\rtlch \ltrch\loch\fs24\loch\f5\hich\af5
+# }{\cf1\rtlch \ltrch\loch\fs24\loch\f5\hich\af5
+UTM.E/UTM.N }{\cf1\rtlch \ltrch\loch\fs24\loch\f5\hich\af5
+C}{\cf1\rtlch \ltrch\loch\fs24\loch\f5\hich\af5
+oordinates - }{\cf1\rtlch \ltrch\loch\fs24\loch\f5\hich\af5
+R}{\cf1\rtlch \ltrch\loch\fs24\loch\f5\hich\af5
+eplace 0 by}{\cf1\rtlch \ltrch\loch\fs24\loch\f5\hich\af5
+ NAs}
+\par \pard\plain \s0\nowidctlpar\hyphpar0\cf0\kerning1\dbch\af6\langfe2052\dbch\af7\afs24\alang1081\loch\f3\hich\af3\fs24\lang3084\tx566\tx1133\tx1700\tx2267\tx2834\tx3401\tx3968\tx4535\tx5102\tx5669\tx6236\tx6803{\cf1\rtlch \ltrch\loch\fs24\loch\f5\hich\af5
+gsgo$UTM.E[gsgo$UTM.E==0] <- NA}
+\par \pard\plain \s0\nowidctlpar\hyphpar0\cf0\kerning1\dbch\af6\langfe2052\dbch\af7\afs24\alang1081\loch\f3\hich\af3\fs24\lang3084\tx566\tx1133\tx1700\tx2267\tx2834\tx3401\tx3968\tx4535\tx5102\tx5669\tx6236\tx6803{\cf1\rtlch \ltrch\loch\fs24\loch\f5\hich\af5
+gsgo$UTM.N[gsgo$UTM.N==0] <- NA}
+\par \pard\plain \s0\nowidctlpar\hyphpar0\cf0\kerning1\dbch\af6\langfe2052\dbch\af7\afs24\alang1081\loch\f3\hich\af3\fs24\lang3084\tx566\tx1133\tx1700\tx2267\tx2834\tx3401\tx3968\tx4535\tx5102\tx5669\tx6236\tx6803\cf1\rtlch \ltrch\loch\fs24\loch\f5\hich\af5
+
+\par \pard\plain \s0\nowidctlpar\hyphpar0\cf0\kerning1\dbch\af6\langfe2052\dbch\af7\afs24\alang1081\loch\f3\hich\af3\fs24\lang3084\tx566\tx1133\tx1700\tx2267\tx2834\tx3401\tx3968\tx4535\tx5102\tx5669\tx6236\tx6803{\cf1\rtlch \ltrch\loch\fs24\loch\f5\hich\af5
+# GROUP IN A DATA FRAME}
+\par \pard\plain \s0\nowidctlpar\hyphpar0\cf0\kerning1\dbch\af6\langfe2052\dbch\af7\afs24\alang1081\loch\f3\hich\af3\fs24\lang3084\tx566\tx1133\tx1700\tx2267\tx2834\tx3401\tx3968\tx4535\tx5102\tx5669\tx6236\tx6803{\cf1\rtlch \ltrch\loch\fs24\loch\f5\hich\af5
+gsgo_df <- data.frame(year=gsgo$AN,site=gsgo$LOC,id=gsgo$ID,FirstFound=gsgo$DATEk,LastPresent=gsgo$DATEl,LastChecked=gsgo$DATEm,fate=gsgo$fate,habitat=gsgo$hab,ISSUE=gsgo$ISSUE,UTM.E=gsgo$UTM.E,UTM.N=gsgo$UTM.N)}
+\par \pard\plain \s0\nowidctlpar\hyphpar0\cf0\kerning1\dbch\af6\langfe2052\dbch\af7\afs24\alang1081\loch\f3\hich\af3\fs24\lang3084\tx566\tx1133\tx1700\tx2267\tx2834\tx3401\tx3968\tx4535\tx5102\tx5669\tx6236\tx6803\cf1\rtlch \ltrch\loch\fs24\loch\f5\hich\af5
+
+\par \pard\plain \s0\nowidctlpar\hyphpar0\cf0\kerning1\dbch\af6\langfe2052\dbch\af7\afs24\alang1081\loch\f3\hich\af3\fs24\lang3084\tx566\tx1133\tx1700\tx2267\tx2834\tx3401\tx3968\tx4535\tx5102\tx5669\tx6236\tx6803{\cf1\rtlch \ltrch\loch\fs24\loch\f5\hich\af5
+# DATA VALIDATION ####}
+\par \pard\plain \s0\nowidctlpar\hyphpar0\cf0\kerning1\dbch\af6\langfe2052\dbch\af7\afs24\alang1081\loch\f3\hich\af3\fs24\lang3084\tx566\tx1133\tx1700\tx2267\tx2834\tx3401\tx3968\tx4535\tx5102\tx5669\tx6236\tx6803\cf1\rtlch \ltrch\loch\fs24\loch\f5\hich\af5
+
+\par \pard\plain \s0\nowidctlpar\hyphpar0\cf0\kerning1\dbch\af6\langfe2052\dbch\af7\afs24\alang1081\loch\f3\hich\af3\fs24\lang3084\tx566\tx1133\tx1700\tx2267\tx2834\tx3401\tx3968\tx4535\tx5102\tx5669\tx6236\tx6803{\cf1\rtlch \ltrch\loch\fs24\loch\f5\hich\af5
+# Remove nests with only one visit (FirstFound = LastChecked)}
+\par \pard\plain \s0\nowidctlpar\hyphpar0\cf0\kerning1\dbch\af6\langfe2052\dbch\af7\afs24\alang1081\loch\f3\hich\af3\fs24\lang3084\tx566\tx1133\tx1700\tx2267\tx2834\tx3401\tx3968\tx4535\tx5102\tx5669\tx6236\tx6803{\cf1\rtlch \ltrch\loch\fs24\loch\f5\hich\af5
+FF.equals.LC <- 0}
+\par \pard\plain \s0\nowidctlpar\hyphpar0\cf0\kerning1\dbch\af6\langfe2052\dbch\af7\afs24\alang1081\loch\f3\hich\af3\fs24\lang3084\tx566\tx1133\tx1700\tx2267\tx2834\tx3401\tx3968\tx4535\tx5102\tx5669\tx6236\tx6803{\cf1\rtlch \ltrch\loch\fs24\loch\f5\hich\af5
+for (i in 1:nrow(gsgo_df))\{}
+\par \pard\plain \s0\nowidctlpar\hyphpar0\cf0\kerning1\dbch\af6\langfe2052\dbch\af7\afs24\alang1081\loch\f3\hich\af3\fs24\lang3084\tx566\tx1133\tx1700\tx2267\tx2834\tx3401\tx3968\tx4535\tx5102\tx5669\tx6236\tx6803{\cf1\rtlch \ltrch\fs24\loch\f5\hich\af5
+  }{\cf1\rtlch \ltrch\loch\fs24\loch\f5\hich\af5
+if (gsgo_df$FirstFound[i] == gsgo_df$LastChecked[i]) FF.equals.LC <- c(FF.equals.LC,i)}
+\par \pard\plain \s0\nowidctlpar\hyphpar0\cf0\kerning1\dbch\af6\langfe2052\dbch\af7\afs24\alang1081\loch\f3\hich\af3\fs24\lang3084\tx566\tx1133\tx1700\tx2267\tx2834\tx3401\tx3968\tx4535\tx5102\tx5669\tx6236\tx6803{\cf1\rtlch \ltrch\loch\fs24\loch\f5\hich\af5
+\}}
+\par \pard\plain \s0\nowidctlpar\hyphpar0\cf0\kerning1\dbch\af6\langfe2052\dbch\af7\afs24\alang1081\loch\f3\hich\af3\fs24\lang3084\tx566\tx1133\tx1700\tx2267\tx2834\tx3401\tx3968\tx4535\tx5102\tx5669\tx6236\tx6803{\cf1\rtlch \ltrch\loch\fs24\loch\f5\hich\af5
+FF.equals.LC <- FF.equals.LC[-1]}
+\par \pard\plain \s0\nowidctlpar\hyphpar0\cf0\kerning1\dbch\af6\langfe2052\dbch\af7\afs24\alang1081\loch\f3\hich\af3\fs24\lang3084\tx566\tx1133\tx1700\tx2267\tx2834\tx3401\tx3968\tx4535\tx5102\tx5669\tx6236\tx6803{\cf1\rtlch \ltrch\loch\fs24\loch\f5\hich\af5
+if (length(FF.equals.LC) > 0) gsgo_df <- gsgo_df[-FF.equals.LC,]}
+\par \pard\plain \s0\nowidctlpar\hyphpar0\cf0\kerning1\dbch\af6\langfe2052\dbch\af7\afs24\alang1081\loch\f3\hich\af3\fs24\lang3084\tx566\tx1133\tx1700\tx2267\tx2834\tx3401\tx3968\tx4535\tx5102\tx5669\tx6236\tx6803{\cf1\rtlch \ltrch\loch\fs24\loch\f5\hich\af5
+row.names(gsgo_df) <- NULL}
+\par \pard\plain \s0\nowidctlpar\hyphpar0\cf0\kerning1\dbch\af6\langfe2052\dbch\af7\afs24\alang1081\loch\f3\hich\af3\fs24\lang3084\tx566\tx1133\tx1700\tx2267\tx2834\tx3401\tx3968\tx4535\tx5102\tx5669\tx6236\tx6803{\cf1\rtlch \ltrch\loch\fs24\loch\f5\hich\af5
+rm(FF.equals.LC)}
+\par \pard\plain \s0\nowidctlpar\hyphpar0\cf0\kerning1\dbch\af6\langfe2052\dbch\af7\afs24\alang1081\loch\f3\hich\af3\fs24\lang3084\tx566\tx1133\tx1700\tx2267\tx2834\tx3401\tx3968\tx4535\tx5102\tx5669\tx6236\tx6803\cf1\rtlch \ltrch\loch\fs24\loch\f5\hich\af5
+
+\par \pard\plain \s0\nowidctlpar\hyphpar0\cf0\kerning1\dbch\af6\langfe2052\dbch\af7\afs24\alang1081\loch\f3\hich\af3\fs24\lang3084\tx566\tx1133\tx1700\tx2267\tx2834\tx3401\tx3968\tx4535\tx5102\tx5669\tx6236\tx6803{\cf1\rtlch \ltrch\loch\fs24\loch\f5\hich\af5
+### CHECK FOR NEST FOR WHICH FIRSTFOUND = LASTPRESENT WHEN NO PREDATION }
+\par \pard\plain \s0\nowidctlpar\hyphpar0\cf0\kerning1\dbch\af6\langfe2052\dbch\af7\afs24\alang1081\loch\f3\hich\af3\fs24\lang3084\tx566\tx1133\tx1700\tx2267\tx2834\tx3401\tx3968\tx4535\tx5102\tx5669\tx6236\tx6803{\cf1\rtlch \ltrch\loch\fs24\loch\f5\hich\af5
+### (THUS ZERO EXPOSURE DAYS)}
+\par \pard\plain \s0\nowidctlpar\hyphpar0\cf0\kerning1\dbch\af6\langfe2052\dbch\af7\afs24\alang1081\loch\f3\hich\af3\fs24\lang3084\tx566\tx1133\tx1700\tx2267\tx2834\tx3401\tx3968\tx4535\tx5102\tx5669\tx6236\tx6803{\cf1\rtlch \ltrch\loch\fs24\loch\f5\hich\af5
+rownum <- 0}
+\par \pard\plain \s0\nowidctlpar\hyphpar0\cf0\kerning1\dbch\af6\langfe2052\dbch\af7\afs24\alang1081\loch\f3\hich\af3\fs24\lang3084\tx566\tx1133\tx1700\tx2267\tx2834\tx3401\tx3968\tx4535\tx5102\tx5669\tx6236\tx6803{\cf1\rtlch \ltrch\loch\fs24\loch\f5\hich\af5
+for (i in 1:nrow(gsgo_df))\{}
+\par \pard\plain \s0\nowidctlpar\hyphpar0\cf0\kerning1\dbch\af6\langfe2052\dbch\af7\afs24\alang1081\loch\f3\hich\af3\fs24\lang3084\tx566\tx1133\tx1700\tx2267\tx2834\tx3401\tx3968\tx4535\tx5102\tx5669\tx6236\tx6803{\cf1\rtlch \ltrch\fs24\loch\f5\hich\af5
+  }{\cf1\rtlch \ltrch\loch\fs24\loch\f5\hich\af5
+if (is.na(gsgo_df$Fate[i])==FALSE) \{}
+\par \pard\plain \s0\nowidctlpar\hyphpar0\cf0\kerning1\dbch\af6\langfe2052\dbch\af7\afs24\alang1081\loch\f3\hich\af3\fs24\lang3084\tx566\tx1133\tx1700\tx2267\tx2834\tx3401\tx3968\tx4535\tx5102\tx5669\tx6236\tx6803{\cf1\rtlch \ltrch\fs24\loch\f5\hich\af5
+    }{\cf1\rtlch \ltrch\loch\fs24\loch\f5\hich\af5
+if (gsgo_df$FirstFound[i] == gsgo_df$LastPresent[i] & gsgo_df$Fate[i] == 0) \{}
+\par \pard\plain \s0\nowidctlpar\hyphpar0\cf0\kerning1\dbch\af6\langfe2052\dbch\af7\afs24\alang1081\loch\f3\hich\af3\fs24\lang3084\tx566\tx1133\tx1700\tx2267\tx2834\tx3401\tx3968\tx4535\tx5102\tx5669\tx6236\tx6803{\cf1\rtlch \ltrch\fs24\loch\f5\hich\af5
+      }{\cf1\rtlch \ltrch\loch\fs24\loch\f5\hich\af5
+rownum <- cbind(rownum, i)}
+\par \pard\plain \s0\nowidctlpar\hyphpar0\cf0\kerning1\dbch\af6\langfe2052\dbch\af7\afs24\alang1081\loch\f3\hich\af3\fs24\lang3084\tx566\tx1133\tx1700\tx2267\tx2834\tx3401\tx3968\tx4535\tx5102\tx5669\tx6236\tx6803{\cf1\rtlch \ltrch\fs24\loch\f5\hich\af5
+    }{\cf1\rtlch \ltrch\loch\fs24\loch\f5\hich\af5
+\}}
+\par \pard\plain \s0\nowidctlpar\hyphpar0\cf0\kerning1\dbch\af6\langfe2052\dbch\af7\afs24\alang1081\loch\f3\hich\af3\fs24\lang3084\tx566\tx1133\tx1700\tx2267\tx2834\tx3401\tx3968\tx4535\tx5102\tx5669\tx6236\tx6803{\cf1\rtlch \ltrch\fs24\loch\f5\hich\af5
+  }{\cf1\rtlch \ltrch\loch\fs24\loch\f5\hich\af5
+\}}
+\par \pard\plain \s0\nowidctlpar\hyphpar0\cf0\kerning1\dbch\af6\langfe2052\dbch\af7\afs24\alang1081\loch\f3\hich\af3\fs24\lang3084\tx566\tx1133\tx1700\tx2267\tx2834\tx3401\tx3968\tx4535\tx5102\tx5669\tx6236\tx6803{\cf1\rtlch \ltrch\loch\fs24\loch\f5\hich\af5
+\}}
+\par \pard\plain \s0\nowidctlpar\hyphpar0\cf0\kerning1\dbch\af6\langfe2052\dbch\af7\afs24\alang1081\loch\f3\hich\af3\fs24\lang3084\tx566\tx1133\tx1700\tx2267\tx2834\tx3401\tx3968\tx4535\tx5102\tx5669\tx6236\tx6803{\cf1\rtlch \ltrch\loch\fs24\loch\f5\hich\af5
+colnames(rownum) <- NULL}
+\par \pard\plain \s0\nowidctlpar\hyphpar0\cf0\kerning1\dbch\af6\langfe2052\dbch\af7\afs24\alang1081\loch\f3\hich\af3\fs24\lang3084\tx566\tx1133\tx1700\tx2267\tx2834\tx3401\tx3968\tx4535\tx5102\tx5669\tx6236\tx6803{\cf1\rtlch \ltrch\loch\fs24\loch\f5\hich\af5
+rownum <- rownum[-1]}
+\par \pard\plain \s0\nowidctlpar\hyphpar0\cf0\kerning1\dbch\af6\langfe2052\dbch\af7\afs24\alang1081\loch\f3\hich\af3\fs24\lang3084\tx566\tx1133\tx1700\tx2267\tx2834\tx3401\tx3968\tx4535\tx5102\tx5669\tx6236\tx6803{\cf1\rtlch \ltrch\loch\fs24\loch\f5\hich\af5
+rownum}
+\par \pard\plain \s0\nowidctlpar\hyphpar0\cf0\kerning1\dbch\af6\langfe2052\dbch\af7\afs24\alang1081\loch\f3\hich\af3\fs24\lang3084\tx566\tx1133\tx1700\tx2267\tx2834\tx3401\tx3968\tx4535\tx5102\tx5669\tx6236\tx6803{\cf1\rtlch \ltrch\loch\fs24\loch\f5\hich\af5
+gsgo_df[rownum,]}
+\par \pard\plain \s0\nowidctlpar\hyphpar0\cf0\kerning1\dbch\af6\langfe2052\dbch\af7\afs24\alang1081\loch\f3\hich\af3\fs24\lang3084\tx566\tx1133\tx1700\tx2267\tx2834\tx3401\tx3968\tx4535\tx5102\tx5669\tx6236\tx6803\cf1\rtlch \ltrch\loch\fs24\loch\f5\hich\af5
+
+\par \pard\plain \s0\nowidctlpar\hyphpar0\cf0\kerning1\dbch\af6\langfe2052\dbch\af7\afs24\alang1081\loch\f3\hich\af3\fs24\lang3084\tx566\tx1133\tx1700\tx2267\tx2834\tx3401\tx3968\tx4535\tx5102\tx5669\tx6236\tx6803{\cf1\rtlch \ltrch\loch\fs24\loch\f5\hich\af5
+### CHECK FOR NESTS FOR WHICH LASTPRESENT != LASTCHECKED WHEN NO PREDATION}
+\par \pard\plain \s0\nowidctlpar\hyphpar0\cf0\kerning1\dbch\af6\langfe2052\dbch\af7\afs24\alang1081\loch\f3\hich\af3\fs24\lang3084\tx566\tx1133\tx1700\tx2267\tx2834\tx3401\tx3968\tx4535\tx5102\tx5669\tx6236\tx6803{\cf1\rtlch \ltrch\loch\fs24\loch\f5\hich\af5
+### (SHOULD NOT HAPPEN)}
+\par \pard\plain \s0\nowidctlpar\hyphpar0\cf0\kerning1\dbch\af6\langfe2052\dbch\af7\afs24\alang1081\loch\f3\hich\af3\fs24\lang3084\tx566\tx1133\tx1700\tx2267\tx2834\tx3401\tx3968\tx4535\tx5102\tx5669\tx6236\tx6803{\cf1\rtlch \ltrch\loch\fs24\loch\f5\hich\af5
+rownum <- 0}
+\par \pard\plain \s0\nowidctlpar\hyphpar0\cf0\kerning1\dbch\af6\langfe2052\dbch\af7\afs24\alang1081\loch\f3\hich\af3\fs24\lang3084\tx566\tx1133\tx1700\tx2267\tx2834\tx3401\tx3968\tx4535\tx5102\tx5669\tx6236\tx6803{\cf1\rtlch \ltrch\loch\fs24\loch\f5\hich\af5
+for (i in 1:nrow(gsgo_df))\{}
+\par \pard\plain \s0\nowidctlpar\hyphpar0\cf0\kerning1\dbch\af6\langfe2052\dbch\af7\afs24\alang1081\loch\f3\hich\af3\fs24\lang3084\tx566\tx1133\tx1700\tx2267\tx2834\tx3401\tx3968\tx4535\tx5102\tx5669\tx6236\tx6803{\cf1\rtlch \ltrch\fs24\loch\f5\hich\af5
+  }{\cf1\rtlch \ltrch\loch\fs24\loch\f5\hich\af5
+if (is.na(gsgo_df$Fate[i])==FALSE) \{}
+\par \pard\plain \s0\nowidctlpar\hyphpar0\cf0\kerning1\dbch\af6\langfe2052\dbch\af7\afs24\alang1081\loch\f3\hich\af3\fs24\lang3084\tx566\tx1133\tx1700\tx2267\tx2834\tx3401\tx3968\tx4535\tx5102\tx5669\tx6236\tx6803{\cf1\rtlch \ltrch\fs24\loch\f5\hich\af5
+    }{\cf1\rtlch \ltrch\loch\fs24\loch\f5\hich\af5
+if (gsgo_df$LastPresent[i] != gsgo_df$LastChecked[i] & gsgo_df$Fate[i] == 0) \{}
+\par \pard\plain \s0\nowidctlpar\hyphpar0\cf0\kerning1\dbch\af6\langfe2052\dbch\af7\afs24\alang1081\loch\f3\hich\af3\fs24\lang3084\tx566\tx1133\tx1700\tx2267\tx2834\tx3401\tx3968\tx4535\tx5102\tx5669\tx6236\tx6803{\cf1\rtlch \ltrch\fs24\loch\f5\hich\af5
+      }{\cf1\rtlch \ltrch\loch\fs24\loch\f5\hich\af5
+rownum <- cbind(rownum, i)}
+\par \pard\plain \s0\nowidctlpar\hyphpar0\cf0\kerning1\dbch\af6\langfe2052\dbch\af7\afs24\alang1081\loch\f3\hich\af3\fs24\lang3084\tx566\tx1133\tx1700\tx2267\tx2834\tx3401\tx3968\tx4535\tx5102\tx5669\tx6236\tx6803{\cf1\rtlch \ltrch\fs24\loch\f5\hich\af5
+    }{\cf1\rtlch \ltrch\loch\fs24\loch\f5\hich\af5
+\}}
+\par \pard\plain \s0\nowidctlpar\hyphpar0\cf0\kerning1\dbch\af6\langfe2052\dbch\af7\afs24\alang1081\loch\f3\hich\af3\fs24\lang3084\tx566\tx1133\tx1700\tx2267\tx2834\tx3401\tx3968\tx4535\tx5102\tx5669\tx6236\tx6803{\cf1\rtlch \ltrch\fs24\loch\f5\hich\af5
+  }{\cf1\rtlch \ltrch\loch\fs24\loch\f5\hich\af5
+\}}
+\par \pard\plain \s0\nowidctlpar\hyphpar0\cf0\kerning1\dbch\af6\langfe2052\dbch\af7\afs24\alang1081\loch\f3\hich\af3\fs24\lang3084\tx566\tx1133\tx1700\tx2267\tx2834\tx3401\tx3968\tx4535\tx5102\tx5669\tx6236\tx6803{\cf1\rtlch \ltrch\loch\fs24\loch\f5\hich\af5
+\}}
+\par \pard\plain \s0\nowidctlpar\hyphpar0\cf0\kerning1\dbch\af6\langfe2052\dbch\af7\afs24\alang1081\loch\f3\hich\af3\fs24\lang3084\tx566\tx1133\tx1700\tx2267\tx2834\tx3401\tx3968\tx4535\tx5102\tx5669\tx6236\tx6803{\cf1\rtlch \ltrch\loch\fs24\loch\f5\hich\af5
+colnames(rownum) <- NULL}
+\par \pard\plain \s0\nowidctlpar\hyphpar0\cf0\kerning1\dbch\af6\langfe2052\dbch\af7\afs24\alang1081\loch\f3\hich\af3\fs24\lang3084\tx566\tx1133\tx1700\tx2267\tx2834\tx3401\tx3968\tx4535\tx5102\tx5669\tx6236\tx6803{\cf1\rtlch \ltrch\loch\fs24\loch\f5\hich\af5
+rownum <- rownum[-1]}
+\par \pard\plain \s0\nowidctlpar\hyphpar0\cf0\kerning1\dbch\af6\langfe2052\dbch\af7\afs24\alang1081\loch\f3\hich\af3\fs24\lang3084\tx566\tx1133\tx1700\tx2267\tx2834\tx3401\tx3968\tx4535\tx5102\tx5669\tx6236\tx6803{\cf1\rtlch \ltrch\loch\fs24\loch\f5\hich\af5
+rownum}
+\par \pard\plain \s0\nowidctlpar\hyphpar0\cf0\kerning1\dbch\af6\langfe2052\dbch\af7\afs24\alang1081\loch\f3\hich\af3\fs24\lang3084\tx566\tx1133\tx1700\tx2267\tx2834\tx3401\tx3968\tx4535\tx5102\tx5669\tx6236\tx6803{\cf1\rtlch \ltrch\loch\fs24\loch\f5\hich\af5
+gsgo_df[rownum,"ID"]}
+\par \pard\plain \s0\nowidctlpar\hyphpar0\cf0\kerning1\dbch\af6\langfe2052\dbch\af7\afs24\alang1081\loch\f3\hich\af3\fs24\lang3084\tx566\tx1133\tx1700\tx2267\tx2834\tx3401\tx3968\tx4535\tx5102\tx5669\tx6236\tx6803\cf1\rtlch \ltrch\loch\fs24\loch\f5\hich\af5
+
+\par \pard\plain \s0\nowidctlpar\hyphpar0\cf0\kerning1\dbch\af6\langfe2052\dbch\af7\afs24\alang1081\loch\f3\hich\af3\fs24\lang3084\tx566\tx1133\tx1700\tx2267\tx2834\tx3401\tx3968\tx4535\tx5102\tx5669\tx6236\tx6803{\cf1\rtlch \ltrch\loch\fs24\loch\f5\hich\af5
+# REMOVE INVALID NESTS}
+\par \pard\plain \s0\nowidctlpar\hyphpar0\cf0\kerning1\dbch\af6\langfe2052\dbch\af7\afs24\alang1081\loch\f3\hich\af3\fs24\lang3084\tx566\tx1133\tx1700\tx2267\tx2834\tx3401\tx3968\tx4535\tx5102\tx5669\tx6236\tx6803{\cf1\rtlch \ltrch\loch\fs24\loch\f5\hich\af5
+# CHECK FOR NESTS FOR WHICH LASTPRESENT == LASTCHECKED WHEN THERE IS PREDATION}
+\par \pard\plain \s0\nowidctlpar\hyphpar0\cf0\kerning1\dbch\af6\langfe2052\dbch\af7\afs24\alang1081\loch\f3\hich\af3\fs24\lang3084\tx566\tx1133\tx1700\tx2267\tx2834\tx3401\tx3968\tx4535\tx5102\tx5669\tx6236\tx6803{\cf1\rtlch \ltrch\loch\fs24\loch\f5\hich\af5
+# (SHOULD NOT HAPPEN UNLESS TWO VISITS IN THE SAME DAY AND PREDATION IN THE SECOND VISIT)}
+\par \pard\plain \s0\nowidctlpar\hyphpar0\cf0\kerning1\dbch\af6\langfe2052\dbch\af7\afs24\alang1081\loch\f3\hich\af3\fs24\lang3084\tx566\tx1133\tx1700\tx2267\tx2834\tx3401\tx3968\tx4535\tx5102\tx5669\tx6236\tx6803{\cf1\rtlch \ltrch\loch\fs24\loch\f5\hich\af5
+rownum <- 0}
+\par \pard\plain \s0\nowidctlpar\hyphpar0\cf0\kerning1\dbch\af6\langfe2052\dbch\af7\afs24\alang1081\loch\f3\hich\af3\fs24\lang3084\tx566\tx1133\tx1700\tx2267\tx2834\tx3401\tx3968\tx4535\tx5102\tx5669\tx6236\tx6803{\cf1\rtlch \ltrch\loch\fs24\loch\f5\hich\af5
+for (i in 1:nrow(gsgo_df))\{}
+\par \pard\plain \s0\nowidctlpar\hyphpar0\cf0\kerning1\dbch\af6\langfe2052\dbch\af7\afs24\alang1081\loch\f3\hich\af3\fs24\lang3084\tx566\tx1133\tx1700\tx2267\tx2834\tx3401\tx3968\tx4535\tx5102\tx5669\tx6236\tx6803{\cf1\rtlch \ltrch\fs24\loch\f5\hich\af5
+  }{\cf1\rtlch \ltrch\loch\fs24\loch\f5\hich\af5
+if (is.na(gsgo_df$Fate[i])==FALSE) \{}
+\par \pard\plain \s0\nowidctlpar\hyphpar0\cf0\kerning1\dbch\af6\langfe2052\dbch\af7\afs24\alang1081\loch\f3\hich\af3\fs24\lang3084\tx566\tx1133\tx1700\tx2267\tx2834\tx3401\tx3968\tx4535\tx5102\tx5669\tx6236\tx6803{\cf1\rtlch \ltrch\fs24\loch\f5\hich\af5
+    }{\cf1\rtlch \ltrch\loch\fs24\loch\f5\hich\af5
+if (gsgo_df$LastPresent[i] == gsgo_df$LastChecked[i] & gsgo_df$Fate[i] == 1) \{}
+\par \pard\plain \s0\nowidctlpar\hyphpar0\cf0\kerning1\dbch\af6\langfe2052\dbch\af7\afs24\alang1081\loch\f3\hich\af3\fs24\lang3084\tx566\tx1133\tx1700\tx2267\tx2834\tx3401\tx3968\tx4535\tx5102\tx5669\tx6236\tx6803{\cf1\rtlch \ltrch\fs24\loch\f5\hich\af5
+      }{\cf1\rtlch \ltrch\loch\fs24\loch\f5\hich\af5
+rownum <- cbind(rownum, i)}
+\par \pard\plain \s0\nowidctlpar\hyphpar0\cf0\kerning1\dbch\af6\langfe2052\dbch\af7\afs24\alang1081\loch\f3\hich\af3\fs24\lang3084\tx566\tx1133\tx1700\tx2267\tx2834\tx3401\tx3968\tx4535\tx5102\tx5669\tx6236\tx6803{\cf1\rtlch \ltrch\fs24\loch\f5\hich\af5
+    }{\cf1\rtlch \ltrch\loch\fs24\loch\f5\hich\af5
+\}}
+\par \pard\plain \s0\nowidctlpar\hyphpar0\cf0\kerning1\dbch\af6\langfe2052\dbch\af7\afs24\alang1081\loch\f3\hich\af3\fs24\lang3084\tx566\tx1133\tx1700\tx2267\tx2834\tx3401\tx3968\tx4535\tx5102\tx5669\tx6236\tx6803{\cf1\rtlch \ltrch\fs24\loch\f5\hich\af5
+  }{\cf1\rtlch \ltrch\loch\fs24\loch\f5\hich\af5
+\}}
+\par \pard\plain \s0\nowidctlpar\hyphpar0\cf0\kerning1\dbch\af6\langfe2052\dbch\af7\afs24\alang1081\loch\f3\hich\af3\fs24\lang3084\tx566\tx1133\tx1700\tx2267\tx2834\tx3401\tx3968\tx4535\tx5102\tx5669\tx6236\tx6803{\cf1\rtlch \ltrch\loch\fs24\loch\f5\hich\af5
+\}}
+\par \pard\plain \s0\nowidctlpar\hyphpar0\cf0\kerning1\dbch\af6\langfe2052\dbch\af7\afs24\alang1081\loch\f3\hich\af3\fs24\lang3084\tx566\tx1133\tx1700\tx2267\tx2834\tx3401\tx3968\tx4535\tx5102\tx5669\tx6236\tx6803{\cf1\rtlch \ltrch\loch\fs24\loch\f5\hich\af5
+colnames(rownum) <- NULL}
+\par \pard\plain \s0\nowidctlpar\hyphpar0\cf0\kerning1\dbch\af6\langfe2052\dbch\af7\afs24\alang1081\loch\f3\hich\af3\fs24\lang3084\tx566\tx1133\tx1700\tx2267\tx2834\tx3401\tx3968\tx4535\tx5102\tx5669\tx6236\tx6803{\cf1\rtlch \ltrch\loch\fs24\loch\f5\hich\af5
+rownum <- rownum[-1]}
+\par \pard\plain \s0\nowidctlpar\hyphpar0\cf0\kerning1\dbch\af6\langfe2052\dbch\af7\afs24\alang1081\loch\f3\hich\af3\fs24\lang3084\tx566\tx1133\tx1700\tx2267\tx2834\tx3401\tx3968\tx4535\tx5102\tx5669\tx6236\tx6803{\cf1\rtlch \ltrch\loch\fs24\loch\f5\hich\af5
+rownum}
+\par \pard\plain \s0\nowidctlpar\hyphpar0\cf0\kerning1\dbch\af6\langfe2052\dbch\af7\afs24\alang1081\loch\f3\hich\af3\fs24\lang3084\tx566\tx1133\tx1700\tx2267\tx2834\tx3401\tx3968\tx4535\tx5102\tx5669\tx6236\tx6803{\cf1\rtlch \ltrch\loch\fs24\loch\f5\hich\af5
+if (length(rownum) > 0) gsgo_df <- data.frame(gsgo_df[-rownum,], row.names=NULL)}
+\par \pard\plain \s0\nowidctlpar\hyphpar0\cf0\kerning1\dbch\af6\langfe2052\dbch\af7\afs24\alang1081\loch\f3\hich\af3\fs24\lang3084\tx566\tx1133\tx1700\tx2267\tx2834\tx3401\tx3968\tx4535\tx5102\tx5669\tx6236\tx6803\cf1\rtlch \ltrch\loch\fs24\loch\f5\hich\af5
+
+\par \pard\plain \s0\nowidctlpar\hyphpar0\cf0\kerning1\dbch\af6\langfe2052\dbch\af7\afs24\alang1081\loch\f3\hich\af3\fs24\lang3084\tx566\tx1133\tx1700\tx2267\tx2834\tx3401\tx3968\tx4535\tx5102\tx5669\tx6236\tx6803{\cf1\rtlch \ltrch\loch\fs24\loch\f5\hich\af5
+# SAVE FILE ####}
+\par \pard\plain \s0\nowidctlpar\hyphpar0\cf0\kerning1\dbch\af6\langfe2052\dbch\af7\afs24\alang1081\loch\f3\hich\af3\fs24\lang3084\tx566\tx1133\tx1700\tx2267\tx2834\tx3401\tx3968\tx4535\tx5102\tx5669\tx6236\tx6803{\cf1\rtlch \ltrch\loch\fs24\loch\f5\hich\af5
+write.csv2(gsgo_df, file = "output/gsgo.csv", row.names = F)}
+\par \pard\plain \s0\nowidctlpar\hyphpar0\cf0\kerning1\dbch\af6\langfe2052\dbch\af7\afs24\alang1081\loch\f3\hich\af3\fs24\lang3084\tx566\tx1133\tx1700\tx2267\tx2834\tx3401\tx3968\tx4535\tx5102\tx5669\tx6236\tx6803{\cf1\rtlch \ltrch\loch\fs24\loch\f5\hich\af5
+write.csv2(gsgo_df, file = "output/gsgo.csv", row.names = F)}
+\par \pard\plain \s0\nowidctlpar\hyphpar0\cf0\kerning1\dbch\af6\langfe2052\dbch\af7\afs24\alang1081\loch\f3\hich\af3\fs24\lang3084\tx566\tx1133\tx1700\tx2267\tx2834\tx3401\tx3968\tx4535\tx5102\tx5669\tx6236\tx6803{\cf1\rtlch \ltrch\loch\fs24\loch\f5\hich\af5
+rm(temp_name,gsgotemp,temp,rownum,minyear,maxyear,i)}
+\par \pard\plain \s0\nowidctlpar\hyphpar0\cf0\kerning1\dbch\af6\langfe2052\dbch\af7\afs24\alang1081\loch\f3\hich\af3\fs24\lang3084\tx566\tx1133\tx1700\tx2267\tx2834\tx3401\tx3968\tx4535\tx5102\tx5669\tx6236\tx6803\cf1\rtlch \ltrch\loch\fs24\loch\f5\hich\af5
+
+\par \pard\plain \s0\nowidctlpar\hyphpar0\cf0\kerning1\dbch\af6\langfe2052\dbch\af7\afs24\alang1081\loch\f3\hich\af3\fs24\lang3084\tx566\tx1133\tx1700\tx2267\tx2834\tx3401\tx3968\tx4535\tx5102\tx5669\tx6236\tx6803{\cf1\rtlch \ltrch\loch\fs24\loch\f5\hich\af5
+# FORMAT DATA FOR LOG-EXPOSURE METHOD ####}
+\par \pard\plain \s0\nowidctlpar\hyphpar0\cf0\kerning1\dbch\af6\langfe2052\dbch\af7\afs24\alang1081\loch\f3\hich\af3\fs24\lang3084\tx566\tx1133\tx1700\tx2267\tx2834\tx3401\tx3968\tx4535\tx5102\tx5669\tx6236\tx6803{\cf1\rtlch \ltrch\loch\fs24\loch\f5\hich\af5
+# (SHAFFER 2004)}
+\par \pard\plain \s0\nowidctlpar\hyphpar0\cf0\kerning1\dbch\af6\langfe2052\dbch\af7\afs24\alang1081\loch\f3\hich\af3\fs24\lang3084\tx566\tx1133\tx1700\tx2267\tx2834\tx3401\tx3968\tx4535\tx5102\tx5669\tx6236\tx6803{\cf1\rtlch \ltrch\loch\fs24\loch\f5\hich\af5
+# For each nest, create one or more visit intervals depending on nest fate}
+\par \pard\plain \s0\nowidctlpar\hyphpar0\cf0\kerning1\dbch\af6\langfe2052\dbch\af7\afs24\alang1081\loch\f3\hich\af3\fs24\lang3084\tx566\tx1133\tx1700\tx2267\tx2834\tx3401\tx3968\tx4535\tx5102\tx5669\tx6236\tx6803{\cf1\rtlch \ltrch\loch\fs24\loch\f5\hich\af5
+# Output: a list that will then be converted in a dataframe}
+\par \pard\plain \s0\nowidctlpar\hyphpar0\cf0\kerning1\dbch\af6\langfe2052\dbch\af7\afs24\alang1081\loch\f3\hich\af3\fs24\lang3084\tx566\tx1133\tx1700\tx2267\tx2834\tx3401\tx3968\tx4535\tx5102\tx5669\tx6236\tx6803{\cf1\rtlch \ltrch\loch\fs24\loch\f5\hich\af5
+ID.list <- list("list",length(unique(gsgo_df$id)))}
+\par \pard\plain \s0\nowidctlpar\hyphpar0\cf0\kerning1\dbch\af6\langfe2052\dbch\af7\afs24\alang1081\loch\f3\hich\af3\fs24\lang3084\tx566\tx1133\tx1700\tx2267\tx2834\tx3401\tx3968\tx4535\tx5102\tx5669\tx6236\tx6803{\cf1\rtlch \ltrch\loch\fs24\loch\f5\hich\af5
+for (i in 1:length(unique(gsgo_df$id))) \{}
+\par \pard\plain \s0\nowidctlpar\hyphpar0\cf0\kerning1\dbch\af6\langfe2052\dbch\af7\afs24\alang1081\loch\f3\hich\af3\fs24\lang3084\tx566\tx1133\tx1700\tx2267\tx2834\tx3401\tx3968\tx4535\tx5102\tx5669\tx6236\tx6803{\cf1\rtlch \ltrch\fs24\loch\f5\hich\af5
+  }{\cf1\rtlch \ltrch\loch\fs24\loch\f5\hich\af5
+if (gsgo_df$fate[i]==0|is.na(gsgo_df$fate[i])) nr <- 1}
+\par \pard\plain \s0\nowidctlpar\hyphpar0\cf0\kerning1\dbch\af6\langfe2052\dbch\af7\afs24\alang1081\loch\f3\hich\af3\fs24\lang3084\tx566\tx1133\tx1700\tx2267\tx2834\tx3401\tx3968\tx4535\tx5102\tx5669\tx6236\tx6803{\cf1\rtlch \ltrch\fs24\loch\f5\hich\af5
+  }{\cf1\rtlch \ltrch\loch\fs24\loch\f5\hich\af5
+if (is.na(gsgo_df$fate[i])==F) \{}
+\par \pard\plain \s0\nowidctlpar\hyphpar0\cf0\kerning1\dbch\af6\langfe2052\dbch\af7\afs24\alang1081\loch\f3\hich\af3\fs24\lang3084\tx566\tx1133\tx1700\tx2267\tx2834\tx3401\tx3968\tx4535\tx5102\tx5669\tx6236\tx6803{\cf1\rtlch \ltrch\fs24\loch\f5\hich\af5
+    }{\cf1\rtlch \ltrch\loch\fs24\loch\f5\hich\af5
+if (gsgo_df$fate[i]==1) nr <- 2}
+\par \pard\plain \s0\nowidctlpar\hyphpar0\cf0\kerning1\dbch\af6\langfe2052\dbch\af7\afs24\alang1081\loch\f3\hich\af3\fs24\lang3084\tx566\tx1133\tx1700\tx2267\tx2834\tx3401\tx3968\tx4535\tx5102\tx5669\tx6236\tx6803{\cf1\rtlch \ltrch\fs24\loch\f5\hich\af5
+  }{\cf1\rtlch \ltrch\loch\fs24\loch\f5\hich\af5
+\}}
+\par \pard\plain \s0\nowidctlpar\hyphpar0\cf0\kerning1\dbch\af6\langfe2052\dbch\af7\afs24\alang1081\loch\f3\hich\af3\fs24\lang3084\tx566\tx1133\tx1700\tx2267\tx2834\tx3401\tx3968\tx4535\tx5102\tx5669\tx6236\tx6803{\cf1\rtlch \ltrch\fs24\loch\f5\hich\af5
+  }{\cf1\rtlch \ltrch\loch\fs24\loch\f5\hich\af5
+ID.list[[i]] <- data.frame(id=rep(gsgo_df$id[i],nr),}
+\par \pard\plain \s0\nowidctlpar\hyphpar0\cf0\kerning1\dbch\af6\langfe2052\dbch\af7\afs24\alang1081\loch\f3\hich\af3\fs24\lang3084\tx566\tx1133\tx1700\tx2267\tx2834\tx3401\tx3968\tx4535\tx5102\tx5669\tx6236\tx6803{\cf1\rtlch \ltrch\fs24\loch\f5\hich\af5
+                             }{\cf1\rtlch \ltrch\loch\fs24\loch\f5\hich\af5
+year=rep(gsgo_df$year[i],nr),}
+\par \pard\plain \s0\nowidctlpar\hyphpar0\cf0\kerning1\dbch\af6\langfe2052\dbch\af7\afs24\alang1081\loch\f3\hich\af3\fs24\lang3084\tx566\tx1133\tx1700\tx2267\tx2834\tx3401\tx3968\tx4535\tx5102\tx5669\tx6236\tx6803{\cf1\rtlch \ltrch\fs24\loch\f5\hich\af5
+                             }{\cf1\rtlch \ltrch\loch\fs24\loch\f5\hich\af5
+site=rep(gsgo_df$site[i],nr),}
+\par \pard\plain \s0\nowidctlpar\hyphpar0\cf0\kerning1\dbch\af6\langfe2052\dbch\af7\afs24\alang1081\loch\f3\hich\af3\fs24\lang3084\tx566\tx1133\tx1700\tx2267\tx2834\tx3401\tx3968\tx4535\tx5102\tx5669\tx6236\tx6803{\cf1\rtlch \ltrch\fs24\loch\f5\hich\af5
+                             }{\cf1\rtlch \ltrch\loch\fs24\loch\f5\hich\af5
+exposure=rep(0,nr), survive=rep(0,nr),}
+\par \pard\plain \s0\nowidctlpar\hyphpar0\cf0\kerning1\dbch\af6\langfe2052\dbch\af7\afs24\alang1081\loch\f3\hich\af3\fs24\lang3084\tx566\tx1133\tx1700\tx2267\tx2834\tx3401\tx3968\tx4535\tx5102\tx5669\tx6236\tx6803{\cf1\rtlch \ltrch\fs24\loch\f5\hich\af5
+                             }{\cf1\rtlch \ltrch\loch\fs24\loch\f5\hich\af5
+UTM.E=rep(gsgo_df$UTM.E[i],nr),}
+\par \pard\plain \s0\nowidctlpar\hyphpar0\cf0\kerning1\dbch\af6\langfe2052\dbch\af7\afs24\alang1081\loch\f3\hich\af3\fs24\lang3084\tx566\tx1133\tx1700\tx2267\tx2834\tx3401\tx3968\tx4535\tx5102\tx5669\tx6236\tx6803{\cf1\rtlch \ltrch\fs24\loch\f5\hich\af5
+                             }{\cf1\rtlch \ltrch\loch\fs24\loch\f5\hich\af5
+UTM.N=rep(gsgo_df$UTM.N[i],nr),}
+\par \pard\plain \s0\nowidctlpar\hyphpar0\cf0\kerning1\dbch\af6\langfe2052\dbch\af7\afs24\alang1081\loch\f3\hich\af3\fs24\lang3084\tx566\tx1133\tx1700\tx2267\tx2834\tx3401\tx3968\tx4535\tx5102\tx5669\tx6236\tx6803{\cf1\rtlch \ltrch\fs24\loch\f5\hich\af5
+                             }{\cf1\rtlch \ltrch\loch\fs24\loch\f5\hich\af5
+habitat=rep(gsgo_df$habitat[i],nr))}
+\par \pard\plain \s0\nowidctlpar\hyphpar0\cf0\kerning1\dbch\af6\langfe2052\dbch\af7\afs24\alang1081\loch\f3\hich\af3\fs24\lang3084\tx566\tx1133\tx1700\tx2267\tx2834\tx3401\tx3968\tx4535\tx5102\tx5669\tx6236\tx6803{\cf1\rtlch \ltrch\fs24\loch\f5\hich\af5
+  }{\cf1\rtlch \ltrch\loch\fs24\loch\f5\hich\af5
+ID.list[[i]]$issue <- gsgo_df$ISSUE[i]}
+\par \pard\plain \s0\nowidctlpar\hyphpar0\cf0\kerning1\dbch\af6\langfe2052\dbch\af7\afs24\alang1081\loch\f3\hich\af3\fs24\lang3084\tx566\tx1133\tx1700\tx2267\tx2834\tx3401\tx3968\tx4535\tx5102\tx5669\tx6236\tx6803{\cf1\rtlch \ltrch\fs24\loch\f5\hich\af5
+  }{\cf1\rtlch \ltrch\loch\fs24\loch\f5\hich\af5
+# If nest success or unknown fate -> Create only one nest interval between FirstPresent and LastPresent}
+\par \pard\plain \s0\nowidctlpar\hyphpar0\cf0\kerning1\dbch\af6\langfe2052\dbch\af7\afs24\alang1081\loch\f3\hich\af3\fs24\lang3084\tx566\tx1133\tx1700\tx2267\tx2834\tx3401\tx3968\tx4535\tx5102\tx5669\tx6236\tx6803{\cf1\rtlch \ltrch\fs24\loch\f5\hich\af5
+  }{\cf1\rtlch \ltrch\loch\fs24\loch\f5\hich\af5
+if (gsgo_df$fate[i]== 0|is.na(gsgo_df$fate[i])) \{}
+\par \pard\plain \s0\nowidctlpar\hyphpar0\cf0\kerning1\dbch\af6\langfe2052\dbch\af7\afs24\alang1081\loch\f3\hich\af3\fs24\lang3084\tx566\tx1133\tx1700\tx2267\tx2834\tx3401\tx3968\tx4535\tx5102\tx5669\tx6236\tx6803{\cf1\rtlch \ltrch\fs24\loch\f5\hich\af5
+    }{\cf1\rtlch \ltrch\loch\fs24\loch\f5\hich\af5
+ID.list[[i]]$survive <- 1}
+\par \pard\plain \s0\nowidctlpar\hyphpar0\cf0\kerning1\dbch\af6\langfe2052\dbch\af7\afs24\alang1081\loch\f3\hich\af3\fs24\lang3084\tx566\tx1133\tx1700\tx2267\tx2834\tx3401\tx3968\tx4535\tx5102\tx5669\tx6236\tx6803{\cf1\rtlch \ltrch\fs24\loch\f5\hich\af5
+    }{\cf1\rtlch \ltrch\loch\fs24\loch\f5\hich\af5
+ID.list[[i]]$exposure <- gsgo_df$LastPresent[i] - gsgo_df$FirstFound[i]}
+\par \pard\plain \s0\nowidctlpar\hyphpar0\cf0\kerning1\dbch\af6\langfe2052\dbch\af7\afs24\alang1081\loch\f3\hich\af3\fs24\lang3084\tx566\tx1133\tx1700\tx2267\tx2834\tx3401\tx3968\tx4535\tx5102\tx5669\tx6236\tx6803{\cf1\rtlch \ltrch\fs24\loch\f5\hich\af5
+  }{\cf1\rtlch \ltrch\loch\fs24\loch\f5\hich\af5
+\}  }
+\par \pard\plain \s0\nowidctlpar\hyphpar0\cf0\kerning1\dbch\af6\langfe2052\dbch\af7\afs24\alang1081\loch\f3\hich\af3\fs24\lang3084\tx566\tx1133\tx1700\tx2267\tx2834\tx3401\tx3968\tx4535\tx5102\tx5669\tx6236\tx6803{\cf1\rtlch \ltrch\fs24\loch\f5\hich\af5
+  }{\cf1\rtlch \ltrch\loch\fs24\loch\f5\hich\af5
+# If nest failure -> Create two visit intervals:}
+\par \pard\plain \s0\nowidctlpar\hyphpar0\cf0\kerning1\dbch\af6\langfe2052\dbch\af7\afs24\alang1081\loch\f3\hich\af3\fs24\lang3084\tx566\tx1133\tx1700\tx2267\tx2834\tx3401\tx3968\tx4535\tx5102\tx5669\tx6236\tx6803{\cf1\rtlch \ltrch\fs24\loch\f5\hich\af5
+  }{\cf1\rtlch \ltrch\loch\fs24\loch\f5\hich\af5
+#  First interval: between FirstFound and LastPresent}
+\par \pard\plain \s0\nowidctlpar\hyphpar0\cf0\kerning1\dbch\af6\langfe2052\dbch\af7\afs24\alang1081\loch\f3\hich\af3\fs24\lang3084\tx566\tx1133\tx1700\tx2267\tx2834\tx3401\tx3968\tx4535\tx5102\tx5669\tx6236\tx6803{\cf1\rtlch \ltrch\fs24\loch\f5\hich\af5
+  }{\cf1\rtlch \ltrch\loch\fs24\loch\f5\hich\af5
+#  Second interval: between LastPresent and LastChecked}
+\par \pard\plain \s0\nowidctlpar\hyphpar0\cf0\kerning1\dbch\af6\langfe2052\dbch\af7\afs24\alang1081\loch\f3\hich\af3\fs24\lang3084\tx566\tx1133\tx1700\tx2267\tx2834\tx3401\tx3968\tx4535\tx5102\tx5669\tx6236\tx6803{\cf1\rtlch \ltrch\fs24\loch\f5\hich\af5
+  }{\cf1\rtlch \ltrch\loch\fs24\loch\f5\hich\af5
+if (is.na(gsgo_df$fate[i])==F) \{}
+\par \pard\plain \s0\nowidctlpar\hyphpar0\cf0\kerning1\dbch\af6\langfe2052\dbch\af7\afs24\alang1081\loch\f3\hich\af3\fs24\lang3084\tx566\tx1133\tx1700\tx2267\tx2834\tx3401\tx3968\tx4535\tx5102\tx5669\tx6236\tx6803{\cf1\rtlch \ltrch\fs24\loch\f5\hich\af5
+    }{\cf1\rtlch \ltrch\loch\fs24\loch\f5\hich\af5
+if (gsgo_df$fate[i]== 1) \{}
+\par \pard\plain \s0\nowidctlpar\hyphpar0\cf0\kerning1\dbch\af6\langfe2052\dbch\af7\afs24\alang1081\loch\f3\hich\af3\fs24\lang3084\tx566\tx1133\tx1700\tx2267\tx2834\tx3401\tx3968\tx4535\tx5102\tx5669\tx6236\tx6803{\cf1\rtlch \ltrch\fs24\loch\f5\hich\af5
+      }{\cf1\rtlch \ltrch\loch\fs24\loch\f5\hich\af5
+ID.list[[i]]$survive[1] <- 1}
+\par \pard\plain \s0\nowidctlpar\hyphpar0\cf0\kerning1\dbch\af6\langfe2052\dbch\af7\afs24\alang1081\loch\f3\hich\af3\fs24\lang3084\tx566\tx1133\tx1700\tx2267\tx2834\tx3401\tx3968\tx4535\tx5102\tx5669\tx6236\tx6803{\cf1\rtlch \ltrch\fs24\loch\f5\hich\af5
+      }{\cf1\rtlch \ltrch\loch\fs24\loch\f5\hich\af5
+ID.list[[i]]$survive[2] <- 0}
+\par \pard\plain \s0\nowidctlpar\hyphpar0\cf0\kerning1\dbch\af6\langfe2052\dbch\af7\afs24\alang1081\loch\f3\hich\af3\fs24\lang3084\tx566\tx1133\tx1700\tx2267\tx2834\tx3401\tx3968\tx4535\tx5102\tx5669\tx6236\tx6803{\cf1\rtlch \ltrch\fs24\loch\f5\hich\af5
+      }{\cf1\rtlch \ltrch\loch\fs24\loch\f5\hich\af5
+ID.list[[i]]$exposure[1] <- gsgo_df$LastPresent[i] - gsgo_df$FirstFound[i]}
+\par \pard\plain \s0\nowidctlpar\hyphpar0\cf0\kerning1\dbch\af6\langfe2052\dbch\af7\afs24\alang1081\loch\f3\hich\af3\fs24\lang3084\tx566\tx1133\tx1700\tx2267\tx2834\tx3401\tx3968\tx4535\tx5102\tx5669\tx6236\tx6803{\cf1\rtlch \ltrch\fs24\loch\f5\hich\af5
+      }{\cf1\rtlch \ltrch\loch\fs24\loch\f5\hich\af5
+ID.list[[i]]$exposure[2] <- gsgo_df$LastChecked[i] - gsgo_df$LastPresent[i]}
+\par \pard\plain \s0\nowidctlpar\hyphpar0\cf0\kerning1\dbch\af6\langfe2052\dbch\af7\afs24\alang1081\loch\f3\hich\af3\fs24\lang3084\tx566\tx1133\tx1700\tx2267\tx2834\tx3401\tx3968\tx4535\tx5102\tx5669\tx6236\tx6803{\cf1\rtlch \ltrch\fs24\loch\f5\hich\af5
+    }{\cf1\rtlch \ltrch\loch\fs24\loch\f5\hich\af5
+\}}
+\par \pard\plain \s0\nowidctlpar\hyphpar0\cf0\kerning1\dbch\af6\langfe2052\dbch\af7\afs24\alang1081\loch\f3\hich\af3\fs24\lang3084\tx566\tx1133\tx1700\tx2267\tx2834\tx3401\tx3968\tx4535\tx5102\tx5669\tx6236\tx6803{\cf1\rtlch \ltrch\fs24\loch\f5\hich\af5
+  }{\cf1\rtlch \ltrch\loch\fs24\loch\f5\hich\af5
+\}}
+\par \pard\plain \s0\nowidctlpar\hyphpar0\cf0\kerning1\dbch\af6\langfe2052\dbch\af7\afs24\alang1081\loch\f3\hich\af3\fs24\lang3084\tx566\tx1133\tx1700\tx2267\tx2834\tx3401\tx3968\tx4535\tx5102\tx5669\tx6236\tx6803{\cf1\rtlch \ltrch\loch\fs24\loch\f5\hich\af5
+\}}
+\par \pard\plain \s0\nowidctlpar\hyphpar0\cf0\kerning1\dbch\af6\langfe2052\dbch\af7\afs24\alang1081\loch\f3\hich\af3\fs24\lang3084\tx566\tx1133\tx1700\tx2267\tx2834\tx3401\tx3968\tx4535\tx5102\tx5669\tx6236\tx6803{\cf1\rtlch \ltrch\loch\fs24\loch\f5\hich\af5
+rm(nr)}
+\par \pard\plain \s0\nowidctlpar\hyphpar0\cf0\kerning1\dbch\af6\langfe2052\dbch\af7\afs24\alang1081\loch\f3\hich\af3\fs24\lang3084\tx566\tx1133\tx1700\tx2267\tx2834\tx3401\tx3968\tx4535\tx5102\tx5669\tx6236\tx6803\cf1\rtlch \ltrch\loch\fs24\loch\f5\hich\af5
+
+\par \pard\plain \s0\nowidctlpar\hyphpar0\cf0\kerning1\dbch\af6\langfe2052\dbch\af7\afs24\alang1081\loch\f3\hich\af3\fs24\lang3084\tx566\tx1133\tx1700\tx2267\tx2834\tx3401\tx3968\tx4535\tx5102\tx5669\tx6236\tx6803{\cf1\rtlch \ltrch\loch\fs24\loch\f5\hich\af5
+# Create empty dataframe to store data in ID.list}
+\par \pard\plain \s0\nowidctlpar\hyphpar0\cf0\kerning1\dbch\af6\langfe2052\dbch\af7\afs24\alang1081\loch\f3\hich\af3\fs24\lang3084\tx566\tx1133\tx1700\tx2267\tx2834\tx3401\tx3968\tx4535\tx5102\tx5669\tx6236\tx6803{\cf1\rtlch \ltrch\loch\fs24\loch\f5\hich\af5
+shaffer <- data.frame(id=as.character(),year=as.integer(),}
+\par \pard\plain \s0\nowidctlpar\hyphpar0\cf0\kerning1\dbch\af6\langfe2052\dbch\af7\afs24\alang1081\loch\f3\hich\af3\fs24\lang3084\tx566\tx1133\tx1700\tx2267\tx2834\tx3401\tx3968\tx4535\tx5102\tx5669\tx6236\tx6803{\cf1\rtlch \ltrch\fs24\loch\f5\hich\af5
+                      }{\cf1\rtlch \ltrch\loch\fs24\loch\f5\hich\af5
+site=as.character(), exposure=as.numeric(), survive=as.integer(),}
+\par \pard\plain \s0\nowidctlpar\hyphpar0\cf0\kerning1\dbch\af6\langfe2052\dbch\af7\afs24\alang1081\loch\f3\hich\af3\fs24\lang3084\tx566\tx1133\tx1700\tx2267\tx2834\tx3401\tx3968\tx4535\tx5102\tx5669\tx6236\tx6803{\cf1\rtlch \ltrch\fs24\loch\f5\hich\af5
+                      }{\cf1\rtlch \ltrch\loch\fs24\loch\f5\hich\af5
+UTM.E=as.numeric(),UTM.N=as.numeric(),habitat=as.character(),}
+\par \pard\plain \s0\nowidctlpar\hyphpar0\cf0\kerning1\dbch\af6\langfe2052\dbch\af7\afs24\alang1081\loch\f3\hich\af3\fs24\lang3084\tx566\tx1133\tx1700\tx2267\tx2834\tx3401\tx3968\tx4535\tx5102\tx5669\tx6236\tx6803{\cf1\rtlch \ltrch\fs24\loch\f5\hich\af5
+                      }{\cf1\rtlch \ltrch\loch\fs24\loch\f5\hich\af5
+issue=as.character())}
+\par \pard\plain \s0\nowidctlpar\hyphpar0\cf0\kerning1\dbch\af6\langfe2052\dbch\af7\afs24\alang1081\loch\f3\hich\af3\fs24\lang3084\tx566\tx1133\tx1700\tx2267\tx2834\tx3401\tx3968\tx4535\tx5102\tx5669\tx6236\tx6803{\cf1\rtlch \ltrch\loch\fs24\loch\f5\hich\af5
+# Merge together data in ID.list in one dataframe}
+\par \pard\plain \s0\nowidctlpar\hyphpar0\cf0\kerning1\dbch\af6\langfe2052\dbch\af7\afs24\alang1081\loch\f3\hich\af3\fs24\lang3084\tx566\tx1133\tx1700\tx2267\tx2834\tx3401\tx3968\tx4535\tx5102\tx5669\tx6236\tx6803{\cf1\rtlch \ltrch\loch\fs24\loch\f5\hich\af5
+for (i in 1:length(ID.list)) \{}
+\par \pard\plain \s0\nowidctlpar\hyphpar0\cf0\kerning1\dbch\af6\langfe2052\dbch\af7\afs24\alang1081\loch\f3\hich\af3\fs24\lang3084\tx566\tx1133\tx1700\tx2267\tx2834\tx3401\tx3968\tx4535\tx5102\tx5669\tx6236\tx6803{\cf1\rtlch \ltrch\fs24\loch\f5\hich\af5
+  }{\cf1\rtlch \ltrch\loch\fs24\loch\f5\hich\af5
+if (is.null(nrow(ID.list[[i]]))==FALSE) \{}
+\par \pard\plain \s0\nowidctlpar\hyphpar0\cf0\kerning1\dbch\af6\langfe2052\dbch\af7\afs24\alang1081\loch\f3\hich\af3\fs24\lang3084\tx566\tx1133\tx1700\tx2267\tx2834\tx3401\tx3968\tx4535\tx5102\tx5669\tx6236\tx6803{\cf1\rtlch \ltrch\fs24\loch\f5\hich\af5
+    }{\cf1\rtlch \ltrch\loch\fs24\loch\f5\hich\af5
+if (nrow(ID.list[[i]]) > 0) shaffer <- rbind(shaffer, ID.list[[i]])}
+\par \pard\plain \s0\nowidctlpar\hyphpar0\cf0\kerning1\dbch\af6\langfe2052\dbch\af7\afs24\alang1081\loch\f3\hich\af3\fs24\lang3084\tx566\tx1133\tx1700\tx2267\tx2834\tx3401\tx3968\tx4535\tx5102\tx5669\tx6236\tx6803{\cf1\rtlch \ltrch\fs24\loch\f5\hich\af5
+  }{\cf1\rtlch \ltrch\loch\fs24\loch\f5\hich\af5
+\}}
+\par \pard\plain \s0\nowidctlpar\hyphpar0\cf0\kerning1\dbch\af6\langfe2052\dbch\af7\afs24\alang1081\loch\f3\hich\af3\fs24\lang3084\tx566\tx1133\tx1700\tx2267\tx2834\tx3401\tx3968\tx4535\tx5102\tx5669\tx6236\tx6803{\cf1\rtlch \ltrch\loch\fs24\loch\f5\hich\af5
+\}}
+\par \pard\plain \s0\nowidctlpar\hyphpar0\cf0\kerning1\dbch\af6\langfe2052\dbch\af7\afs24\alang1081\loch\f3\hich\af3\fs24\lang3084\tx566\tx1133\tx1700\tx2267\tx2834\tx3401\tx3968\tx4535\tx5102\tx5669\tx6236\tx6803{\cf1\rtlch \ltrch\loch\fs24\loch\f5\hich\af5
+# In this dataframe named "shaffer", there is one or two lines per nest}
+\par \pard\plain \s0\nowidctlpar\hyphpar0\cf0\kerning1\dbch\af6\langfe2052\dbch\af7\afs24\alang1081\loch\f3\hich\af3\fs24\lang3084\tx566\tx1133\tx1700\tx2267\tx2834\tx3401\tx3968\tx4535\tx5102\tx5669\tx6236\tx6803{\cf1\rtlch \ltrch\loch\fs24\loch\f5\hich\af5
+# Each line for a nest represent a nest visit interval during which nest fate did not change}
+\par \pard\plain \s0\nowidctlpar\hyphpar0\cf0\kerning1\dbch\af6\langfe2052\dbch\af7\afs24\alang1081\loch\f3\hich\af3\fs24\lang3084\tx566\tx1133\tx1700\tx2267\tx2834\tx3401\tx3968\tx4535\tx5102\tx5669\tx6236\tx6803{\cf1\rtlch \ltrch\loch\fs24\loch\f5\hich\af5
+# For each line, the exposure time represent the number of days in the nest visit interval}
+\par \pard\plain \s0\nowidctlpar\hyphpar0\cf0\kerning1\dbch\af6\langfe2052\dbch\af7\afs24\alang1081\loch\f3\hich\af3\fs24\lang3084\tx566\tx1133\tx1700\tx2267\tx2834\tx3401\tx3968\tx4535\tx5102\tx5669\tx6236\tx6803{\cf1\rtlch \ltrch\loch\fs24\loch\f5\hich\af5
+# For each line, the survive variable indicates the nest fate at the end of the interval}
+\par \pard\plain \s0\nowidctlpar\hyphpar0\cf0\kerning1\dbch\af6\langfe2052\dbch\af7\afs24\alang1081\loch\f3\hich\af3\fs24\lang3084\tx566\tx1133\tx1700\tx2267\tx2834\tx3401\tx3968\tx4535\tx5102\tx5669\tx6236\tx6803{\cf1\rtlch \ltrch\loch\fs24\loch\f5\hich\af5
+#   survive = 1 means the nest survived at the end of the nest visit interval}
+\par \pard\plain \s0\nowidctlpar\hyphpar0\cf0\kerning1\dbch\af6\langfe2052\dbch\af7\afs24\alang1081\loch\f3\hich\af3\fs24\lang3084\tx566\tx1133\tx1700\tx2267\tx2834\tx3401\tx3968\tx4535\tx5102\tx5669\tx6236\tx6803{\cf1\rtlch \ltrch\loch\fs24\loch\f5\hich\af5
+#   survive = 0 means the nest did not survive at the end of the nest visit interval}
+\par \pard\plain \s0\nowidctlpar\hyphpar0\cf0\kerning1\dbch\af6\langfe2052\dbch\af7\afs24\alang1081\loch\f3\hich\af3\fs24\lang3084\tx566\tx1133\tx1700\tx2267\tx2834\tx3401\tx3968\tx4535\tx5102\tx5669\tx6236\tx6803{\cf1\rtlch \ltrch\loch\fs24\loch\f5\hich\af5
+# One line for successful nest or nest with unknown fate and two lines for }
+\par \pard\plain \s0\nowidctlpar\hyphpar0\cf0\kerning1\dbch\af6\langfe2052\dbch\af7\afs24\alang1081\loch\f3\hich\af3\fs24\lang3084\tx566\tx1133\tx1700\tx2267\tx2834\tx3401\tx3968\tx4535\tx5102\tx5669\tx6236\tx6803\cf1\rtlch \ltrch\loch\fs24\loch\f5\hich\af5
+
+\par \pard\plain \s0\nowidctlpar\hyphpar0\cf0\kerning1\dbch\af6\langfe2052\dbch\af7\afs24\alang1081\loch\f3\hich\af3\fs24\lang3084\tx566\tx1133\tx1700\tx2267\tx2834\tx3401\tx3968\tx4535\tx5102\tx5669\tx6236\tx6803{\cf1\rtlch \ltrch\loch\fs24\loch\f5\hich\af5
+# REMOVE LINES WITHOUT EXPOSURE TIME (WITHOUT MONITORING, EXPOSURE == 0 or NA)}
+\par \pard\plain \s0\nowidctlpar\hyphpar0\cf0\kerning1\dbch\af6\langfe2052\dbch\af7\afs24\alang1081\loch\f3\hich\af3\fs24\lang3084\tx566\tx1133\tx1700\tx2267\tx2834\tx3401\tx3968\tx4535\tx5102\tx5669\tx6236\tx6803{\cf1\rtlch \ltrch\loch\fs24\loch\f5\hich\af5
+shaffer <- shaffer[shaffer$exposure>0,]}
+\par \pard\plain \s0\nowidctlpar\hyphpar0\cf0\kerning1\dbch\af6\langfe2052\dbch\af7\afs24\alang1081\loch\f3\hich\af3\fs24\lang3084\tx566\tx1133\tx1700\tx2267\tx2834\tx3401\tx3968\tx4535\tx5102\tx5669\tx6236\tx6803{\cf1\rtlch \ltrch\loch\fs24\loch\f5\hich\af5
+shaffer <- shaffer[is.na(shaffer$exposure)==F,]}
+\par \pard\plain \s0\nowidctlpar\hyphpar0\cf0\kerning1\dbch\af6\langfe2052\dbch\af7\afs24\alang1081\loch\f3\hich\af3\fs24\lang3084\tx566\tx1133\tx1700\tx2267\tx2834\tx3401\tx3968\tx4535\tx5102\tx5669\tx6236\tx6803{\cf1\rtlch \ltrch\loch\fs24\loch\f5\hich\af5
+hist(shaffer$exposure)}
+\par \pard\plain \s0\nowidctlpar\hyphpar0\cf0\kerning1\dbch\af6\langfe2052\dbch\af7\afs24\alang1081\loch\f3\hich\af3\fs24\lang3084\tx566\tx1133\tx1700\tx2267\tx2834\tx3401\tx3968\tx4535\tx5102\tx5669\tx6236\tx6803\cf1\rtlch \ltrch\loch\fs24\loch\f5\hich\af5
+
+\par \pard\plain \s0\nowidctlpar\hyphpar0\cf0\kerning1\dbch\af6\langfe2052\dbch\af7\afs24\alang1081\loch\f3\hich\af3\fs24\lang3084\tx566\tx1133\tx1700\tx2267\tx2834\tx3401\tx3968\tx4535\tx5102\tx5669\tx6236\tx6803{\cf1\rtlch \ltrch\loch\fs24\loch\f5\hich\af5
+# ADD VARIABLES ####}
+\par \pard\plain \s0\nowidctlpar\hyphpar0\cf0\kerning1\dbch\af6\langfe2052\dbch\af7\afs24\alang1081\loch\f3\hich\af3\fs24\lang3084\tx566\tx1133\tx1700\tx2267\tx2834\tx3401\tx3968\tx4535\tx5102\tx5669\tx6236\tx6803{\cf1\rtlch \ltrch\loch\fs24\loch\f5\hich\af5
+shaffer$fyear <- as.factor(as.character(shaffer$year)) # Year as a factor}
+\par \pard\plain \s0\nowidctlpar\hyphpar0\cf0\kerning1\dbch\af6\langfe2052\dbch\af7\afs24\alang1081\loch\f3\hich\af3\fs24\lang3084\tx566\tx1133\tx1700\tx2267\tx2834\tx3401\tx3968\tx4535\tx5102\tx5669\tx6236\tx6803{\cf1\rtlch \ltrch\loch\fs24\loch\f5\hich\af5
+# IMPORT VARIABLES}
+\par \pard\plain \s0\nowidctlpar\hyphpar0\cf0\kerning1\dbch\af6\langfe2052\dbch\af7\afs24\alang1081\loch\f3\hich\af3\fs24\lang3084\tx566\tx1133\tx1700\tx2267\tx2834\tx3401\tx3968\tx4535\tx5102\tx5669\tx6236\tx6803{\cf1\rtlch \ltrch\loch\fs24\loch\f5\hich\af5
+covariates <- read.delim("csv/covariates.csv",sep=";")}
+\par \pard\plain \s0\nowidctlpar\hyphpar0\cf0\kerning1\dbch\af6\langfe2052\dbch\af7\afs24\alang1081\loch\f3\hich\af3\fs24\lang3084\tx566\tx1133\tx1700\tx2267\tx2834\tx3401\tx3968\tx4535\tx5102\tx5669\tx6236\tx6803{\cf1\rtlch \ltrch\loch\fs24\loch\f5\hich\af5
+shaffer[names(covariates)[-1]] <- NA # creates new columns for covariates}
+\par \pard\plain \s0\nowidctlpar\hyphpar0\cf0\kerning1\dbch\af6\langfe2052\dbch\af7\afs24\alang1081\loch\f3\hich\af3\fs24\lang3084\tx566\tx1133\tx1700\tx2267\tx2834\tx3401\tx3968\tx4535\tx5102\tx5669\tx6236\tx6803{\cf1\rtlch \ltrch\loch\fs24\loch\f5\hich\af5
+for (i in 2:length(names(covariates)))\{}
+\par \pard\plain \s0\nowidctlpar\hyphpar0\cf0\kerning1\dbch\af6\langfe2052\dbch\af7\afs24\alang1081\loch\f3\hich\af3\fs24\lang3084\tx566\tx1133\tx1700\tx2267\tx2834\tx3401\tx3968\tx4535\tx5102\tx5669\tx6236\tx6803{\cf1\rtlch \ltrch\fs24\loch\f5\hich\af5
+  }{\cf1\rtlch \ltrch\loch\fs24\loch\f5\hich\af5
+for (j in 1:length(covariates[,"Year"]))\{}
+\par \pard\plain \s0\nowidctlpar\hyphpar0\cf0\kerning1\dbch\af6\langfe2052\dbch\af7\afs24\alang1081\loch\f3\hich\af3\fs24\lang3084\tx566\tx1133\tx1700\tx2267\tx2834\tx3401\tx3968\tx4535\tx5102\tx5669\tx6236\tx6803{\cf1\rtlch \ltrch\fs24\loch\f5\hich\af5
+    }{\cf1\rtlch \ltrch\loch\fs24\loch\f5\hich\af5
+shaffer[,names(covariates)[i]][shaffer$year == covariates[,"Year"][j]] <- covariates[,names(covariates)[i]][covariates$Year == covariates[,"Year"][j]]}
+\par \pard\plain \s0\nowidctlpar\hyphpar0\cf0\kerning1\dbch\af6\langfe2052\dbch\af7\afs24\alang1081\loch\f3\hich\af3\fs24\lang3084\tx566\tx1133\tx1700\tx2267\tx2834\tx3401\tx3968\tx4535\tx5102\tx5669\tx6236\tx6803{\cf1\rtlch \ltrch\fs24\loch\f5\hich\af5
+  }{\cf1\rtlch \ltrch\loch\fs24\loch\f5\hich\af5
+\}}
+\par \pard\plain \s0\nowidctlpar\hyphpar0\cf0\kerning1\dbch\af6\langfe2052\dbch\af7\afs24\alang1081\loch\f3\hich\af3\fs24\lang3084\tx566\tx1133\tx1700\tx2267\tx2834\tx3401\tx3968\tx4535\tx5102\tx5669\tx6236\tx6803{\cf1\rtlch \ltrch\loch\fs24\loch\f5\hich\af5
+\}}
+\par \pard\plain \s0\nowidctlpar\hyphpar0\cf0\kerning1\dbch\af6\langfe2052\dbch\af7\afs24\alang1081\loch\f3\hich\af3\fs24\lang3084\tx566\tx1133\tx1700\tx2267\tx2834\tx3401\tx3968\tx4535\tx5102\tx5669\tx6236\tx6803{\cf1\rtlch \ltrch\loch\fs24\loch\f5\hich\af5
+rm(ID.list,i,j)}
+\par \pard\plain \s0\nowidctlpar\hyphpar0\cf0\kerning1\dbch\af6\langfe2052\dbch\af7\afs24\alang1081\loch\f3\hich\af3\fs24\lang3084\tx566\tx1133\tx1700\tx2267\tx2834\tx3401\tx3968\tx4535\tx5102\tx5669\tx6236\tx6803{\cf1\rtlch \ltrch\loch\fs24\loch\f5\hich\af5
+row.names(shaffer) <- NULL}
+\par \pard\plain \s0\nowidctlpar\hyphpar0\cf0\kerning1\dbch\af6\langfe2052\dbch\af7\afs24\alang1081\loch\f3\hich\af3\fs24\lang3084\tx566\tx1133\tx1700\tx2267\tx2834\tx3401\tx3968\tx4535\tx5102\tx5669\tx6236\tx6803\cf1\rtlch \ltrch\loch\fs24\loch\f5\hich\af5
+
+\par \pard\plain \s0\nowidctlpar\hyphpar0\cf0\kerning1\dbch\af6\langfe2052\dbch\af7\afs24\alang1081\loch\f3\hich\af3\fs24\lang3084\tx566\tx1133\tx1700\tx2267\tx2834\tx3401\tx3968\tx4535\tx5102\tx5669\tx6236\tx6803{\cf1\rtlch \ltrch\loch\fs24\loch\f5\hich\af5
+# SAVE FILE ####}
+\par \pard\plain \s0\nowidctlpar\hyphpar0\cf0\kerning1\dbch\af6\langfe2052\dbch\af7\afs24\alang1081\loch\f3\hich\af3\fs24\lang3084\tx566\tx1133\tx1700\tx2267\tx2834\tx3401\tx3968\tx4535\tx5102\tx5669\tx6236\tx6803{\cf1\rtlch \ltrch\loch\fs24\loch\f5\hich\af5
 write.csv2(shaffer, file = "output/gsgo_shaffer.csv", row.names = F)}
+\par }
