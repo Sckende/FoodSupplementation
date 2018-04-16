@@ -10,7 +10,7 @@ setwd("/home/claire/OneDriveDoc/Doc doc doc/Ph.D. - ANALYSES/R analysis/Data")
 supp<-read.table("MARK_suppl_2015.txt", h = T, dec = ".", sep = ",")
 str(supp)
 dim(supp)
-summary(supp)
+summary(supp) 
 
 # Treat dummy variables for experimentation types as factors
 #supp$FOOD=factor(supp$FOOD)
