@@ -5,12 +5,12 @@
 #pour que la ligne soit valide#
 #require(RMark)
 
-#getwd()
-#setwd("/Users/nicolas/Desktop/Claire/MARK_analysis")
-#supp<-read.table("Mark2-2015.txt", h=T, dec=",", sep="\t")
-#str(supp)
-#dim(supp)
-#summary(supp)
+getwd()
+setwd("/home/claire/OneDriveDoc/Doc doc doc/Ph.D. - ANALYSES/R analysis/Data")
+supp<-read.table("MARK_suppl_2015.txt", h = T, dec = ".", sep = ",")
+str(supp)
+dim(supp)
+summary(supp)
 
 # Treat dummy variables for experimentation types as factors
 #supp$FOOD=factor(supp$FOOD)
@@ -19,22 +19,37 @@
 #supp$WET=factor(supp$WET)
 #supp$MES=factor(supp$MES)
 
-#summary(subset(supp,FOOD=="1"& MES=="1"))#pour obtenir les effectifs dans les diff?rents traitements et milieux
+#summary(subset(supp,FOOD=="1"& MES=="1"))#pour obtenir les effectifs dans les differents traitements et milieux
 
 
 #summary(supp)
 #run.expe=function ()
 #{# 1. A model of constant daily survival rate (DSR)
-# Dot=mark(supp,nocc=27,model="Nest",model.parameters=list(S=list(formula=~1)))
-# 2. DSR varies by experimentation type - treats experimentation as factors
-# and the output provides S-expe for each experimentation type
-#EXPE=mark(supp,nocc=27,model="Nest", model.parameters=list(S=list(formula=~FOOD+WATER+FOWA)),groups=c("FOOD","WATER","FOWA"))
+Dot <- mark(supp, nocc = 27, model = "Nest", model.parameters = list(S = list(formula = ~1)))
+
+# 2. DSR varies by experimentation type - treats experimentation as factors and the output provides S-expe for each experimentation type
+EXPE <- mark(supp, nocc = 27, model = "Nest", model.parameters = list(S = list(formula= ~SUPPL)), groups = "SUPPL")
+
 # 3. DSR varies with habitat type
-#Habitat=mark(supp,nocc=27,model="Nest",model.parameters=list(S=list(formula=~MES+WET)),groups=c("MES","WET"))
-#EXPEHAB=mark(supp,nocc=27, model="Nest",model.parameters = list(S=list(formula=~FOOD+WATER+FOWA+MES+WET)),groups=c("FOOD","WATER","FOWA","MES","WET"))
-#Age=mark(supp,nocc=27,model="Nest",model.parameters=list(S=list(formula=~NestAge)))
-#Predation=mark(supp,nocc=27,model="Nest",model.parameters=list(S=list(formula=~ParPred)))
-#ExperimentDate=mark(supp,nocc=27,model = "Nest", model.parameters = list(S=list(formula=~ExpDate)))
+Habitat <- mark(supp, nocc = 27, model = "Nest", model.parameters = list(S = list(formula = ~ HABITAT)), groups = "HABITAT")
+
+# 4.
+EXPEHAB <- mark(supp, nocc = 27, model = "Nest", model.parameters = list(S = list(formula = ~ SUPPL + HABITAT)), groups = c("SUPPL", "HABITAT"))
+
+# 5.
+Age <- mark(supp, nocc = 27, model = "Nest", model.parameters = list(S = list(formula = ~ NestAge)))
+# 6.
+AgeHab <- mark(supp, nocc = 27, model = "Nest", model.parameters = list(S = list(formula = ~ HABITAT + NestAge)), groups = "HABITAT")
+
+# 7.
+AgeSuppl <- mark(supp, nocc = 27, model = "Nest", model.parameters = list(S = list(formula = ~ SUPPL + NestAge)), groups = "SUPPL")
+
+# 8.
+AgeSupplHab <- mark(supp, nocc = 27, model = "Nest", model.parameters = list(S = list(formula = ~ SUPPL + HABITAT + NestAge)), groups = c("SUPPL", "HABITAT"))
+
+# 9.
+ExperimentDate <- mark(supp, nocc = 27, model = "Nest", model.parameters = list(S = list(formula = ~ExpDate)))
+
 #           }
 
 #expe.results=run.expe()
@@ -42,8 +57,7 @@
 
 
 #####Snow Geese - EXPERIMENTATION - MARK3#####
-#idem Fichier Rmark 2 mais sans les nids avec date d'initiation#
-#aberrante pour utiliser l'analyse "AgeDay1" (SH36J, SM3J, SM11J, SM13J, SH16R)#
+#idem Fichier Rmark 2 mais sans les nids avec date d'initiation aberrante pour utiliser l'analyse "AgeDay1" (SH36J, SM3J, SM11J, SM13J, SH16R)#
 require(RMark)
 
 getwd()
@@ -59,6 +73,7 @@ supp3$WATER=factor(supp3$WATER)
 supp3$FOWA=factor(supp3$FOWA)
 supp3$WET=factor(supp3$WET)
 supp3$MES=factor(supp3$MES)
+supp3$Fate <- as.factor(supp3$Fate)
 #supp3$ExpDate=factor(supp3$ExpDate)
 supp3$AgeFound<-(supp3$FirstFound-supp3$IniDate)+1
 supp3$AgeDay1<-(supp3$AgeFound-supp3$FirstFound)+1

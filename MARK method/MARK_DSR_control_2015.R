@@ -3,7 +3,7 @@ rm(list = ls())
 
 require(RMark)
 getwd()
-setwd("//home/claire/OneDriveDoc/Doc doc doc/Ph.D. - ANALYSES/R analysis/Data")
+setwd("/home/claire/OneDriveDoc/Doc doc doc/Ph.D. - ANALYSES/R analysis/Data")
 
 #----------------------------------#
 #####Snow geese - control 2015#####
@@ -30,13 +30,22 @@ nocc<-max(geese$LastChecked)
 #run.geese=function()
 #{# 1. A model of constant daily survival rate (DSR)
 Dot <- mark(geese, nocc=nocc, model="Nest", model.parameters = list(S = list(formula = ~1)))
-# 2. DSR varies by habitat type - treats habitats as factors
-# and the output provides S-hats for each habitat type
-Hbt <- mark(geese, nocc=nocc, model="Nest", model.parameters = list(S = list(formula = ~WET+MES)), groups = c("WET","MES"))
+
+# 2. DSR varies by habitat type - treats habitats as factors and the output provides S-hats for each habitat type
+Hbt <- mark(geese, nocc=nocc, model="Nest", model.parameters = list(S = list(formula = ~WET+MES)), groups = c("WET","MES")) # PROBLEM WITH THE CONDIDENT INTERVALS OF HABITAT ESTIMATES
+
+# 2bis. DSR varies by habitat type - treats habitats as factors and the output provides S-hats for each habitat type
+Hbt <- mark(geese, nocc=nocc, model="Nest", model.parameters = list(S = list(formula = ~ habitat)), groups = "habitat") 
+
 # 3. DSR varies with NestAge
-AgeGeese <- mark(geese, nocc=nocc, model="Nest", model.parameters = list(S = list(formula = ~NestAge)))
+AgeGeese <- mark(geese, nocc=nocc, model="Nest", model.parameters = list(S = list(formula = ~NestAge))) # NON SIGNIFICANT EFFECT
+
 #4.DSR varie with NestAge and Habitat
-AgeHbt <- mark(geese, nocc=nocc, model="Nest", model.parameters = list(S = list(formula = ~NestAge + WET + MES)), groups = c("WET","MES"))
+AgeHbt <- mark(geese, nocc=nocc, model="Nest", model.parameters = list(S = list(formula = ~NestAge + habitat)), groups = "habitat")
+
+# 5. DSR follows a trend through time
+TimeTrend <- mark(geese, nocc = nocc, model = "Nest", model.parameters = list(S = list(formula = ~Time))) # NON SIGNIFICANT EFFECT
+
 
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~#
 # Examine table of model-selection results #
@@ -48,7 +57,7 @@ AgeHbt <- mark(geese, nocc=nocc, model="Nest", model.parameters = list(S = list(
 #Creates a .Rinp, .inp and optionally renamed output files that can be imported into MARK to
 #create a new MARK project with all the data and output files.
 geese.results # print model-selection table to screen - Bilan AICc
-#exportation des r?sultats en format .txt
+#exportation des resultats en format .txt
 options(width=100) # set page width to 100 characters
 sink("resultsgeese.table.txt") # capture screen output to file
 print(geese.results) # send output to file

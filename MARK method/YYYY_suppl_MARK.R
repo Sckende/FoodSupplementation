@@ -1,83 +1,14 @@
-setwd("/Users/nicolas/Documents/Claire/Doc doc doc !/R analysis/Data")
+setwd("/home/claire/OneDriveDoc/Doc doc doc/Ph.D. - ANALYSES/R analysis/Data")
 #Pour faire tourber ce script, le tableau de base doit contenir les données originelles issues de la rentrée de données suite aux expérimentations de supplémentations en eau et en nourriture des nids de la grande oie des neiges - Cf protocole d'extraction de données : "GOOSE-extracBDD.pdf"
 
-#s<-read.table("2015_suppl_MARK.txt",sep = "\t", dec = ",", h = T)
-s<-read.table("2015_suppl_MARK.txt", sep = "\t", dec = ",", h = T)
-s<-read.table("2016_suppl_MARK.txt", sep = "\t", dec = ",", h = T)
-s<-read.table("2017_suppl_MARK.txt", sep = "\t", dec = ",", h = T)
+# Change the year depending on the expected dataset
+ann <- 2016
+
+# Load the dataset file
+s <- read.table(file = paste(ann, "_suppl_MARK.txt", sep = ""), sep = "\t", dec = ",", h = T)
 
 s$Fate<-as.factor(s$Fate)
 summary(s)
-
-########-------------Variables qualitatives creation-----------------#############
-#boucle pour la variable WET
-#WET<-NULL
-#x <- s$HABITAT
-#for(i in x){
-#  if (i == "WET") {
-#    r<-1
-#  } else
-#    r<-0
-#  WET<-rbind(WET,r)	}
-
-#s<-cbind(s, WET)
-
-#-----------------------------------------#
-#boucle pour la variable MES
-#MES<-NULL
-#x <- s$HABITAT
-#for(i in x){
-#  if (i == "WET") {
-#    r<-0
-#  } else
-#    r<-1
-#  MES<-rbind(MES,r)	}
-
-#s<-cbind(s, MES)
-#-----------------------------------------#
-#s$WET=as.factor(s$WET)
-#s$MES=as.factor(s$MES)
-
-#boucle pour les variables de supplémentation : WATER
-#W<-NULL
-#x <- s$SUPPL
-#for(i in x){
-#  if (i == "W") {
-#    r<-1
-#  }  else
-#    r<-0
-#  W<-rbind(W,r)	}
-
-#s<-cbind(s, W)
-
-#boucle pour les variables de supplémentation : FOOD
-#Fo<-NULL
-#x <- s$SUPPL
-#for(i in x){
-#  if (i == "F") {
-#    r<-1
-#  }  else
-#    r<-0
-#  Fo<-rbind(Fo,r)	}
-
-#s<-cbind(s, Fo)
-
-#boucle pour les variables de supplémentation : WATER+FOOD
-#To use only for the 2015 data
-#WF<-NULL
-#x <- s$SUPPL
-#for(i in x){
-#  if (i == "WF") {
-#    r<-1
-#  }  else
-#    r<-0
-#  WF<-rbind(WF,r)	}
-
-#s<-cbind(s, WF)
-
-#s$W=as.factor(s$W)
-#s$Fo=as.factor(s$Fo)
-#s$WF=as.factor(s$WF)
 
 #### Retrait des nids à echec avant supplémentation pour 2017 ####
 s <- s[s$SUPPL != "NONE",]
@@ -107,6 +38,10 @@ s$LastChecked<-s$LastChecked-(FF-1)
 #--------------------------------#
 #correspond à l'âge du nid lors du premier jour du suivi de nids
 s$AgeDay1<-(s$AgeFound-s$FirstFound)+1
+
+# Extraction d'un nouveau fichier de donnees pour analyses MARK
+summary(s)
+write.csv(s, file = paste("MARK_suppl_", unique(s$AN), ".txt", sep = ""))
 
 #### Modeles ####
 require(RMark)
