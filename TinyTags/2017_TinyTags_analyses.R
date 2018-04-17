@@ -33,6 +33,18 @@ summary(C)
 full <- merge(L, C, "socle")
 summary(full)
 
+# Obtaining the total duration of TT registration used to compute variables
+require(lubridate)
+#Setting dates as dates
+full$ttag_exp_start <- as.POSIXct(full$ttag_exp_start, tz = "America/Toronto", format = "%Y-%m-%d %H:%M:%S")
+full$ttag_exp_end <- as.POSIXct(full$ttag_exp_end, tz = "America/Toronto", format = "%Y-%m-%d %H:%M:%S")
+full$ttag_duration <- as.numeric(full$ttag_exp_end - full$ttag_exp_start) # in days
+full$ttag_duration <- full$ttag_duration*24*60 # in minute
+full$lengthinc <- full$ttag_duration - full$lengthrecess
+
+# To check ... MISMATCH !!!!!
+full$inc_propV2 <- full$lengthinc / full$ttag_duration
+
 # Keep variables of interest
 TT <- full[, c(1, 4:8, 10, 11, 13, 16, 18:22)]
 summary(TT)
@@ -49,14 +61,16 @@ hist(full$inc_prop)
 # 1. Null model
 inc1 <- glm(cbind())
 
-
+# Example to follow ...
 jo <- glm(cbind(breed_dens, monit_dens-breed_dens) ~ lmg_C1 + cumul_prec + MEAN_temp, family = binomial, data = mC1)
 summary(jo)
 
 #~~~~~~~~~~~~~~~~~~~~~~~~~~#
 #### meanrecess models ####
 #~~~~~~~~~~~~~~~~~~~~~~~~#
+hist(TT$meanrecess)
 
+rec1 <- lmer (meanrecess ~ 1, data = TT)
 
 #~~~~~~~~~~~~~~~~~~~~~~~~#
 #### meanfreq models ####
