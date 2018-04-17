@@ -42,7 +42,7 @@ And what about extrems years ?
 * Use papers which cite the Lecomte et al 2009 paper
 * Food supplementation with GSGO goslings - Lindholm and Gauthier 1994
 * Extract DSR values for each nests and put them in path analyses
-
+* THINK ABOUT NESTS WITH TT - fail status the same day as the deployment day
 ## Things done
 * Understand and test the Cynthia script
 * Method choosen: DSR with MARK software and use
