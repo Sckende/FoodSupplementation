@@ -43,6 +43,8 @@ And what about extrems years ?
 * Food supplementation with GSGO goslings - Lindholm and Gauthier 1994
 * Extract DSR values for each nests and put them in path analyses
 * THINK ABOUT NESTS WITH TT - fail status the same day as the deployment day
+* Quadratic effect of NestAge?
+
 ## Things done
 * Understand and test the Cynthia script
 * Method choosen: DSR with MARK software and use
