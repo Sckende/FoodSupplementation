@@ -1,10 +1,9 @@
 getwd()
 setwd("/home/claire/OneDriveDoc/Doc doc doc/Ph.D. - ANALYSES/R analysis/Data")
-<<<<<<< HEAD
+
 rm(list = ls())
 
-=======
->>>>>>> 324459a738389e9b8a5739a7f05d6baad4a698d3
+
 gsg <- read.table("GOOSE_MARK_all_nests.csv", h = T, dec = ".", sep = ",")
 str(gsg)
 dim(gsg)
@@ -19,6 +18,7 @@ gsg$SUPPL[gsg$SUPPL == "NONE"] <- "TEM"
 
 gsg$IniDate <- as.numeric(gsg$IniDate)
 gsg$SupplDate <- as.numeric(gsg$SupplDate)
+gsg$AN <- as.factor(gag$AN)
 
 # Nest ISSUE 0:excluded, 1:Success, 2:Abandonment, 3:Destroyed, 5:Unknown
 gsg$Fate[gsg$ISSUE == 1] <- 0
@@ -29,21 +29,17 @@ gsg <- gsg[,-11]
 gsg <- droplevels(gsg)
 gsg$Fate <- as.factor(gsg$Fate)
 
-<<<<<<< HEAD
-=======
+
 #################### choix de l'annee a tester####################
->>>>>>> 324459a738389e9b8a5739a7f05d6baad4a698d3
+
 gsg2015 <- subset(gsg, AN == 2015)
 gsg2016 <- subset(gsg, AN == 2016)
 gsg2017 <- subset(gsg, AN == 2017)
 
-<<<<<<< HEAD
 #################### choix de l'annee a tester####################
-geese <- gsg
-=======
+
 # Ici utiliser l'annee souhaitee
-geese <- gsg2016
->>>>>>> 324459a738389e9b8a5739a7f05d6baad4a698d3
+geese <- gsg
 summary(geese)
 
 #enlever les données manquantes
@@ -78,14 +74,14 @@ nocc <- max(geese$LastChecked)
 
 require(RMark)
 # Write a function for evaluating a set of competing models
-<<<<<<< HEAD
+
 run.geese=function()
 {
 # 1. A model of constant daily survival rate (DSR)
-=======
+
 #run.geese=function()
 #{# 1. A model of constant daily survival rate (DSR)
->>>>>>> 324459a738389e9b8a5739a7f05d6baad4a698d3
+
 Dot <- mark(geese, nocc = nocc, model = "Nest", model.parameters = list(S = list(formula = ~1)))
 
 # 2. DSR varies by habitat type - treats habitats as factors and the output provides S-hats for each habitat type
@@ -111,7 +107,6 @@ AgeExpe <- mark(geese, nocc = nocc, model = "Nest", model.parameters = list(S = 
 
 # 9. DSR varies with treatments, NestAge and habitats
 AgeExpeHab <- mark(geese, nocc = nocc, model = "Nest", model.parameters = list(S = list(formula = ~ NestAge + SUPPL + HABITAT)), groups = c("SUPPL", "HABITAT"))
-<<<<<<< HEAD
 
 return(collect.models())
 }
@@ -130,5 +125,4 @@ print(mallard.results) # send output to file
 sink() # return output to screen
 # remove "#" on next line to see output in notepad
 system("notepad results.table.txt",invisible=FALSE,wait=FALSE)
-=======
->>>>>>> 324459a738389e9b8a5739a7f05d6baad4a698d3
+
