@@ -16,9 +16,17 @@ gsg$SUPPL[gsg$SUPPL == "FOO"] <- "F"
 gsg$SUPPL[gsg$SUPPL == "WAT"] <- "W"
 gsg$SUPPL[gsg$SUPPL == "NONE"] <- "TEM"
 
+# Formating the reference level
+gsg$SUPPL <- relevel(gsg$SUPPL, "TEM")
+
+# Delete WF level in SUPPL
+gsg <- gsg[gsg$SUPPL != "WF",]
+gsg <- droplevels(gsg)
+
+# Formating variables
 gsg$IniDate <- as.numeric(gsg$IniDate)
 gsg$SupplDate <- as.numeric(gsg$SupplDate)
-gsg$AN <- as.factor(gag$AN)
+gsg$AN <- as.factor(gsg$AN)
 
 # Nest ISSUE 0:excluded, 1:Success, 2:Abandonment, 3:Destroyed, 5:Unknown
 gsg$Fate[gsg$ISSUE == 1] <- 0
@@ -74,42 +82,58 @@ nocc <- max(geese$LastChecked)
 
 require(RMark)
 # Write a function for evaluating a set of competing models
+# Set of modeles to test on MARK_modeles.odt 
 
-run.geese=function()
-{
+#run.geese=function()
+#{
 # 1. A model of constant daily survival rate (DSR)
 
 #run.geese=function()
-#{# 1. A model of constant daily survival rate (DSR)
+#{
+  
+# 0. A model of constant daily survival rate (DSR)
+M0 <- mark(geese, nocc = nocc, model = "Nest", model.parameters = list(S = list(formula = ~1)))
 
-Dot <- mark(geese, nocc = nocc, model = "Nest", model.parameters = list(S = list(formula = ~1)))
+# 00. year effect
+M00 <- mark(geese, nocc = nocc, model = "Nest", model.parameters = list(S = list(formula = ~ AN)), groups = "AN")
 
-# 2. DSR varies by habitat type - treats habitats as factors and the output provides S-hats for each habitat type
-Hbt <- mark(geese, nocc = nocc, model = "Nest", model.parameters = list(S = list(formula = ~ HABITAT)), groups = "HABITAT") 
+# 000. habitat effect
+M000 <- mark(geese, nocc = nocc, model = "Nest", model.parameters = list(S = list(formula = ~ HABITAT)), groups = "HABITAT")
 
-# 3. DSR varies with NestAge
-AgeGeese <- mark(geese, nocc = nocc, model = "Nest", model.parameters = list(S = list(formula = ~ NestAge)))
+# 0000. supplementation effect
+M0000 <- mark(geese, nocc = nocc, model = "Nest", model.parameters = list(S = list(formula = ~ SUPPL)), groups = "SUPPL")
 
-#4.DSR varie with NestAge and Habitat
-AgeHbt <- mark(geese, nocc = nocc, model = "Nest", model.parameters = list(S = list(formula = ~ NestAge + HABITAT)), groups = "HABITAT")
+# 1. AN + SUPPL
+M01 <- mark(geese, nocc = nocc, model = "Nest", model.parameters = list(S = list(formula = ~ AN + SUPPL)), groups = c("AN", "SUPPL"))
 
-# 5. DSR follows a trend through time
-TimeTrend <- mark(geese, nocc = nocc, model = "Nest", model.parameters = list(S = list(formula = ~ Time))) 
+# 2. AN + SUPPL + HABITAT
+M02 <- mark(geese, nocc = nocc, model = "Nest", model.parameters = list(S = list(formula = ~ AN + SUPPL + HABITAT)), groups = c("AN", "SUPPL", "HABITAT"))
 
-# 6. DSR varies with treatments
-Expe <- mark(geese, nocc = nocc, model = "Nest", model.parameters = list(S = list(formula = ~ SUPPL)), groups = "SUPPL")
+# 3. AN + SUPPL + HABITAT + HABITAT*SUPPL
+M03 <- mark(geese, nocc = nocc, model = "Nest", model.parameters = list(S = list(formula = ~ AN + SUPPL + HABITAT + HABITAT*SUPPL)), groups = c("AN", "SUPPL", "HABITAT"))
 
-# 7. DSR varies with treatments and habitats
-ExpeHab <- mark(geese, nocc = nocc, model = "Nest", model.parameters = list(S = list(formula = ~ SUPPL + HABITAT)), groups = c("SUPPL", "HABITAT"))
+# 4. AN + SUPPL + HABITAT + NestAge
+M04 <- mark(geese, nocc = nocc, model = "Nest", model.parameters = list(S = list(formula = ~ AN + SUPPL + HABITAT + NestAge)), groups = c("AN", "SUPPL", "HABITAT"))
 
-# 8. DSR varies with treatments and NestAge
-AgeExpe <- mark(geese, nocc = nocc, model = "Nest", model.parameters = list(S = list(formula = ~ NestAge + SUPPL)), groups = "SUPPL")
+# 5. AN + SUPPL + HABITAT + NestAge + HABITAT*SUPPL
+M05 <- mark(geese, nocc = nocc, model = "Nest", model.parameters = list(S = list(formula = ~ AN + SUPPL + HABITAT + NestAge + HABITAT*SUPPL)), groups = c("AN", "SUPPL", "HABITAT"))
 
-# 9. DSR varies with treatments, NestAge and habitats
-AgeExpeHab <- mark(geese, nocc = nocc, model = "Nest", model.parameters = list(S = list(formula = ~ NestAge + SUPPL + HABITAT)), groups = c("SUPPL", "HABITAT"))
+# 8. AN + HABITAT
+M08 <- mark(geese, nocc = nocc, model = "Nest", model.parameters = list(S = list(formula = ~ AN + HABITAT)), groups = c("AN", "HABITAT"))
 
-return(collect.models())
-}
+# 9. AN + HABITAT + NestAge
+M09 <- mark(geese, nocc = nocc, model = "Nest", model.parameters = list(S = list(formula = ~ AN + HABITAT + NestAge)), groups = c("AN", "HABITAT"))
+
+# 11. AN + NestAge
+M11 <- mark(geese, nocc = nocc, model = "Nest", model.parameters = list(S = list(formula = ~ AN + NestAge)), groups = "AN")
+
+# 14. AN + SUPPL + NestAge
+M14 <- mark(geese, nocc = nocc, model = "Nest", model.parameters = list(S = list(formula = ~ AN + SUPPL + NestAge)), groups = c("AN", "SUPPL"))
+
+
+#return(collect.models())
+#}
+
 
 # run defined models
 geese.results <- run.geese()

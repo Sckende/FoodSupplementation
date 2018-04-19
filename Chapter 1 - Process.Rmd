@@ -44,10 +44,12 @@ And what about extrems years ?
 * Extract DSR values for each nests and put them in path analyses
 * THINK ABOUT NESTS WITH TT - fail status the same day as the deployment day
 * Quadratic effect of NestAge?
+* Add PREDPAR variable in database
 
 ## Things done
 * Understand and test the Cynthia script
 * Method choosen: DSR with MARK software and use
+* table with considered modeles
 
 ```{r cars}
 
