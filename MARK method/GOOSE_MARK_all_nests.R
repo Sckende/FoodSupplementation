@@ -9,6 +9,8 @@ str(gsg)
 dim(gsg)
 summary(gsg) 
 
+#################### Cleaning of data ####################
+
 gsg$HABITAT[gsg$HABITAT == "Mesic"] <- "MES"
 gsg$HABITAT[gsg$HABITAT == "Wetland"] <- "WET"
 
@@ -37,27 +39,25 @@ gsg <- gsg[,-11]
 gsg <- droplevels(gsg)
 gsg$Fate <- as.factor(gsg$Fate)
 
-
-#################### choix de l'annee a tester####################
-
+# Subset depending on the year
 gsg2015 <- subset(gsg, AN == 2015)
 gsg2016 <- subset(gsg, AN == 2016)
 gsg2017 <- subset(gsg, AN == 2017)
 
-#################### choix de l'annee a tester####################
+#################### Which year(s) tested ####################
 
-# Ici utiliser l'annee souhaitee
+# Here choose one specific year or not
 geese <- gsg
 summary(geese)
 
-#enlever les données manquantes
+# Remove NAs
 geese$SupplDate[is.na(geese$SupplDate)] <- 99999
 geese <- na.omit(geese)
 
-#Création de la variable AgeFound#
+#Creation of AgeFound variable#
 #--------------------------------#
-#attention, ceci doit être fait avant la modification de la variable FirstFound
-geese$AgeFound <- (geese$FirstFound - geese$IniDate) + 1 #...+1 car l'âge 0 est impossible
+#WARNING ! It has to be done before the modification of the FirstFound variable
+geese$AgeFound <- (geese$FirstFound - geese$IniDate) + 1 #...+1 cause age 0 is impossible
 geese$FindNest <- geese$FirstFound
 
 #Modification des dates de la variables FirstFound (la date minimale = Jour 1)#
@@ -88,8 +88,8 @@ require(RMark)
 #{
 # 1. A model of constant daily survival rate (DSR)
 
-#run.geese=function()
-#{
+run.geese=function()
+{
   
 # 0. A model of constant daily survival rate (DSR)
 M0 <- mark(geese, nocc = nocc, model = "Nest", model.parameters = list(S = list(formula = ~1)))
@@ -130,10 +130,8 @@ M11 <- mark(geese, nocc = nocc, model = "Nest", model.parameters = list(S = list
 # 14. AN + SUPPL + NestAge
 M14 <- mark(geese, nocc = nocc, model = "Nest", model.parameters = list(S = list(formula = ~ AN + SUPPL + NestAge)), groups = c("AN", "SUPPL"))
 
-
-#return(collect.models())
-#}
-
+return(collect.models() )
+}
 
 # run defined models
 geese.results <- run.geese()
@@ -141,12 +139,14 @@ geese.results <- run.geese()
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~#
 # Examine table of model-selection results #
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~#
-export.MARK(geese.results$Age$data,"MallDSR",mallard.results,replace=TRUE,ind.covariates="all")
-mallard.results # print model-selection table to screen
-options(width=100) # set page width to 100 characters
-sink("results.table.txt") # capture screen output to file
-print(mallard.results) # send output to file
-sink() # return output to screen
-# remove "#" on next line to see output in notepad
-system("notepad results.table.txt",invisible=FALSE,wait=FALSE)
+geese.results # print model-selection table to screen
 
+#################### Best model for full database ####################
+
+# First best model
+# 5. AN + SUPPL + HABITAT + NestAge + HABITAT*SUPPL
+M05 <- mark(geese, nocc = nocc, model = "Nest", model.parameters = list(S = list(formula = ~ AN + SUPPL + HABITAT + NestAge + HABITAT*SUPPL)), groups = c("AN", "SUPPL", "HABITAT"))
+
+# Second best model
+# 4. AN + SUPPL + HABITAT + NestAge
+M04 <- mark(geese, nocc = nocc, model = "Nest", model.parameters = list(S = list(formula = ~ AN + SUPPL + HABITAT + NestAge)), groups = c("AN", "SUPPL", "HABITAT"))
