@@ -6,7 +6,7 @@
 rm(list = ls())
 setwd("/home/claire/OneDriveDoc/Doc doc doc/Ph.D. - ANALYSES/R analysis/Data")
 
-L <- read.csv("LAREN_inc_geese_V2.csv") # Need to use version 2, because computation error un the first file (registrement frequency: 1min vs 1min15)
+L <- read.csv("LAREN_inc_geese_v3.csv") # Need to use version 2, because computation error un the first file (registrement frequency: 1min vs 1min15)
 C <- read.csv("2017_TT_infos.csv")
 
 summary(L)
@@ -57,22 +57,44 @@ pairs(TT[, -c(1, 2, 3, 7, 9, 15)])
 #### inc_prop models ####
 #~~~~~~~~~~~~~~~~~~~~~~#
 
-hist(full$inc_prop)
+hist(full$inc.prop)
 
-# 1. Null model
-inc1 <- glm(cbind())
+# 0. Null model
+full$SUPPL <- relevel(full$SUPPL, "TEM")
+inc0 <- glm(cbind(lengthinc, lengthrecess) ~ 1, family = binomial, data = full)
+summary(inc0)
 
-# Example to follow ...
-jo <- glm(cbind(breed_dens, monit_dens-breed_dens) ~ lmg_C1 + cumul_prec + MEAN_temp, family = binomial, data = mC1)
-summary(jo)
+# 1. Supplementation effect
+inc1 <- glm(cbind(lengthinc, lengthrecess) ~ SUPPL, family = binomial, data = full)
+summary(inc1)
 
 #~~~~~~~~~~~~~~~~~~~~~~~~~~#
 #### meanrecess models ####
 #~~~~~~~~~~~~~~~~~~~~~~~~#
-hist(TT$meanrecess)
+hist(full$meanrecess) # POISSON distribution ?
 
-rec1 <- lmer (meanrecess ~ 1, data = TT)
+# 0. Null model
+rec0 <- glm(meanrecess ~ 1, family = gaussian, data = full)
+summary(rec0)
+
+# 1. Supplementation effects
+rec1 <- glm(meanrecess ~ SUPPL, family = gaussian, data = full)
+summary(rec1)
+
+# 2. Supplementation effects
+rec2 <- glm(meanrecess ~ SUPPL, family = poisson, data = full)
+summary(rec2)
 
 #~~~~~~~~~~~~~~~~~~~~~~~~#
 #### meanfreq models ####
 #~~~~~~~~~~~~~~~~~~~~~~#
+
+hist(full$meanfreq)
+
+# 0. Null model
+freq0 <- glm(meanfreq ~ 1, family = gaussian, data = full)
+summary(freq0)
+
+# 1. Supplementation effects
+freq1 <- glm(meanfreq ~ SUPPL, family = gaussian, data = full)
+summary(freq1)
