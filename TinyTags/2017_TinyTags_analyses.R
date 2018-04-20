@@ -45,7 +45,7 @@ full$lengthinc <- full$ttag_duration - full$lengthrecess
 full$inc_propV2 <- full$lengthinc / full$ttag_duration
 full[,c(1, 7, 26)]
 
-
+##### METTRE A JOUR ICI !!!####
 # Keep variables of interest
 TT <- full[, c(1, 4:8, 10, 11, 13, 16, 18:22)]
 summary(TT)
