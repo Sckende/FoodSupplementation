@@ -47,7 +47,7 @@ gsg2017 <- subset(gsg, AN == 2017)
 #################### Which year(s) tested ####################
 
 # Here choose one specific year or not
-geese <- gsg2017
+geese <- gsg
 summary(geese)
 
 # Remove NAs
@@ -73,11 +73,52 @@ library('ggthemes')   # for scale_fill_few('medium')
 library('ztable')     # format tables for reporting
 
 #Creating new data frame
-prop <- cbind(c(rep(2015, 3), rep(2016, 3), rep(2017, 3)), rep(c("TEM","W", "F"), 3), NA, NA)
-colnames(prop) <- c("YEAR", "SUPPL", "n", "PROP")
+prop <- cbind(c(rep(2015, 3), rep(2016, 3), rep(2017, 3)), rep(c("TEM","W", "F"), 3))
+colnames(prop) <- c("YEAR", "SUPPL")
+prop <- as.data.frame(prop)
+nn <- c(
+  dim(geese[geese$AN == "2015" & geese$SUPPL == "TEM" & geese$Fate == "0",])[1] ,
+  dim(geese[geese$AN == "2015" & geese$SUPPL == "W" & geese$Fate == "0",])[1],
+  dim(geese[geese$AN == "2015" & geese$SUPPL == "F" & geese$Fate == "0",])[1],
+  
+  dim(geese[geese$AN == "2016" & geese$SUPPL == "TEM" & geese$Fate == "0",])[1],
+  dim(geese[geese$AN == "2016" & geese$SUPPL == "W" & geese$Fate == "0",])[1],
+  dim(geese[geese$AN == "2016" & geese$SUPPL == "F" & geese$Fate == "0",])[1],
+  
+  dim(geese[geese$AN == "2017" & geese$SUPPL == "TEM" & geese$Fate == "0",])[1],
+  dim(geese[geese$AN == "2017" & geese$SUPPL == "W" & geese$Fate == "0",])[1],
+  dim(geese[geese$AN == "2017" & geese$SUPPL == "F" & geese$Fate == "0",])[1]
+)
+PP <- c(
+  dim(geese[geese$AN == "2015" & geese$SUPPL == "TEM" & geese$Fate == "0",])[1] / dim(geese[geese$AN == "2015" & geese$SUPPL == "TEM",])[1],
+  dim(geese[geese$AN == "2015" & geese$SUPPL == "W" & geese$Fate == "0",])[1] / dim(geese[geese$AN == "2015" & geese$SUPPL == "W",])[1],
+  dim(geese[geese$AN == "2015" & geese$SUPPL == "F" & geese$Fate == "0",])[1] / dim(geese[geese$AN == "2015" & geese$SUPPL == "F",])[1],
+  
+  dim(geese[geese$AN == "2016" & geese$SUPPL == "TEM" & geese$Fate == "0",])[1] / dim(geese[geese$AN == "2016" & geese$SUPPL == "TEM",])[1],
+  dim(geese[geese$AN == "2016" & geese$SUPPL == "W" & geese$Fate == "0",])[1] / dim(geese[geese$AN == "2016" & geese$SUPPL == "W",])[1],
+  dim(geese[geese$AN == "2016" & geese$SUPPL == "F" & geese$Fate == "0",])[1] / dim(geese[geese$AN == "2016" & geese$SUPPL == "F",])[1],
+  
+  dim(geese[geese$AN == "2017" & geese$SUPPL == "TEM" & geese$Fate == "0",])[1] / dim(geese[geese$AN == "2017" & geese$SUPPL == "TEM",])[1],
+  dim(geese[geese$AN == "2017" & geese$SUPPL == "W" & geese$Fate == "0",])[1] / dim(geese[geese$AN == "2017" & geese$SUPPL == "W",])[1],
+  dim(geese[geese$AN == "2017" & geese$SUPPL == "F" & geese$Fate == "0",])[1] / dim(geese[geese$AN == "2017" & geese$SUPPL == "F",])[1]
+)
 
-SNgeeseTEM <- dim(geese[geese$SUPPL == "TEM" & geese$Fate == "0",])[1] / dim(geese[geese$SUPPL == "TEM",])[1]
+prop$n <- nn
+prop$PROP <- PP
+prop$error_type <- sqrt(prop$PROP*(1-prop$PROP)/prop$n)
 
+head(prop)
+summary(prop)
+
+# Graphic
+color <- c("olivedrab3", "aquamarine3", "darkgoldenrod2")
+
+barCenters <- barplot(prop$PROP, width = 0.5, col = color, xlab = "Year", ylab = "Nesting success", ylim = c(0, 1), names.arg = c("",2015, "","",2016, "","",2017, ""), main = "Goose nesting success  depending on year and treatments", legend.text = TRUE, space = c(0.2,0,0,0.2,0,0,0.2,0,0))
+
+legend("topleft", inset = c(0, -0,05),
+       legend = c("TEMOIN", "WATER", "FOOD"), 
+       fill = color, bty = "n")
+segments(barCenters, prop$PROP - prop$error_type, barCenters, prop$PROP + prop$error_type, lwd = 1.5)
 
 #Creation of AgeFound variable#
 #--------------------------------#

@@ -45,6 +45,7 @@ And what about extrems years ?
 * THINK ABOUT NESTS WITH TT - fail status the same day as the deployment day
 * Quadratic effect of NestAge?
 * Add PREDPAR variable in database
+* Lire papier sur incubation et penser aux analyses
 
 ## Things done
 * Understand and test the Cynthia script
