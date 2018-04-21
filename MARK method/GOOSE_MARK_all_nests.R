@@ -47,12 +47,37 @@ gsg2017 <- subset(gsg, AN == 2017)
 #################### Which year(s) tested ####################
 
 # Here choose one specific year or not
-geese <- gsg
+geese <- gsg2017
 summary(geese)
 
 # Remove NAs
 geese$SupplDate[is.na(geese$SupplDate)] <- 99999
 geese <- na.omit(geese)
+
+#Data exploration - Basic NS computation#
+#--------------------------------------#
+SNgeeseTEM <- dim(geese[geese$SUPPL == "TEM" & geese$Fate == "0",])[1] / dim(geese[geese$SUPPL == "TEM",])[1]
+
+SNgeeseF <- dim(geese[geese$SUPPL == "F" & geese$Fate == "0",])[1] / dim(geese[geese$SUPPL == "F",])[1]
+
+SNgeeseW <- dim(geese[geese$SUPPL == "W" & geese$Fate == "0",])[1] / dim(geese[geese$SUPPL == "W",])[1]
+
+# Packages for data manipulation, plotting & presenting tables
+library('dplyr')      # for data manipulation
+library('tidyr')      # for reshaping data
+
+library('ggplot2')    # plotting data
+library('scales')     # for scale_y_continuous(label = percent)
+library('ggthemes')   # for scale_fill_few('medium')
+
+library('ztable')     # format tables for reporting
+
+#Creating new data frame
+prop <- cbind(c(rep(2015, 3), rep(2016, 3), rep(2017, 3)), rep(c("TEM","W", "F"), 3), NA, NA)
+colnames(prop) <- c("YEAR", "SUPPL", "n", "PROP")
+
+SNgeeseTEM <- dim(geese[geese$SUPPL == "TEM" & geese$Fate == "0",])[1] / dim(geese[geese$SUPPL == "TEM",])[1]
+
 
 #Creation of AgeFound variable#
 #--------------------------------#
