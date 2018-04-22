@@ -119,6 +119,8 @@ legend("topleft", inset = c(0, -0,05),
        legend = c("TEMOIN", "WATER", "FOOD"), 
        fill = color, bty = "n")
 segments(barCenters, prop$PROP - prop$error_type, barCenters, prop$PROP + prop$error_type, lwd = 1.5)
+text(barCenters,0.2, labels = paste("(", as.character(prop$n), ")", sep = ""))
+
 
 #Creating new data frame - SN by year, by habitat and by treatments
 prop2 <- NULL
