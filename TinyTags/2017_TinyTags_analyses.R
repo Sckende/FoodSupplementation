@@ -6,7 +6,7 @@
 rm(list = ls())
 setwd("/home/claire/OneDriveDoc/Doc doc doc/Ph.D. - ANALYSES/R analysis/Data")
 
-L <- read.csv("LAREN_inc_geese_v3.csv") # Need to use version 2, because computation error un the first file (registrement frequency: 1min vs 1min15)
+L <- read.csv("LAREN_inc_geese_v3.csv") # Need to use version 3, because computation error un the first file (registrement frequency: 1min vs 1min15)
 C <- read.csv("2017_TT_infos.csv")
 
 summary(L)
@@ -33,25 +33,7 @@ summary(C)
 full <- merge(L, C, "socle")
 summary(full)
 
-# Obtaining the total duration of TT recording used to compute variables
-require(lubridate)
-#Setting dates as dates
-full$ttag_exp_start <- as.POSIXct(full$ttag_exp_start, tz = "America/Toronto", format = "%Y-%m-%d %H:%M:%S")
-full$ttag_exp_end <- as.POSIXct(full$ttag_exp_end, tz = "America/Toronto", format = "%Y-%m-%d %H:%M:%S")
-full$ttag_duration <- as.numeric((full$ttag_exp_end - full$ttag_exp_start)*24*60) # in minutes
-full$lengthinc <- full$ttag_duration - full$lengthrecess
 
-# To check ... MISMATCH !!!!!
-full$inc_propV2 <- full$lengthinc / full$ttag_duration
-full[,c(1, 7, 26)]
-
-##### METTRE A JOUR ICI !!!####
-# Keep variables of interest
-TT <- full[, c(1, 4:8, 10, 11, 13, 16, 18:22)]
-summary(TT)
-
-# Visual exploration of data
-pairs(TT[, -c(1, 2, 3, 7, 9, 15)])
 
 #~~~~~~~~~~~~~~~~~~~~~~~~#
 #### inc_prop models ####

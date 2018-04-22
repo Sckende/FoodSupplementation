@@ -72,7 +72,7 @@ library('ggthemes')   # for scale_fill_few('medium')
 
 library('ztable')     # format tables for reporting
 
-#Creating new data frame
+#Creating new data frame - SN by year and by treatments
 prop <- cbind(c(rep(2015, 3), rep(2016, 3), rep(2017, 3)), rep(c("TEM","W", "F"), 3))
 colnames(prop) <- c("YEAR", "SUPPL")
 prop <- as.data.frame(prop)
@@ -120,6 +120,35 @@ legend("topleft", inset = c(0, -0,05),
        fill = color, bty = "n")
 segments(barCenters, prop$PROP - prop$error_type, barCenters, prop$PROP + prop$error_type, lwd = 1.5)
 
+#Creating new data frame - SN by year, by habitat and by treatments
+prop2 <- NULL
+for (i in unique(geese$AN)){
+  for (j in c("TEM", "W", "F")) {
+    for (k in c("MES", "WET")){
+      YEAR <- i
+      TREAT <- j
+      HAB <- k
+      N <- dim(geese[geese$AN == i & geese$SUPPL == j & geese$HABITAT == k & geese$Fate == "0",])[1]
+      PROP <- dim(geese[geese$AN == i & geese$SUPPL == j & geese$HABITAT == k & geese$Fate == "0",])[1] / dim(geese[geese$AN == i & geese$SUPPL == j & geese$HABITAT == k,])[1]
+      error_type <- sqrt(PROP*(1-PROP)/N)
+      
+      r <- data.frame(YEAR, HAB, TREAT, N, PROP, error_type)
+      
+      prop2 <- rbind(prop2, r)
+    }    
+  }
+}
+View(prop2)
+# Graphic
+color <- c("olivedrab3", "olivedrab4", "aquamarine3", "aquamarine4", "darkgoldenrod2", "darkgoldenrod3")
+
+barCenters <- barplot(prop2$PROP, col = color, xlab = "", ylab = "Nesting success", ylim = c(0, 1.2), names.arg = paste(prop2$HAB, " (" , prop2$N, ")", sep = ""), main = "Goose nesting success  depending on year, habitat and treatment", legend.text = TRUE, space = c(0.2, rep(c(0,0.1,0,0.1,0,0.4), 2) , c(0,0.1,0,0.1,0)), las = 2)
+
+legend("topright", 
+       #inset = c(0, -0,05),
+       legend = c("TEMOIN", "WATER", "FOOD"), 
+       fill = c("olivedrab3", "aquamarine3", "darkgoldenrod2"), bty = "n")
+segments(barCenters, prop2$PROP - prop2$error_type, barCenters, prop2$PROP + prop2$error_type, lwd = 1.5)
 #Creation of AgeFound variable#
 #--------------------------------#
 #WARNING ! It has to be done before the modification of the FirstFound variable
