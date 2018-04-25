@@ -39,28 +39,13 @@ gsg <- gsg[,-11]
 gsg <- droplevels(gsg)
 gsg$Fate <- as.factor(gsg$Fate)
 
-# Subset depending on the year
-gsg2015 <- subset(gsg, AN == 2015)
-gsg2016 <- subset(gsg, AN == 2016)
-gsg2017 <- subset(gsg, AN == 2017)
+####Data exploration - Basic NS computation#####
+#####--------------------------------------#####
+SNgeeseTEM <- dim(gsg[gsg$SUPPL == "TEM" & gsg$Fate == "0",])[1] / dim(gsg[gsg$SUPPL == "TEM",])[1]
 
-#################### Which year(s) tested ####################
+SNgeeseF <- dim(gsg[gsg$SUPPL == "F" & gsg$Fate == "0",])[1] / dim(gsg[gsg$SUPPL == "F",])[1]
 
-# Here choose one specific year or not
-geese <- gsg
-summary(geese)
-
-# Remove NAs
-geese$SupplDate[is.na(geese$SupplDate)] <- 99999
-geese <- na.omit(geese)
-
-#Data exploration - Basic NS computation#
-#--------------------------------------#
-SNgeeseTEM <- dim(geese[geese$SUPPL == "TEM" & geese$Fate == "0",])[1] / dim(geese[geese$SUPPL == "TEM",])[1]
-
-SNgeeseF <- dim(geese[geese$SUPPL == "F" & geese$Fate == "0",])[1] / dim(geese[geese$SUPPL == "F",])[1]
-
-SNgeeseW <- dim(geese[geese$SUPPL == "W" & geese$Fate == "0",])[1] / dim(geese[geese$SUPPL == "W",])[1]
+SNgeeseW <- dim(gsg[gsg$SUPPL == "W" & gsg$Fate == "0",])[1] / dim(gsg[gsg$SUPPL == "W",])[1]
 
 # Packages for data manipulation, plotting & presenting tables
 library('dplyr')      # for data manipulation
@@ -77,30 +62,30 @@ prop <- cbind(c(rep(2015, 3), rep(2016, 3), rep(2017, 3)), rep(c("TEM","W", "F")
 colnames(prop) <- c("YEAR", "SUPPL")
 prop <- as.data.frame(prop)
 nn <- c(
-  dim(geese[geese$AN == "2015" & geese$SUPPL == "TEM" & geese$Fate == "0",])[1] ,
-  dim(geese[geese$AN == "2015" & geese$SUPPL == "W" & geese$Fate == "0",])[1],
-  dim(geese[geese$AN == "2015" & geese$SUPPL == "F" & geese$Fate == "0",])[1],
+  dim(gsg[gsg$AN == "2015" & gsg$SUPPL == "TEM" & gsg$Fate == "0",])[1] ,
+  dim(gsg[gsg$AN == "2015" & gsg$SUPPL == "W" & gsg$Fate == "0",])[1],
+  dim(gsg[gsg$AN == "2015" & gsg$SUPPL == "F" & gsg$Fate == "0",])[1],
   
-  dim(geese[geese$AN == "2016" & geese$SUPPL == "TEM" & geese$Fate == "0",])[1],
-  dim(geese[geese$AN == "2016" & geese$SUPPL == "W" & geese$Fate == "0",])[1],
-  dim(geese[geese$AN == "2016" & geese$SUPPL == "F" & geese$Fate == "0",])[1],
+  dim(gsg[gsg$AN == "2016" & gsg$SUPPL == "TEM" & gsg$Fate == "0",])[1],
+  dim(gsg[gsg$AN == "2016" & gsg$SUPPL == "W" & gsg$Fate == "0",])[1],
+  dim(gsg[gsg$AN == "2016" & gsg$SUPPL == "F" & gsg$Fate == "0",])[1],
   
-  dim(geese[geese$AN == "2017" & geese$SUPPL == "TEM" & geese$Fate == "0",])[1],
-  dim(geese[geese$AN == "2017" & geese$SUPPL == "W" & geese$Fate == "0",])[1],
-  dim(geese[geese$AN == "2017" & geese$SUPPL == "F" & geese$Fate == "0",])[1]
+  dim(gsg[gsg$AN == "2017" & gsg$SUPPL == "TEM" & gsg$Fate == "0",])[1],
+  dim(gsg[gsg$AN == "2017" & gsg$SUPPL == "W" & gsg$Fate == "0",])[1],
+  dim(gsg[gsg$AN == "2017" & gsg$SUPPL == "F" & gsg$Fate == "0",])[1]
 )
 PP <- c(
-  dim(geese[geese$AN == "2015" & geese$SUPPL == "TEM" & geese$Fate == "0",])[1] / dim(geese[geese$AN == "2015" & geese$SUPPL == "TEM",])[1],
-  dim(geese[geese$AN == "2015" & geese$SUPPL == "W" & geese$Fate == "0",])[1] / dim(geese[geese$AN == "2015" & geese$SUPPL == "W",])[1],
-  dim(geese[geese$AN == "2015" & geese$SUPPL == "F" & geese$Fate == "0",])[1] / dim(geese[geese$AN == "2015" & geese$SUPPL == "F",])[1],
+  dim(gsg[gsg$AN == "2015" & gsg$SUPPL == "TEM" & gsg$Fate == "0",])[1] / dim(gsg[gsg$AN == "2015" & gsg$SUPPL == "TEM",])[1],
+  dim(gsg[gsg$AN == "2015" & gsg$SUPPL == "W" & gsg$Fate == "0",])[1] / dim(gsg[gsg$AN == "2015" & gsg$SUPPL == "W",])[1],
+  dim(gsg[gsg$AN == "2015" & gsg$SUPPL == "F" & gsg$Fate == "0",])[1] / dim(gsg[gsg$AN == "2015" & gsg$SUPPL == "F",])[1],
   
-  dim(geese[geese$AN == "2016" & geese$SUPPL == "TEM" & geese$Fate == "0",])[1] / dim(geese[geese$AN == "2016" & geese$SUPPL == "TEM",])[1],
-  dim(geese[geese$AN == "2016" & geese$SUPPL == "W" & geese$Fate == "0",])[1] / dim(geese[geese$AN == "2016" & geese$SUPPL == "W",])[1],
-  dim(geese[geese$AN == "2016" & geese$SUPPL == "F" & geese$Fate == "0",])[1] / dim(geese[geese$AN == "2016" & geese$SUPPL == "F",])[1],
+  dim(gsg[gsg$AN == "2016" & gsg$SUPPL == "TEM" & gsg$Fate == "0",])[1] / dim(gsg[gsg$AN == "2016" & gsg$SUPPL == "TEM",])[1],
+  dim(gsg[gsg$AN == "2016" & gsg$SUPPL == "W" & gsg$Fate == "0",])[1] / dim(gsg[gsg$AN == "2016" & gsg$SUPPL == "W",])[1],
+  dim(gsg[gsg$AN == "2016" & gsg$SUPPL == "F" & gsg$Fate == "0",])[1] / dim(gsg[gsg$AN == "2016" & gsg$SUPPL == "F",])[1],
   
-  dim(geese[geese$AN == "2017" & geese$SUPPL == "TEM" & geese$Fate == "0",])[1] / dim(geese[geese$AN == "2017" & geese$SUPPL == "TEM",])[1],
-  dim(geese[geese$AN == "2017" & geese$SUPPL == "W" & geese$Fate == "0",])[1] / dim(geese[geese$AN == "2017" & geese$SUPPL == "W",])[1],
-  dim(geese[geese$AN == "2017" & geese$SUPPL == "F" & geese$Fate == "0",])[1] / dim(geese[geese$AN == "2017" & geese$SUPPL == "F",])[1]
+  dim(gsg[gsg$AN == "2017" & gsg$SUPPL == "TEM" & gsg$Fate == "0",])[1] / dim(gsg[gsg$AN == "2017" & gsg$SUPPL == "TEM",])[1],
+  dim(gsg[gsg$AN == "2017" & gsg$SUPPL == "W" & gsg$Fate == "0",])[1] / dim(gsg[gsg$AN == "2017" & gsg$SUPPL == "W",])[1],
+  dim(gsg[gsg$AN == "2017" & gsg$SUPPL == "F" & gsg$Fate == "0",])[1] / dim(gsg[gsg$AN == "2017" & gsg$SUPPL == "F",])[1]
 )
 
 prop$n <- nn
@@ -124,14 +109,14 @@ text(barCenters,0.2, labels = paste("(", as.character(prop$n), ")", sep = ""))
 
 #Creating new data frame - SN by year, by habitat and by treatments
 prop2 <- NULL
-for (i in unique(geese$AN)){
+for (i in unique(gsg$AN)){
   for (j in c("TEM", "W", "F")) {
     for (k in c("MES", "WET")){
       YEAR <- i
       TREAT <- j
       HAB <- k
-      N <- dim(geese[geese$AN == i & geese$SUPPL == j & geese$HABITAT == k & geese$Fate == "0",])[1]
-      PROP <- dim(geese[geese$AN == i & geese$SUPPL == j & geese$HABITAT == k & geese$Fate == "0",])[1] / dim(geese[geese$AN == i & geese$SUPPL == j & geese$HABITAT == k,])[1]
+      N <- dim(gsg[gsg$AN == i & gsg$SUPPL == j & gsg$HABITAT == k & gsg$Fate == "0",])[1]
+      PROP <- dim(gsg[gsg$AN == i & gsg$SUPPL == j & gsg$HABITAT == k & gsg$Fate == "0",])[1] / dim(gsg[gsg$AN == i & gsg$SUPPL == j & gsg$HABITAT == k,])[1]
       error_type <- sqrt(PROP*(1-PROP)/N)
       
       r <- data.frame(YEAR, HAB, TREAT, N, PROP, error_type)
@@ -151,6 +136,22 @@ legend("topright",
        legend = c("TEMOIN", "WATER", "FOOD"), 
        fill = c("olivedrab3", "aquamarine3", "darkgoldenrod2"), bty = "n")
 segments(barCenters, prop2$PROP - prop2$error_type, barCenters, prop2$PROP + prop2$error_type, lwd = 1.5)
+
+
+#### Data Analyses ####
+
+# Subset depending on the year
+gsg2015 <- subset(gsg, AN == 2015)
+gsg2016 <- subset(gsg, AN == 2016)
+gsg2017 <- subset(gsg, AN == 2017)
+
+# Here choose one specific year or not
+geese <- gsg2015[gsg2015$SUPPL == "TEM",]
+summary(geese)
+
+# Remove NAs
+geese$SupplDate[is.na(geese$SupplDate)] <- 99999
+geese <- na.omit(geese)
 #Creation of AgeFound variable#
 #--------------------------------#
 #WARNING ! It has to be done before the modification of the FirstFound variable
@@ -200,6 +201,12 @@ M000 <- mark(geese, nocc = nocc, model = "Nest", model.parameters = list(S = lis
 # 0000. supplementation effect
 M0000 <- mark(geese, nocc = nocc, model = "Nest", model.parameters = list(S = list(formula = ~ SUPPL)), groups = "SUPPL")
 
+# 00000. supplementation effect
+M00000 <- mark(geese, nocc = nocc, model = "Nest", model.parameters = list(S = list(formula = ~ NestAge)))
+
+# 000000. supplementation effect
+M000000 <- mark(geese, nocc = nocc, model = "Nest", model.parameters = list(S = list(formula = ~ HABITAT*NestAge)), groups = "HABITAT")
+
 # 1. AN + SUPPL
 M01 <- mark(geese, nocc = nocc, model = "Nest", model.parameters = list(S = list(formula = ~ AN + SUPPL)), groups = c("AN", "SUPPL"))
 
@@ -226,6 +233,9 @@ M11 <- mark(geese, nocc = nocc, model = "Nest", model.parameters = list(S = list
 
 # 14. AN + SUPPL + NestAge
 M14 <- mark(geese, nocc = nocc, model = "Nest", model.parameters = list(S = list(formula = ~ AN + SUPPL + NestAge)), groups = c("AN", "SUPPL"))
+
+# 15. AN * SUPPL
+M15 <- mark(geese, nocc = nocc, model = "Nest", model.parameters = list(S = list(formula = ~ AN * SUPPL)), groups = c("AN", "SUPPL"))
 
 return(collect.models() )
 }

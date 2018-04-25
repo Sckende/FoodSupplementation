@@ -16,19 +16,24 @@ Climate models predict an increase of summer air temperature and precipitation i
 
 Which are the effects of water and food supplementation on goose nesting success? In mesic tundra vs wetland? During dry year vs wet year?
 
-## Predictions
-1 - Goose nesting success increases with water supplementation.  
-  a - NS increase is more importante in mesic tundra than in wetland.  
-  b - NS increase is more importante during a dry year than a wet year.
-  
-  2 - Goose nesting success increases with food supplementation.  
-  a - NS increase is more importante in mesic tundra than in wetland.  
-  b - NS increase is more importante during a dry year than a wet year.  
-    
-And what about extrems years ?
+## Hypothesis and predictions
+
+* **Hypothèse A.1** — Le comportement d’incubation des oies va varier selon la disponibilité en eau et en nourriture près du nid, modifiant ainsi la vulnérabilité des nids à la prédation et ultimement le succès de nidification. 
+Une augmentation expérimentale de la disponibilité en eau ou en nourriture près du nid devrait mener à :  
+
+*Prédiction A.1.1* — Une diminution de la durée des absences du nid et de la distance d’éloignement du nid pendant les pauses d’incubation.  
+*Prédiction A.1.2* — Une augmentation du succès de nidification des oies  
+
+* **Hypothèse A.2** — L’habitat et les conditions climatiques déterminent tous les deux, la disponibilité en eau et en nourriture des oies au nid et l’issue de la nidification.  
+
+*Prédiction A.2.1* — Les nids en milieu mésique présentent un moins bon succès de nidification dans les années sèches par rapport aux années humides.   
+*Prédiction A.2.2* — Les nids en milieux humides ne présenteront pas de différence de succès de nidification entre les années humides et les années sèches.   
+*Prédiction A.2.3* — La différence de succès de nidification entre milieu humide et milieu mésique sera moins grande au cours des années humides.   
+*Prédiction A.2.4* — Les facteurs climatiques et de supplémentations de nids interagissent entre eux et affectent le succès reproducteur des oies.  
   
 ## Things to do
 
+* Add specific temperatures and precipitation for each nests to try to put climate variables in MARK modeles
 * Voir structure de article de Lecomte et al 2009 pour la rédaction de l'article
 * Enter and clean goose data for the 4 years (including Nicolas data in 2005)
 * Determine year category: which one is wet, wich one is dry (biblio !)
