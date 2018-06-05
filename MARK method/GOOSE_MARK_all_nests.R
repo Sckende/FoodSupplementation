@@ -184,9 +184,6 @@ require(RMark)
 # Write a function for evaluating a set of competing models
 # Set of modeles to test on MARK_modeles.odt 
 
-#run.geese=function()
-#{
-# 1. A model of constant daily survival rate (DSR)
 
 run.geese=function()
 {
@@ -206,8 +203,8 @@ M0000 <- mark(geese, nocc = nocc, model = "Nest", model.parameters = list(S = li
 # 00000. NestAge effect
 M00000 <- mark(geese, nocc = nocc, model = "Nest", model.parameters = list(S = list(formula = ~ NestAge)))
 
-# 000000. habitat and NestAge interaction effect
-M000000 <- mark(geese, nocc = nocc, model = "Nest", model.parameters = list(S = list(formula = ~ HABITAT*NestAge)), groups = "HABITAT")
+# 000000. habitat*NestAge
+#M000000 <- mark(geese, nocc = nocc, model = "Nest", model.parameters = list(S = list(formula = ~ HABITAT*NestAge)), groups = "HABITAT")
 
 # 1. AN + SUPPL
 M01 <- mark(geese, nocc = nocc, model = "Nest", model.parameters = list(S = list(formula = ~ AN + SUPPL)), groups = c("AN", "SUPPL"))
@@ -216,13 +213,13 @@ M01 <- mark(geese, nocc = nocc, model = "Nest", model.parameters = list(S = list
 M02 <- mark(geese, nocc = nocc, model = "Nest", model.parameters = list(S = list(formula = ~ AN + SUPPL + HABITAT)), groups = c("AN", "SUPPL", "HABITAT"))
 
 # 3. AN + SUPPL + HABITAT + HABITAT*SUPPL
-M03 <- mark(geese, nocc = nocc, model = "Nest", model.parameters = list(S = list(formula = ~ AN + SUPPL + HABITAT + HABITAT*SUPPL)), groups = c("AN", "SUPPL", "HABITAT"))
+#M03 <- mark(geese, nocc = nocc, model = "Nest", model.parameters = list(S = list(formula = ~ AN + HABITAT*SUPPL)), groups = c("AN", "SUPPL", "HABITAT"))
 
 # 4. AN + SUPPL + HABITAT + NestAge
 M04 <- mark(geese, nocc = nocc, model = "Nest", model.parameters = list(S = list(formula = ~ AN + SUPPL + HABITAT + NestAge)), groups = c("AN", "SUPPL", "HABITAT"))
 
-# 5. AN + SUPPL + HABITAT + NestAge + HABITAT*SUPPL
-M05 <- mark(geese, nocc = nocc, model = "Nest", model.parameters = list(S = list(formula = ~ AN + SUPPL + HABITAT + NestAge + HABITAT*SUPPL)), groups = c("AN", "SUPPL", "HABITAT"))
+# 5. AN + NestAge + HABITAT*SUPPL
+#M05 <- mark(geese, nocc = nocc, model = "Nest", model.parameters = list(S = list(formula = ~ AN + NestAge + HABITAT*SUPPL)), groups = c("AN", "SUPPL", "HABITAT"))
 
 # 8. AN + HABITAT
 M08 <- mark(geese, nocc = nocc, model = "Nest", model.parameters = list(S = list(formula = ~ AN + HABITAT)), groups = c("AN", "HABITAT"))
@@ -237,7 +234,7 @@ M11 <- mark(geese, nocc = nocc, model = "Nest", model.parameters = list(S = list
 M14 <- mark(geese, nocc = nocc, model = "Nest", model.parameters = list(S = list(formula = ~ AN + SUPPL + NestAge)), groups = c("AN", "SUPPL"))
 
 # 15. AN * SUPPL
-M15 <- mark(geese, nocc = nocc, model = "Nest", model.parameters = list(S = list(formula = ~ AN * SUPPL)), groups = c("AN", "SUPPL"))
+#M15 <- mark(geese, nocc = nocc, model = "Nest", model.parameters = list(S = list(formula = ~ AN * SUPPL)), groups = c("AN", "SUPPL"))
 
 return(collect.models() )
 }
@@ -251,11 +248,8 @@ geese.results <- run.geese()
 geese.results # print model-selection table to screen
 
 #################### Best model for full database ####################
-
+############## only considering models without interaction ##########
 # First best model
-# 5. AN + SUPPL + HABITAT + NestAge + HABITAT*SUPPL
-M05 <- mark(geese, nocc = nocc, model = "Nest", model.parameters = list(S = list(formula = ~ AN + SUPPL + HABITAT + NestAge + HABITAT*SUPPL)), groups = c("AN", "SUPPL", "HABITAT"))
-
-# Second best model
 # 4. AN + SUPPL + HABITAT + NestAge
 M04 <- mark(geese, nocc = nocc, model = "Nest", model.parameters = list(S = list(formula = ~ AN + SUPPL + HABITAT + NestAge)), groups = c("AN", "SUPPL", "HABITAT"))
+
