@@ -4,7 +4,7 @@ setwd("C:/Users/HP_9470m/OneDrive - Université de Moncton/Doc doc doc/Ph.D. - A
 rm(list = ls())
 
 
-gsg <- read.table("GOOSE_MARK_all_nests.csv", h = T, dec = ".", sep = ",")
+gsg <- read.table("GOOSE_MARK_all_nests.txt", h = T, dec = ".", sep = "\t")
 str(gsg)
 dim(gsg)
 summary(gsg) 
@@ -16,28 +16,31 @@ gsg$HABITAT[gsg$HABITAT == "Wetland"] <- "WET"
 
 gsg$SUPPL[gsg$SUPPL == "FOO"] <- "F"
 gsg$SUPPL[gsg$SUPPL == "WAT"] <- "W"
-gsg$SUPPL[gsg$SUPPL == "NONE"] <- "TEM"
 
 # Formating the reference level
 gsg$SUPPL <- relevel(gsg$SUPPL, "TEM")
 
 # Delete WF level in SUPPL
 gsg <- gsg[gsg$SUPPL != "WF",]
-gsg <- droplevels(gsg)
+gsg <- gsg[gsg$SUPPL != "NONE",]
 
 # Formating variables
-gsg$IniDate <- as.numeric(gsg$IniDate)
-gsg$SupplDate <- as.numeric(gsg$SupplDate)
 gsg$AN <- as.factor(gsg$AN)
 
 # Nest ISSUE 0:excluded, 1:Success, 2:Abandonment, 3:Destroyed, 5:Unknown
-gsg$Fate[gsg$ISSUE == 1] <- 0
-gsg$Fate[gsg$ISSUE == 3] <- 1
-gsg$Fate[gsg$ISSUE == 0|gsg$ISSUE == 2|gsg$ISSUE == 5] <- NA
+gsg$Fate[gsg$Groupe == "COLONY" & gsg$ISSUE == 1] <- 0
+gsg$Fate[gsg$Groupe == "COLONY" & gsg$ISSUE == 3] <- 1
 
+# Delete the ISSUE variable
 gsg <- gsg[,-11]
-gsg <- droplevels(gsg)
+
 gsg$Fate <- as.factor(gsg$Fate)
+gsg <- droplevels(gsg)
+
+# Remove NAs
+gsg$SupplDate[is.na(gsg$SupplDate)] <- 99999
+gsg <- na.omit(gsg)
+# WARNING ! Here we deleted some failed nests ==> underestimation of failed nests number
 
 ####Data exploration - Basic NS computation#####
 #####--------------------------------------#####
@@ -125,7 +128,7 @@ for (i in unique(gsg$AN)){
     }    
   }
 }
-View(prop2)
+#View(prop2)
 # Graphic
 color <- c("olivedrab3", "olivedrab4", "aquamarine3", "aquamarine4", "darkgoldenrod2", "darkgoldenrod3")
 
@@ -146,12 +149,11 @@ gsg2016 <- subset(gsg, AN == 2016)
 gsg2017 <- subset(gsg, AN == 2017)
 
 # Here choose one specific year or not
-geese <- gsg2015[gsg2015$SUPPL == "TEM",]
+geese <- gsg
 summary(geese)
+dim(geese)
 
-# Remove NAs
-geese$SupplDate[is.na(geese$SupplDate)] <- 99999
-geese <- na.omit(geese)
+
 #Creation of AgeFound variable#
 #--------------------------------#
 #WARNING ! It has to be done before the modification of the FirstFound variable
@@ -201,10 +203,10 @@ M000 <- mark(geese, nocc = nocc, model = "Nest", model.parameters = list(S = lis
 # 0000. supplementation effect
 M0000 <- mark(geese, nocc = nocc, model = "Nest", model.parameters = list(S = list(formula = ~ SUPPL)), groups = "SUPPL")
 
-# 00000. supplementation effect
+# 00000. NestAge effect
 M00000 <- mark(geese, nocc = nocc, model = "Nest", model.parameters = list(S = list(formula = ~ NestAge)))
 
-# 000000. supplementation effect
+# 000000. habitat and NestAge interaction effect
 M000000 <- mark(geese, nocc = nocc, model = "Nest", model.parameters = list(S = list(formula = ~ HABITAT*NestAge)), groups = "HABITAT")
 
 # 1. AN + SUPPL
