@@ -114,11 +114,22 @@ summary(prop)
 x11()
 color <- c("olivedrab3", "aquamarine3", "darkgoldenrod2")
 
-barCenters <- barplot(prop$PROP, width = 0.5, col = color, xlab = "Year", ylab = "Nesting success", ylim = c(0, 1), names.arg = c("",2015, "","",2016, "","",2017, ""), main = "Goose nesting success  depending on year and treatments", legend.text = TRUE, space = c(0.2,0,0,0.2,0,0,0.2,0,0))
+barCenters <- barplot(prop$PROP,
+                      width = 0.5,
+                      col = color,
+                      xlab = "Year",
+                      ylab = "Nesting success",
+                      ylim = c(0, 1),
+                      names.arg = c("",2015, "","",2016, "","",2017, ""),
+                      main = "Goose nesting success  depending on year and treatments",
+                      legend.text = TRUE,
+                      space = c(0.2,0,0,0.2,0,0,0.2,0,0))
 
-legend("topleft", inset = c(0, -0,05),
+legend("topleft",
+       inset = c(0, -0,05),
        legend = c("TEMOIN", "WATER", "FOOD"), 
-       fill = color, bty = "n")
+       fill = color,
+       bty = "n")
 segments(barCenters, prop$PROP - prop$error_type, barCenters, prop$PROP + prop$error_type, lwd = 1.5)
 text(barCenters,0.2, labels = paste("(", as.character(prop$n), ")", sep = ""))
 
