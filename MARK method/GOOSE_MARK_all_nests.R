@@ -91,7 +91,19 @@ PP <- c(
   dim(gsg[gsg$AN == "2017" & gsg$SUPPL == "F" & gsg$Fate == "0",])[1] / dim(gsg[gsg$AN == "2017" & gsg$SUPPL == "F",])[1]
 )
 
-prop$n <- nn
+prop$n <- c(
+  dim(gsg[gsg$AN == "2015" & gsg$SUPPL == "TEM",])[1] ,
+  dim(gsg[gsg$AN == "2015" & gsg$SUPPL == "W",])[1],
+  dim(gsg[gsg$AN == "2015" & gsg$SUPPL == "F",])[1],
+  
+  dim(gsg[gsg$AN == "2016" & gsg$SUPPL == "TEM",])[1],
+  dim(gsg[gsg$AN == "2016" & gsg$SUPPL == "W",])[1],
+  dim(gsg[gsg$AN == "2016" & gsg$SUPPL == "F",])[1],
+  
+  dim(gsg[gsg$AN == "2017" & gsg$SUPPL == "TEM",])[1],
+  dim(gsg[gsg$AN == "2017" & gsg$SUPPL == "W",])[1],
+  dim(gsg[gsg$AN == "2017" & gsg$SUPPL == "F",])[1]
+)
 prop$PROP <- PP
 prop$error_type <- sqrt(prop$PROP*(1-prop$PROP)/prop$n)
 
@@ -99,6 +111,7 @@ head(prop)
 summary(prop)
 
 # Graphic
+x11()
 color <- c("olivedrab3", "aquamarine3", "darkgoldenrod2")
 
 barCenters <- barplot(prop$PROP, width = 0.5, col = color, xlab = "Year", ylab = "Nesting success", ylim = c(0, 1), names.arg = c("",2015, "","",2016, "","",2017, ""), main = "Goose nesting success  depending on year and treatments", legend.text = TRUE, space = c(0.2,0,0,0.2,0,0,0.2,0,0))
@@ -111,6 +124,7 @@ text(barCenters,0.2, labels = paste("(", as.character(prop$n), ")", sep = ""))
 
 
 #Creating new data frame - SN by year, by habitat and by treatments
+gsg <- arrange(gsg, AN)
 prop2 <- NULL
 for (i in unique(gsg$AN)){
   for (j in c("TEM", "W", "F")) {
@@ -118,7 +132,7 @@ for (i in unique(gsg$AN)){
       YEAR <- i
       TREAT <- j
       HAB <- k
-      N <- dim(gsg[gsg$AN == i & gsg$SUPPL == j & gsg$HABITAT == k & gsg$Fate == "0",])[1]
+      N <- dim(gsg[gsg$AN == i & gsg$SUPPL == j & gsg$HABITAT == k,])[1]
       PROP <- dim(gsg[gsg$AN == i & gsg$SUPPL == j & gsg$HABITAT == k & gsg$Fate == "0",])[1] / dim(gsg[gsg$AN == i & gsg$SUPPL == j & gsg$HABITAT == k,])[1]
       error_type <- sqrt(PROP*(1-PROP)/N)
       
@@ -130,17 +144,31 @@ for (i in unique(gsg$AN)){
 }
 #View(prop2)
 # Graphic
+X11()
 color <- c("olivedrab3", "olivedrab4", "aquamarine3", "aquamarine4", "darkgoldenrod2", "darkgoldenrod3")
 
-barCenters <- barplot(prop2$PROP, col = color, xlab = "", ylab = "Nesting success", ylim = c(0, 1.2), names.arg = paste(prop2$HAB, " (" , prop2$N, ")", sep = ""), main = "Goose nesting success  depending on year, habitat and treatment", legend.text = TRUE, space = c(0.2, rep(c(0,0.1,0,0.1,0,0.4), 2) , c(0,0.1,0,0.1,0)), las = 2)
+barCenters <- barplot(prop2$PROP, 
+                      col = color,
+                      xlab = "", 
+                      ylab = "Nesting success", 
+                      ylim = c(0, 1.2), 
+                      names.arg = prop2$HAB, 
+                      main = "", 
+                      legend.text = TRUE, 
+                      space = c(0.2, rep(c(0,0.1,0,0.1,0,0.4), 2) , c(0,0.1,0,0.1,0)), 
+                      las = 2)
 
 legend("topright", 
        #inset = c(0, -0,05),
-       legend = c("TEMOIN", "WATER", "FOOD"), 
-       fill = c("olivedrab3", "aquamarine3", "darkgoldenrod2"), bty = "n")
+       legend = c("CONTROL", "WATER", "FOOD"), 
+       fill = c("olivedrab3", "aquamarine3", "darkgoldenrod2"), bty = "n", cex = 1)
 segments(barCenters, prop2$PROP - prop2$error_type, barCenters, prop2$PROP + prop2$error_type, lwd = 1.5)
+text(barCenters,0.2, labels = paste("(", as.character(prop2$N), ")", sep = ""), cex = 1)
+text(3.3, 1.1, labels = 2015, cex = 2)
+text(9.9, 1.1, labels = 2016, cex = 2)
+text(16.5, 1.1, labels = 2017, cex = 2)
 
-
+dev.off()
 #### Data Analyses ####
 
 # Subset depending on the year
@@ -204,7 +232,7 @@ M0000 <- mark(geese, nocc = nocc, model = "Nest", model.parameters = list(S = li
 M00000 <- mark(geese, nocc = nocc, model = "Nest", model.parameters = list(S = list(formula = ~ NestAge)))
 
 # 000000. habitat*NestAge
-#M000000 <- mark(geese, nocc = nocc, model = "Nest", model.parameters = list(S = list(formula = ~ HABITAT*NestAge)), groups = "HABITAT")
+M000000 <- mark(geese, nocc = nocc, model = "Nest", model.parameters = list(S = list(formula = ~ HABITAT*NestAge)), groups = "HABITAT")
 
 # 1. AN + SUPPL
 M01 <- mark(geese, nocc = nocc, model = "Nest", model.parameters = list(S = list(formula = ~ AN + SUPPL)), groups = c("AN", "SUPPL"))
@@ -213,13 +241,13 @@ M01 <- mark(geese, nocc = nocc, model = "Nest", model.parameters = list(S = list
 M02 <- mark(geese, nocc = nocc, model = "Nest", model.parameters = list(S = list(formula = ~ AN + SUPPL + HABITAT)), groups = c("AN", "SUPPL", "HABITAT"))
 
 # 3. AN + SUPPL + HABITAT + HABITAT*SUPPL
-#M03 <- mark(geese, nocc = nocc, model = "Nest", model.parameters = list(S = list(formula = ~ AN + HABITAT*SUPPL)), groups = c("AN", "SUPPL", "HABITAT"))
+M03 <- mark(geese, nocc = nocc, model = "Nest", model.parameters = list(S = list(formula = ~ AN + HABITAT*SUPPL)), groups = c("AN", "SUPPL", "HABITAT"))
 
 # 4. AN + SUPPL + HABITAT + NestAge
 M04 <- mark(geese, nocc = nocc, model = "Nest", model.parameters = list(S = list(formula = ~ AN + SUPPL + HABITAT + NestAge)), groups = c("AN", "SUPPL", "HABITAT"))
 
 # 5. AN + NestAge + HABITAT*SUPPL
-#M05 <- mark(geese, nocc = nocc, model = "Nest", model.parameters = list(S = list(formula = ~ AN + NestAge + HABITAT*SUPPL)), groups = c("AN", "SUPPL", "HABITAT"))
+M05 <- mark(geese, nocc = nocc, model = "Nest", model.parameters = list(S = list(formula = ~ AN + NestAge + HABITAT*SUPPL)), groups = c("AN", "SUPPL", "HABITAT"))
 
 # 8. AN + HABITAT
 M08 <- mark(geese, nocc = nocc, model = "Nest", model.parameters = list(S = list(formula = ~ AN + HABITAT)), groups = c("AN", "HABITAT"))
@@ -234,7 +262,7 @@ M11 <- mark(geese, nocc = nocc, model = "Nest", model.parameters = list(S = list
 M14 <- mark(geese, nocc = nocc, model = "Nest", model.parameters = list(S = list(formula = ~ AN + SUPPL + NestAge)), groups = c("AN", "SUPPL"))
 
 # 15. AN * SUPPL
-#M15 <- mark(geese, nocc = nocc, model = "Nest", model.parameters = list(S = list(formula = ~ AN * SUPPL)), groups = c("AN", "SUPPL"))
+M15 <- mark(geese, nocc = nocc, model = "Nest", model.parameters = list(S = list(formula = ~ AN * SUPPL)), groups = c("AN", "SUPPL"))
 
 return(collect.models() )
 }
@@ -253,3 +281,21 @@ geese.results # print model-selection table to screen
 # 4. AN + SUPPL + HABITAT + NestAge
 M04 <- mark(geese, nocc = nocc, model = "Nest", model.parameters = list(S = list(formula = ~ AN + SUPPL + HABITAT + NestAge)), groups = c("AN", "SUPPL", "HABITAT"))
 
+# To obtain a plot
+M04 <- geese.results$M04
+fc <- find.covariates(M04,geese)
+fc$value[1:41]=1:41 # assign 1:35 to 1st 35 nest ages
+
+
+fc$value[fc$var == "M04"] <- 0.1 # assign new value to PpnGrass
+design <- fill.covariates(M04,fc) # fill design matrix with values
+
+
+# extract 1st 41 rows of output
+M04.survival <- compute.real(M04, design = design)[1:41,]
+
+
+# insert covariate columns
+M04.survival <- cbind(design[1:41, c(2:3)], M04.survival)
+colnames(M04.survival) <- c("Age", "M04","DSR","seDSR","lclDSR","uclDSR")
+M04.survival # view estimates of DSR for each age and PpnGrass combo
