@@ -41,7 +41,7 @@ abline(h = mean(cum$cumRAIN) + sd(cum$cumRAIN),
 #### cum 1 & cum11 - Trends between 1995 and 2017 -  Average goose nidification period (12 June - 25 July) ####
 ## Cf dates in Lecomte et al. 2009
 ## Without taking account of bissextile and non bissextile years
-cum1 <- as.data.frame(tapply(rain$RAIN[rain$JJ >= 163 & rain$JJ <= 2016], rain$YEAR[rain$JJ >= 163 & rain$JJ <= 2016], sum))
+cum1 <- as.data.frame(tapply(rain$RAIN[rain$JJ >= 163 & rain$JJ <= 206], rain$YEAR[rain$JJ >= 163 & rain$JJ <= 206], sum))
 
 cum1 <- cbind(1995:2017, cum1)
 names(cum1) <- c("YEAR", "cumRAIN")
@@ -105,11 +105,47 @@ abline(h = mean(cum11$cumRAIN) + sd(cum11$cumRAIN),
        col = "darkgoldenrod2",
        lwd = 1.5,
        lty = "dotdash")
-dev.off()
 
-#### Correlation between cum1$cumRAIN (cumulative rain between same dates for each nesting season) and cum11$cumRAIN (cumulative rain specific to each nesting season)
-plot(cum1$cumRAIN, cum11$cumRAIN)
-cor.test(cum1$cumRAIN, cum11$cumRAIN)
+#### cum2 - Trends between 1995 and 2017 -  Specific dates for each goose nidification period ####
+nidi <- read.table("GOOSE_jour_moy_ponte_eclos.txt", sep = "\t", dec = ".", h = T)
+
+cum2 <- NULL
+for (i in unique(rain$YEAR)) {
+  YEAR <- i
+  INI <- nidi$moy_ponte[nidi$year == i]
+  ECLO <- nidi$moy_eclos[nidi$year == i]
+  
+  cumRAIN <- sum(rain$RAIN[rain$YEAR == i & rain$JJ >= INI & rain$JJ <= ECLO])
+  
+  TAB <- data.frame(YEAR, INI, ECLO, cumRAIN)
+  
+  cum2 <- rbind(cum2, TAB)
+}
+
+# Plot
+my_vector <- cum2$cumRAIN
+names(my_vector) <- cum2$YEAR
+barplot(my_vector,
+        col = "olivedrab3",
+        border = "olivedrab3",
+        main = "Trend for specific dates for each goose nesting period",
+        ylab = "Cumulative precipitation (mm)")
+abline(h = mean(cum2$cumRAIN),
+       col = "darkolivegreen",
+       lwd = 3,
+       lty = "solid")
+abline(h = mean(cum2$cumRAIN) - sd(cum2$cumRAIN),
+       col = "darkolivegreen",
+       lwd = 1.5,
+       lty = "dotdash")
+abline(h = mean(cum2$cumRAIN) + sd(cum2$cumRAIN),
+       col = "darkolivegreen",
+       lwd = 1.5,
+       lty = "dotdash")
+
+#### Correlation between cum11$cumRAIN (cumulative rain between same dates for each nesting season) and cum2$cumRAIN (cumulative rain specific to each nesting season)
+plot(cum11$cumRAIN, cum2$cumRAIN)
+cor.test(cum11$cumRAIN, cum2$cumRAIN)
 
 ##### DATA EXPLORATION #####
 #### Trends between 2013 and 2017
