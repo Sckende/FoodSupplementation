@@ -4,7 +4,8 @@ setwd("C:/Users/HP_9470m/OneDrive - Université de Moncton/Doc doc doc/Ph.D. - A
 rm(list = ls())
 
 
-gsg <- read.table("GOOSE_MARK_all_nests.txt", h = T, dec = ".", sep = "\t")
+gsg <- read.table("GOOSE_MARK_all_nests.txt", h = T, dec = ".", sep = "\t") # Only for years with supplementation (2005 is missing)
+gsg <- read.table("GOOSE_MARK_all_nests_all_years.txt", h = T, dec = ".", sep = "\t") # all years, with and without supplemented nests
 str(gsg)
 dim(gsg)
 summary(gsg) 
