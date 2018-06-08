@@ -18,6 +18,9 @@ gsg$HABITAT[gsg$HABITAT == "Wetland"] <- "WET"
 gsg$SUPPL[gsg$SUPPL == "FOO"] <- "F"
 gsg$SUPPL[gsg$SUPPL == "WAT"] <- "W"
 
+gsg$Groupe[gsg$Groupe == "Colony"] <- "COLONY"
+
+gsg <- droplevels(gsg)
 # Formating the reference level
 gsg$SUPPL <- relevel(gsg$SUPPL, "TEM")
 
@@ -30,7 +33,8 @@ gsg$AN <- as.factor(gsg$AN)
 
 # Nest ISSUE 0:excluded, 1:Success, 2:Abandonment, 3:Destroyed, 5:Unknown
 gsg$Fate[gsg$Groupe == "COLONY" & gsg$ISSUE == 1] <- 0
-gsg$Fate[gsg$Groupe == "COLONY" & gsg$ISSUE == 3] <- 1
+gsg$Fate[gsg$Groupe == "COLONY" & gsg$ISSUE == 2 | gsg$ISSUE == 3] <- 1
+
 
 # Delete the ISSUE variable
 gsg <- gsg[,-11]
@@ -111,7 +115,7 @@ prop$error_type <- sqrt(prop$PROP*(1-prop$PROP)/prop$n)
 head(prop)
 summary(prop)
 
-# Graphic
+# Graphic (for experiment nests)
 x11()
 color <- c("olivedrab3", "aquamarine3", "darkgoldenrod2")
 
@@ -155,7 +159,7 @@ for (i in unique(gsg$AN)){
   }
 }
 #View(prop2)
-# Graphic
+# Graphic (for experiment nests)
 X11()
 color <- c("olivedrab3", "olivedrab4", "aquamarine3", "aquamarine4", "darkgoldenrod2", "darkgoldenrod3")
 
@@ -193,6 +197,8 @@ geese <- gsg
 summary(geese)
 dim(geese)
 
+# If run only control nests
+geese <- geese[geese$Groupe == "COLONY",]
 
 #Creation of AgeFound variable#
 #--------------------------------#
@@ -223,6 +229,13 @@ nocc <- max(geese$LastChecked)
 require(RMark)
 # Write a function for evaluating a set of competing models
 # Set of modeles to test on MARK_modeles.odt 
+
+# Delete error lines
+geese <- geese[- c(169, 2357, 3510, 4833),]
+
+#Add type of rainfall year
+
+
 
 
 run.geese=function()

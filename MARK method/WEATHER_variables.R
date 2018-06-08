@@ -121,6 +121,13 @@ for (i in unique(rain$YEAR)) {
   
   cum2 <- rbind(cum2, TAB)
 }
+cum2$RAINFALL[cum2$cumRAIN <= mean(cum2$cumRAIN) - sd(cum2$cumRAIN)] <- "LOW"
+cum2$RAINFALL[cum2$cumRAIN >= mean(cum2$cumRAIN) + sd(cum2$cumRAIN)] <- "HIGH"
+cum2$RAINFALL[cum2$cumRAIN <= mean(cum2$cumRAIN) + sd(cum2$cumRAIN) & cum2$cumRAIN >= mean(cum2$cumRAIN) - sd(cum2$cumRAIN)] <- "INTER"
+cum2$RAINFALL <- as.factor(cum2$RAINFALL)
+
+#write.table(cum2, "PREC_cum2.txt", sep = "/t", dec = ".")
+
 
 # Plot
 my_vector <- cum2$cumRAIN
