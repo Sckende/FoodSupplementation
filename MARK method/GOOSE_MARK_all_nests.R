@@ -4,7 +4,7 @@ setwd("C:/Users/HP_9470m/OneDrive - Université de Moncton/Doc doc doc/Ph.D. - A
 rm(list = ls())
 
 
-gsg <- read.table("GOOSE_MARK_all_nests.txt", h = T, dec = ".", sep = "\t") # Only for years with supplementation (2005 is missing)
+#gsg <- read.table("GOOSE_MARK_all_nests.txt", h = T, dec = ".", sep = "\t") # Only for years with supplementation (2005 is missing)
 gsg <- read.table("GOOSE_MARK_all_nests_all_years.txt", h = T, dec = ".", sep = "\t") # all years, with and without supplemented nests
 str(gsg)
 dim(gsg)
@@ -234,6 +234,7 @@ require(RMark)
 geese <- geese[- c(169, 2357, 3510, 4833),]
 
 #Add type of rainfall year
+cum2 <- read.table("PREC_cum2.txt", sep = "\t", dec = ".", h = T)
 
 
 
@@ -324,3 +325,34 @@ M04.survival <- compute.real(M04, design = design)[1:41,]
 M04.survival <- cbind(design[1:41, c(2:3)], M04.survival)
 colnames(M04.survival) <- c("Age", "M04","DSR","seDSR","lclDSR","uclDSR")
 M04.survival # view estimates of DSR for each age and PpnGrass combo
+
+
+
+#### Supplementation effect on the hatching date ####
+# Using gsg database after cleaning code
+
+# Keep only nest with success
+try <- gsg[gsg$Fate == 0,]
+
+# Check if all lastpresent date = lastchecked date
+all(try$LastChecked %in% try$LastPresent)
+# More right to use
+identical(try$LastChecked, try$LastPresent)
+
+plot(try$LastChecked)
+hist(try$LastChecked)
+
+require(lme4)
+
+# Full model
+l0 <- lmer(LastChecked ~ SUPPL + (1|IniDate) + (1|AN), data = try, REML = F) # REML = F allows comparison between likelihood estimator of different models 
+l0
+summary(l0)
+
+# Null model
+l.NULL <- lmer(LastChecked ~ 1 + (1|IniDate) + (1|AN), data = try, REML = F)
+l.NULL
+summary(l.NULL)
+
+# Model comparison
+anova(l.NULL, l0)
