@@ -4,12 +4,12 @@ setwd("C:/Users/HP_9470m/OneDrive - Université de Moncton/Doc doc doc/Ph.D. - A
 list.files()
 
 #### RAINFALL ####
-rain <- read.table("PREC_precipitation_Bylot_1996-2017.txt", sep = "\t", dec = ",", h = T)
+rain <- read.table("PREC_precipitation_Bylot_1995-2017.txt", sep = "\t", dec = ",", h = T)
 
 summary(rain)
 rain <- na.omit(rain)
 
-#### cum - Trends between 1995 and 2017 -  Complete summer ####
+#### cum - Trends between 1995 and 2017 -  Complete data ####
 cum <- as.data.frame(tapply(rain$RAIN, rain$YEAR, sum))
 
 cum <- cbind(1995:2017, cum)
@@ -22,7 +22,7 @@ names(my_vector) <- cum$YEAR
 barplot(my_vector,
         col = "olivedrab3",
         border = "olivedrab3",
-        main = "Trend for the complete field season (1 June to 15 August)",
+        main = "Trend for the complete field season",
         ylab = "Cumulative precipitation (mm)")
 abline(h = mean(cum$cumRAIN),
        col = "darkgoldenrod2",
@@ -37,6 +37,33 @@ abline(h = mean(cum$cumRAIN) + sd(cum$cumRAIN),
        lwd = 1.5,
        lty = "dotdash")
 
+#### cum0 - Trends between 1995 and 2017 -  Complete summer (from 1 June to 20 August - Report Bylot 2017) ####
+cum0 <- as.data.frame(tapply(rain$RAIN[rain$JJ >= 152 & rain$JJ <= 232], rain$YEAR[rain$JJ >= 152 & rain$JJ <= 232], sum))
+
+cum0 <- cbind(1995:2017, cum0)
+names(cum0) <- c("YEAR", "cumRAIN")
+cum0$meanCUMrain <- mean(cum0$cumRAIN)
+
+# Plot
+my_vector <- cum0$cumRAIN
+names(my_vector) <- cum0$YEAR
+barplot(my_vector,
+        col = "olivedrab3",
+        border = "olivedrab3",
+        main = "Trend for the complete summer (1 June to 20 August)",
+        ylab = "Cumulative precipitation (mm)")
+abline(h = mean(cum0$cumRAIN),
+       col = "darkgoldenrod2",
+       lwd = 3,
+       lty = "solid")
+abline(h = mean(cum0$cumRAIN) - sd(cum0$cumRAIN),
+       col = "darkgoldenrod2",
+       lwd = 1.5,
+       lty = "dotdash")
+abline(h = mean(cum0$cumRAIN) + sd(cum0$cumRAIN),
+       col = "darkgoldenrod2",
+       lwd = 1.5,
+       lty = "dotdash")
 
 #### cum 1 & cum11 - Trends between 1995 and 2017 -  Average goose nidification period (12 June - 25 July) ####
 ## Cf dates in Lecomte et al. 2009
@@ -106,8 +133,9 @@ abline(h = mean(cum11$cumRAIN) + sd(cum11$cumRAIN),
        lwd = 1.5,
        lty = "dotdash")
 
-#### cum2 - Trends between 1995 and 2017 -  Specific dates for each goose nidification period ####
+#### cum2 - Trends between 1995 and 2017 -  Specific dates for each goose nidification period *** ####
 nidi <- read.table("GOOSE_jour_moy_ponte_eclos.txt", sep = "\t", dec = ".", h = T)
+summary(nidi)
 
 cum2 <- NULL
 for (i in unique(rain$YEAR)) {
