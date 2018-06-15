@@ -160,7 +160,7 @@ cum2$NEST_DURATION <- cum2$ECLO - cum2$INI
 # cumRAIN/day to compensate the different length of nesing period
 cum2$cumRAIN_DAY <- cum2$cumRAIN / cum2$NEST_DURATION
 
-#write.table(cum2, "PREC_cum2.txt", sep = "/t", dec = ".")
+#write.table(cum2, "PREC_cum2.txt", dec = ".")
 
 
 # Plot
