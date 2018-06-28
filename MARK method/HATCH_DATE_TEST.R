@@ -73,11 +73,24 @@ hh$SUPPL <- relevel(hh$SUPPL, ref="TEM") # setting of the reference level
 #### Full model ####
 # Not enougth levels to consider a random effect with year (necessity of minimum 5 levels for strong results)
 
+l.full <- lm(INCUB ~ SUPPL + HAB + cumPREC + CLUTCH + mean_TEMP + cumPREC*mean_TEMP, data = hh); l.full
+summary(l.full)
+
+# To check the global effect of factors
+Anova(l.full, type = "III") # library car
+
+#### Model 0 ####
+# Delete interaction cause non significant
 l0 <- lm(INCUB ~ SUPPL + HAB + cumPREC + CLUTCH + mean_TEMP, data = hh); l0
 summary(l0)
 
 # To check the global effect of factors
 Anova(l0, type = "III") # library car
+
+# Model comparison
+anova(l0, l.full) #always in first the most simple model, here l0
+# Non significant anova, so, models are similar and cumPREC*mean_TEMP can be deleted
+# Work again as previously with the new best model - l0 - and dele mean_TEMP (cf l1)
 
 #### Model 1 ####
 # Delete mean_TEMP cause non significant
