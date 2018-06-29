@@ -119,7 +119,7 @@ anova(l2, l1)
 # Non significant anova, so, models are similar and mean_TEMP can be deleted
 # Work again as previously with the new best model - l1 - and dele HAB (cf l3)
 
-#### Model 3 ####
+#### Model 3 *** ####
 l3 <- lm(INCUB ~ SUPPL + cumPREC + CLUTCH, data = hh); l3
 summary(l3)
 
