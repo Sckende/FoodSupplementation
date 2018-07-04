@@ -2,50 +2,141 @@ getwd()
 setwd("C:/Users/HP_9470m/OneDrive - Université de Moncton/Doc doc doc/Ph.D. - ANALYSES/R analysis/Data")
 
 rm(list = ls())
+list.files()
 
-
-#gsg <- read.table("GOOSE_MARK_all_nests.txt", h = T, dec = ".", sep = "\t") # Only for years with supplementation (2005 is missing)
-gsg <- read.table("GOOSE_MARK_all_nests_all_years.txt", h = T, dec = ".", sep = "\t") # all years, with and without supplemented nests
-str(gsg)
-dim(gsg)
-summary(gsg) 
+suppl <- read.table("GOOSE_MARK_all_SUPPL_nests_all_years.txt", h = T, dec = ".", sep = "\t", stringsAsFactors = FALSE) # Supplemented nests data
+tem <- read.table("GOOSE_MARK_all_CONTROL_nests_all_years.txt", h = T, dec = ".", sep = "\t", stringsAsFactors = FALSE) # Control nests data (i.e. colony data)
+str(suppl); str(tem)
+dim(suppl); dim(tem)
+summary(suppl); summary(tem) 
 
 #################### Cleaning of data ####################
+#### Supplemented nests data ####
 
-gsg$HABITAT[gsg$HABITAT == "Mesic"] <- "MES"
-gsg$HABITAT[gsg$HABITAT == "Wetland"] <- "WET"
+names(suppl)
+summary(suppl)
+
+# Conversion of data
+    # SUPPL_DATE
+table(suppl$SUPPL_DATE, useNA = "always")
+suppl$SUPPL_DATE[suppl$SUPPL_DATE == "NONE"] <- "999"
+
+    # INITIATION
+table(suppl$INITIATION, useNA = "always")
+suppl$INITIATION <- as.numeric(suppl$INITIATION)
+summary(suppl$INITIATION)
+
+    # HATCH
+table(suppl$HATCH, useNA = "always")
+suppl$HATCH <- as.numeric(suppl$HATCH)
+summary(suppl$HATCH)
+
+    # NIDIF
+      # S = success = 0 in MARK
+      # F = fail = 1 in MARK
+
+suppl$Fate[which(suppl$NIDIF == "S")] <- 0
+suppl$Fate[which(suppl$NIDIF == "F")] <- 1
+
+table(suppl$Fate, useNA = "always")
+
+# Need to correct the "LastPresent" and "LastVisit" date by the hatching date ONLY FOR SUCCESSFUL NESTS
+suppl$LastPresent[which(suppl$NIDIF == "S")] <- suppl$HATCH[which(suppl$NIDIF == "S")]
+
+suppl$LastVisit[which(suppl$NIDIF == "S")] <- suppl$HATCH[which(suppl$NIDIF == "S")]
+
+# Check point
+    # For successful nests, LastVisit == LastPresent == HATCH
+table(suppl$HATCH[which(suppl$Fate == 0)] == suppl$LastPresent[which(suppl$Fate == 0)], useNA = "always")
+table(suppl$LastVisit[which(suppl$Fate == 0)] == suppl$LastPresent[which(suppl$Fate == 0)], useNA = "always")
+
+    # For unsuccessful nests, LastVisit != LastPresent
+table(suppl$LastVisit[which(suppl$Fate == 1)] == suppl$LastPresent[which(suppl$Fate == 1)], useNA = "always") # here there are 3 TRUE. Need to treat these nests cause it can be integrate by MARK analyses
+suppl[which(suppl$Fate == 1 & suppl$LastPresent == suppl$LastVisit),]
+
+# Correction of LastVisit date for lihes # 69, 74 & 83 (cause LastVisit == LastPresent is impossible in MARK)
+suppl$LastVisit[which(suppl$Fate == 1 & suppl$LastPresent == suppl$LastVisit)] <- suppl$LastVisit[which(suppl$Fate == 1 & suppl$LastPresent == suppl$LastVisit)] + 1
+
+# Class of variables
+suppl$Fate <- as.factor(suppl$Fate)
+suppl$ID <- as.factor(suppl$ID)
+suppl$SUPPL <- as.factor(suppl$SUPPL)
+suppl$HAB <- as.factor(suppl$HAB)
+suppl$ZONE <- as.factor(suppl$ZONE)
+suppl$SUPPL_DATE <- as.numeric(suppl$SUPPL_DATE)
+suppl$PRED1 <- as.factor(suppl$PRED1)
+suppl$PRED2 <- as.factor(suppl$PRED2)
+suppl$PRED_DATE <- as.numeric(suppl$PRED_DATE)
+suppl$Groupe <- as.factor(suppl$Groupe)
+suppl$HATCH_STATUS <- as.factor(suppl$HATCH_STATUS)
+suppl$INI_STATUS <- as.factor(suppl$INI_STATUS)
+
+#### Control nests data ####
+names(tem)
+summary(tem)
+
+# Standardization of variables names between both dataframes
+names(suppl)
+names(tem)
+suppl$Groupe <- "EXPE"
+tem$Groupe <- "COLONY"
+
+names(tem)[c(1:3, 5, 6, 11)] <- c("YEAR", "ID", "HAB", "INITIATION", "SUPPL_DATE", "NIDIF")
+names(suppl)[25] <- "LastChecked"
+
+# Conversion of data
+    # Fate --> 0:excluded, 1:Success, 2:Abandonment, 3:Destroyed, 5:Unknown
+tem$Fate[tem$NIDIF == 1] <- 0
+tem$Fate[is.na(tem$Fate)] <- 1
+
+tem$ID <- as.factor(tem$ID)
+tem$HAB <- as.factor(tem$HAB)
+tem$SUPPL <- as.factor(tem$SUPPL)
+tem$Groupe <- as.factor(tem$Groupe)
+tem$Fate <- as.factor(tem$Fate)
+
+tem$SUPPL_DATE <- 9999
+
+
+# Merge of both dataframes
+    # Selection of identical variables between both dataframes
+suppl2 <- suppl[, c(1, 2, 9, 5, 20, 12, 26, 11, 24, 25, 19, 27)]
+    # Join both dataframes together
+gsg <- rbind(tem, suppl2)
+summary(gsg)
+
+# Check point
+    # For successful nests, LastVisit == LastPresent
+table(gsg$LastChecked[which(gsg$Fate == "0")] == gsg$LastPresent[which(gsg$Fate == "0")], useNA = "always")
+
+    # For unsuccessful nests, LastVisit != LastPresent
+table(gsg$LastChecked[which(gsg$Fate == "1")] == gsg$LastPresent[which(gsg$Fate == "1")], useNA = "always")
+ ############## ATTENTION' VOIR ICI POUR LES ÉGALITÉS ENTRE LES DATES !!!!! ##################
+
+# Cleaning of dataframe
+gsg$YEAR <- as.factor(gsg$YEAR)
+
+gsg$HAB[gsg$HAB == "Mesic"] <- "MES"
+gsg$HAB[gsg$HAB == "Wetland"] <- "WET"
 
 gsg$SUPPL[gsg$SUPPL == "FOO"] <- "F"
 gsg$SUPPL[gsg$SUPPL == "WAT"] <- "W"
+gsg <- gsg[gsg$SUPPL != "WF",]
+gsg <- gsg[gsg$SUPPL != "PRED_BEF_SUPPL",]
 
-gsg$Groupe[gsg$Groupe == "Colony"] <- "COLONY"
+# Delete the NIDIF variable
+gsg <- gsg[,-11]
 
-gsg <- droplevels(gsg)
 # Formating the reference level
 gsg$SUPPL <- relevel(gsg$SUPPL, "TEM")
 
-# Delete WF level in SUPPL
-gsg <- gsg[gsg$SUPPL != "WF",]
-gsg <- gsg[gsg$SUPPL != "NONE",]
+# Remove NA's
+gsg <- gsg[!is.na(gsg$INITIATION),]
+gsg <- gsg[!is.na(gsg$Fate),]
+gsg <- gsg[!is.na(gsg$LastPresent),]
 
-# Formating variables
-gsg$AN <- as.factor(gsg$AN)
-
-# Nest ISSUE 0:excluded, 1:Success, 2:Abandonment, 3:Destroyed, 5:Unknown
-gsg$Fate[gsg$Groupe == "COLONY" & gsg$ISSUE == 1] <- 0
-gsg$Fate[gsg$Groupe == "COLONY" & gsg$ISSUE == 2 | gsg$ISSUE == 3] <- 1
-
-
-# Delete the ISSUE variable
-gsg <- gsg[,-11]
-
-gsg$Fate <- as.factor(gsg$Fate)
 gsg <- droplevels(gsg)
-
-# Remove NAs
-gsg$SupplDate[is.na(gsg$SupplDate)] <- 99999
-gsg <- na.omit(gsg)
-# WARNING ! Here we deleted some failed nests ==> underestimation of failed nests number
+# **** WARNING ! Here we deleted some failed nests ==> underestimation of failed nests number **** #
 
 ####Data exploration - Basic NS computation#####
 #####--------------------------------------#####
@@ -70,44 +161,44 @@ prop <- cbind(c(rep(2015, 3), rep(2016, 3), rep(2017, 3)), rep(c("TEM","W", "F")
 colnames(prop) <- c("YEAR", "SUPPL")
 prop <- as.data.frame(prop)
 nn <- c(
-  dim(gsg[gsg$AN == "2015" & gsg$SUPPL == "TEM" & gsg$Fate == "0",])[1] ,
-  dim(gsg[gsg$AN == "2015" & gsg$SUPPL == "W" & gsg$Fate == "0",])[1],
-  dim(gsg[gsg$AN == "2015" & gsg$SUPPL == "F" & gsg$Fate == "0",])[1],
+  dim(gsg[gsg$YEAR == "2015" & gsg$SUPPL == "TEM" & gsg$Fate == "0",])[1] ,
+  dim(gsg[gsg$YEAR == "2015" & gsg$SUPPL == "W" & gsg$Fate == "0",])[1],
+  dim(gsg[gsg$YEAR == "2015" & gsg$SUPPL == "F" & gsg$Fate == "0",])[1],
   
-  dim(gsg[gsg$AN == "2016" & gsg$SUPPL == "TEM" & gsg$Fate == "0",])[1],
-  dim(gsg[gsg$AN == "2016" & gsg$SUPPL == "W" & gsg$Fate == "0",])[1],
-  dim(gsg[gsg$AN == "2016" & gsg$SUPPL == "F" & gsg$Fate == "0",])[1],
+  dim(gsg[gsg$YEAR == "2016" & gsg$SUPPL == "TEM" & gsg$Fate == "0",])[1],
+  dim(gsg[gsg$YEAR == "2016" & gsg$SUPPL == "W" & gsg$Fate == "0",])[1],
+  dim(gsg[gsg$YEAR == "2016" & gsg$SUPPL == "F" & gsg$Fate == "0",])[1],
   
-  dim(gsg[gsg$AN == "2017" & gsg$SUPPL == "TEM" & gsg$Fate == "0",])[1],
-  dim(gsg[gsg$AN == "2017" & gsg$SUPPL == "W" & gsg$Fate == "0",])[1],
-  dim(gsg[gsg$AN == "2017" & gsg$SUPPL == "F" & gsg$Fate == "0",])[1]
+  dim(gsg[gsg$YEAR == "2017" & gsg$SUPPL == "TEM" & gsg$Fate == "0",])[1],
+  dim(gsg[gsg$YEAR == "2017" & gsg$SUPPL == "W" & gsg$Fate == "0",])[1],
+  dim(gsg[gsg$YEAR == "2017" & gsg$SUPPL == "F" & gsg$Fate == "0",])[1]
 )
 PP <- c(
-  dim(gsg[gsg$AN == "2015" & gsg$SUPPL == "TEM" & gsg$Fate == "0",])[1] / dim(gsg[gsg$AN == "2015" & gsg$SUPPL == "TEM",])[1],
-  dim(gsg[gsg$AN == "2015" & gsg$SUPPL == "W" & gsg$Fate == "0",])[1] / dim(gsg[gsg$AN == "2015" & gsg$SUPPL == "W",])[1],
-  dim(gsg[gsg$AN == "2015" & gsg$SUPPL == "F" & gsg$Fate == "0",])[1] / dim(gsg[gsg$AN == "2015" & gsg$SUPPL == "F",])[1],
+  dim(gsg[gsg$YEAR == "2015" & gsg$SUPPL == "TEM" & gsg$Fate == "0",])[1] / dim(gsg[gsg$YEAR == "2015" & gsg$SUPPL == "TEM",])[1],
+  dim(gsg[gsg$YEAR == "2015" & gsg$SUPPL == "W" & gsg$Fate == "0",])[1] / dim(gsg[gsg$YEAR == "2015" & gsg$SUPPL == "W",])[1],
+  dim(gsg[gsg$YEAR == "2015" & gsg$SUPPL == "F" & gsg$Fate == "0",])[1] / dim(gsg[gsg$YEAR == "2015" & gsg$SUPPL == "F",])[1],
   
-  dim(gsg[gsg$AN == "2016" & gsg$SUPPL == "TEM" & gsg$Fate == "0",])[1] / dim(gsg[gsg$AN == "2016" & gsg$SUPPL == "TEM",])[1],
-  dim(gsg[gsg$AN == "2016" & gsg$SUPPL == "W" & gsg$Fate == "0",])[1] / dim(gsg[gsg$AN == "2016" & gsg$SUPPL == "W",])[1],
-  dim(gsg[gsg$AN == "2016" & gsg$SUPPL == "F" & gsg$Fate == "0",])[1] / dim(gsg[gsg$AN == "2016" & gsg$SUPPL == "F",])[1],
+  dim(gsg[gsg$YEAR == "2016" & gsg$SUPPL == "TEM" & gsg$Fate == "0",])[1] / dim(gsg[gsg$YEAR == "2016" & gsg$SUPPL == "TEM",])[1],
+  dim(gsg[gsg$YEAR == "2016" & gsg$SUPPL == "W" & gsg$Fate == "0",])[1] / dim(gsg[gsg$YEAR == "2016" & gsg$SUPPL == "W",])[1],
+  dim(gsg[gsg$YEAR == "2016" & gsg$SUPPL == "F" & gsg$Fate == "0",])[1] / dim(gsg[gsg$YEAR == "2016" & gsg$SUPPL == "F",])[1],
   
-  dim(gsg[gsg$AN == "2017" & gsg$SUPPL == "TEM" & gsg$Fate == "0",])[1] / dim(gsg[gsg$AN == "2017" & gsg$SUPPL == "TEM",])[1],
-  dim(gsg[gsg$AN == "2017" & gsg$SUPPL == "W" & gsg$Fate == "0",])[1] / dim(gsg[gsg$AN == "2017" & gsg$SUPPL == "W",])[1],
-  dim(gsg[gsg$AN == "2017" & gsg$SUPPL == "F" & gsg$Fate == "0",])[1] / dim(gsg[gsg$AN == "2017" & gsg$SUPPL == "F",])[1]
+  dim(gsg[gsg$YEAR == "2017" & gsg$SUPPL == "TEM" & gsg$Fate == "0",])[1] / dim(gsg[gsg$YEAR == "2017" & gsg$SUPPL == "TEM",])[1],
+  dim(gsg[gsg$YEAR == "2017" & gsg$SUPPL == "W" & gsg$Fate == "0",])[1] / dim(gsg[gsg$YEAR == "2017" & gsg$SUPPL == "W",])[1],
+  dim(gsg[gsg$YEAR == "2017" & gsg$SUPPL == "F" & gsg$Fate == "0",])[1] / dim(gsg[gsg$YEAR == "2017" & gsg$SUPPL == "F",])[1]
 )
 
 prop$n <- c(
-  dim(gsg[gsg$AN == "2015" & gsg$SUPPL == "TEM",])[1] ,
-  dim(gsg[gsg$AN == "2015" & gsg$SUPPL == "W",])[1],
-  dim(gsg[gsg$AN == "2015" & gsg$SUPPL == "F",])[1],
+  dim(gsg[gsg$YEAR == "2015" & gsg$SUPPL == "TEM",])[1] ,
+  dim(gsg[gsg$YEAR == "2015" & gsg$SUPPL == "W",])[1],
+  dim(gsg[gsg$YEAR == "2015" & gsg$SUPPL == "F",])[1],
   
-  dim(gsg[gsg$AN == "2016" & gsg$SUPPL == "TEM",])[1],
-  dim(gsg[gsg$AN == "2016" & gsg$SUPPL == "W",])[1],
-  dim(gsg[gsg$AN == "2016" & gsg$SUPPL == "F",])[1],
+  dim(gsg[gsg$YEAR == "2016" & gsg$SUPPL == "TEM",])[1],
+  dim(gsg[gsg$YEAR == "2016" & gsg$SUPPL == "W",])[1],
+  dim(gsg[gsg$YEAR == "2016" & gsg$SUPPL == "F",])[1],
   
-  dim(gsg[gsg$AN == "2017" & gsg$SUPPL == "TEM",])[1],
-  dim(gsg[gsg$AN == "2017" & gsg$SUPPL == "W",])[1],
-  dim(gsg[gsg$AN == "2017" & gsg$SUPPL == "F",])[1]
+  dim(gsg[gsg$YEAR == "2017" & gsg$SUPPL == "TEM",])[1],
+  dim(gsg[gsg$YEAR == "2017" & gsg$SUPPL == "W",])[1],
+  dim(gsg[gsg$YEAR == "2017" & gsg$SUPPL == "F",])[1]
 )
 prop$PROP <- PP
 prop$error_type <- sqrt(prop$PROP*(1-prop$PROP)/prop$n)
@@ -140,16 +231,15 @@ text(barCenters,0.2, labels = paste("(", as.character(prop$n), ")", sep = ""))
 
 
 #Creating new data frame - SN by year, by habitat and by treatments
-gsg <- arrange(gsg, AN)
 prop2 <- NULL
-for (i in unique(gsg$AN)){
+for (i in 2015:2017){
   for (j in c("TEM", "W", "F")) {
     for (k in c("MES", "WET")){
       YEAR <- i
       TREAT <- j
       HAB <- k
-      N <- dim(gsg[gsg$AN == i & gsg$SUPPL == j & gsg$HABITAT == k,])[1]
-      PROP <- dim(gsg[gsg$AN == i & gsg$SUPPL == j & gsg$HABITAT == k & gsg$Fate == "0",])[1] / dim(gsg[gsg$AN == i & gsg$SUPPL == j & gsg$HABITAT == k,])[1]
+      N <- dim(gsg[gsg$YEAR == i & gsg$SUPPL == j & gsg$HAB == k,])[1]
+      PROP <- dim(gsg[gsg$YEAR == i & gsg$SUPPL == j & gsg$HAB == k & gsg$Fate == "0",])[1] / dim(gsg[gsg$YEAR == i & gsg$SUPPL == j & gsg$HAB == k,])[1]
       error_type <- sqrt(PROP*(1-PROP)/N)
       
       r <- data.frame(YEAR, HAB, TREAT, N, PROP, error_type)
@@ -186,31 +276,23 @@ text(16.5, 1.1, labels = 2017, cex = 2)
 
 dev.off()
 #### Data Analyses ####
-
-# Subset depending on the year
-gsg2015 <- subset(gsg, AN == 2015)
-gsg2016 <- subset(gsg, AN == 2016)
-gsg2017 <- subset(gsg, AN == 2017)
-
 # Here choose one specific year or not
-geese <- gsg
+geese <- gsg[gsg$YEAR == "2015" | gsg$YEAR == "2016" | gsg$YEAR == "2017",]
+geese <- droplevels(geese)
 summary(geese)
 dim(geese)
-
-# If run only control nests
-geese <- geese[geese$Groupe == "COLONY",]
 
 #Creation of AgeFound variable#
 #--------------------------------#
 #WARNING ! It has to be done before the modification of the FirstFound variable
-geese$AgeFound <- (geese$FirstFound - geese$IniDate) + 1 #...+1 cause age 0 is impossible
+geese$AgeFound <- (geese$FirstFound - geese$INITIATION) + 1 #...+1 cause age 0 is impossible
 geese$FindNest <- geese$FirstFound
 
 #Modification des dates de la variables FirstFound (la date minimale = Jour 1)#
 #-----------------------------------------------------------------------------#
 #Attention ici valeur change selon les annees
-FF <- min(geese$FirstFound) #date minimum = 164
-geese$FirstFound <- geese$FirstFound - (FF - 1) #ici 163 = 164 - 1 (pour Day 1)
+FF <- min(geese$FirstFound) #date minimum = 160
+geese$FirstFound <- geese$FirstFound - (FF - 1) #ici 159 = 160 - 1 (pour Day 1)
 
 #Idem pour les variables LastPresent, LastChecked#
 #-------------------------------------------------#
@@ -227,11 +309,10 @@ geese$AgeDay1 <- (geese$AgeFound - geese$FirstFound) + 1
 nocc <- max(geese$LastChecked)
 
 require(RMark)
-# Write a function for evaluating a set of competing models
-# Set of modeles to test on MARK_modeles.odt 
-
-# Delete error lines
-geese <- geese[- c(169, 2357, 3510, 4833),]
+ #Check point
+table(geese$LastChecked[which(geese$Fate == "1")] == geese$LastPresent[which(geese$Fate == "1")], useNA = "always")
+geese[geese$Fate == "1" & geese$LastPresent==geese$LastChecked,]
+geese$LastChecked[geese$Fate == "1" & geese$LastPresent==geese$LastChecked] <- geese$LastChecked[geese$Fate == "1" & geese$LastPresent==geese$LastChecked] + 1 # correction of LastChecked == LAstPresent for failed nests
 
 #Add type of rainfall year
 cum2 <- read.table("PREC_cum2.txt", sep = "\t", dec = ".", h = T)
@@ -246,10 +327,10 @@ run.geese=function()
 M0 <- mark(geese, nocc = nocc, model = "Nest", model.parameters = list(S = list(formula = ~1)))
 
 # 00. year effect
-M00 <- mark(geese, nocc = nocc, model = "Nest", model.parameters = list(S = list(formula = ~ AN)), groups = "AN")
+M00 <- mark(geese, nocc = nocc, model = "Nest", model.parameters = list(S = list(formula = ~ YEAR)), groups = "YEAR")
 
 # 000. habitat effect
-M000 <- mark(geese, nocc = nocc, model = "Nest", model.parameters = list(S = list(formula = ~ HABITAT)), groups = "HABITAT")
+M000 <- mark(geese, nocc = nocc, model = "Nest", model.parameters = list(S = list(formula = ~ HAB)), groups = "HAB")
 
 # 0000. supplementation effect
 M0000 <- mark(geese, nocc = nocc, model = "Nest", model.parameters = list(S = list(formula = ~ SUPPL)), groups = "SUPPL")
@@ -258,37 +339,38 @@ M0000 <- mark(geese, nocc = nocc, model = "Nest", model.parameters = list(S = li
 M00000 <- mark(geese, nocc = nocc, model = "Nest", model.parameters = list(S = list(formula = ~ NestAge)))
 
 # 000000. habitat*NestAge
-M000000 <- mark(geese, nocc = nocc, model = "Nest", model.parameters = list(S = list(formula = ~ HABITAT*NestAge)), groups = "HABITAT")
+M000000 <- mark(geese, nocc = nocc, model = "Nest", model.parameters = list(S = list(formula = ~ HAB*NestAge)), groups = "HAB")
 
 # 1. AN + SUPPL
-M01 <- mark(geese, nocc = nocc, model = "Nest", model.parameters = list(S = list(formula = ~ AN + SUPPL)), groups = c("AN", "SUPPL"))
+M01 <- mark(geese, nocc = nocc, model = "Nest", model.parameters = list(S = list(formula = ~ YEAR + SUPPL)), groups = c("YEAR", "SUPPL"))
+
 
 # 2. AN + SUPPL + HABITAT
-M02 <- mark(geese, nocc = nocc, model = "Nest", model.parameters = list(S = list(formula = ~ AN + SUPPL + HABITAT)), groups = c("AN", "SUPPL", "HABITAT"))
+M02 <- mark(geese, nocc = nocc, model = "Nest", model.parameters = list(S = list(formula = ~ YEAR + SUPPL + HAB)), groups = c("YEAR", "SUPPL", "HAB"))
 
 # 3. AN + SUPPL + HABITAT + HABITAT*SUPPL
-M03 <- mark(geese, nocc = nocc, model = "Nest", model.parameters = list(S = list(formula = ~ AN + HABITAT*SUPPL)), groups = c("AN", "SUPPL", "HABITAT"))
+M03 <- mark(geese, nocc = nocc, model = "Nest", model.parameters = list(S = list(formula = ~ YEAR + HAB*SUPPL)), groups = c("YEAR", "SUPPL", "HAB"))
 
 # 4. AN + SUPPL + HABITAT + NestAge
-M04 <- mark(geese, nocc = nocc, model = "Nest", model.parameters = list(S = list(formula = ~ AN + SUPPL + HABITAT + NestAge)), groups = c("AN", "SUPPL", "HABITAT"))
+M04 <- mark(geese, nocc = nocc, model = "Nest", model.parameters = list(S = list(formula = ~ YEAR + SUPPL + HAB + NestAge)), groups = c("YEAR", "SUPPL", "HAB"))
 
 # 5. AN + NestAge + HABITAT*SUPPL
-M05 <- mark(geese, nocc = nocc, model = "Nest", model.parameters = list(S = list(formula = ~ AN + NestAge + HABITAT*SUPPL)), groups = c("AN", "SUPPL", "HABITAT"))
+M05 <- mark(geese, nocc = nocc, model = "Nest", model.parameters = list(S = list(formula = ~ YEAR + NestAge + HAB*SUPPL)), groups = c("YEAR", "SUPPL", "HAB"))
 
 # 8. AN + HABITAT
-M08 <- mark(geese, nocc = nocc, model = "Nest", model.parameters = list(S = list(formula = ~ AN + HABITAT)), groups = c("AN", "HABITAT"))
+M08 <- mark(geese, nocc = nocc, model = "Nest", model.parameters = list(S = list(formula = ~ YEAR + HAB)), groups = c("YEAR", "HAB"))
 
 # 9. AN + HABITAT + NestAge
-M09 <- mark(geese, nocc = nocc, model = "Nest", model.parameters = list(S = list(formula = ~ AN + HABITAT + NestAge)), groups = c("AN", "HABITAT"))
+M09 <- mark(geese, nocc = nocc, model = "Nest", model.parameters = list(S = list(formula = ~ YEAR + HAB + NestAge)), groups = c("YEAR", "HAB"))
 
 # 11. AN + NestAge
-M11 <- mark(geese, nocc = nocc, model = "Nest", model.parameters = list(S = list(formula = ~ AN + NestAge)), groups = "AN")
+M11 <- mark(geese, nocc = nocc, model = "Nest", model.parameters = list(S = list(formula = ~ YEAR + NestAge)), groups = "YEAR")
 
 # 14. AN + SUPPL + NestAge
-M14 <- mark(geese, nocc = nocc, model = "Nest", model.parameters = list(S = list(formula = ~ AN + SUPPL + NestAge)), groups = c("AN", "SUPPL"))
+M14 <- mark(geese, nocc = nocc, model = "Nest", model.parameters = list(S = list(formula = ~ YEAR + SUPPL + NestAge)), groups = c("YEAR", "SUPPL"))
 
 # 15. AN * SUPPL
-M15 <- mark(geese, nocc = nocc, model = "Nest", model.parameters = list(S = list(formula = ~ AN * SUPPL)), groups = c("AN", "SUPPL"))
+M15 <- mark(geese, nocc = nocc, model = "Nest", model.parameters = list(S = list(formula = ~ YEAR * SUPPL)), groups = c("YEAR", "SUPPL"))
 
 return(collect.models() )
 }
@@ -303,9 +385,11 @@ geese.results # print model-selection table to screen
 
 #################### Best model for full database ####################
 ############## only considering models without interaction ##########
-# First best model
-# 4. AN + SUPPL + HABITAT + NestAge
-M04 <- mark(geese, nocc = nocc, model = "Nest", model.parameters = list(S = list(formula = ~ AN + SUPPL + HABITAT + NestAge)), groups = c("AN", "SUPPL", "HABITAT"))
+# Two best model
+# 4. YEAR + SUPPL + HABITAT + NestAge
+M04 <- mark(geese, nocc = nocc, model = "Nest", model.parameters = list(S = list(formula = ~ YEAR + SUPPL + HAB + NestAge)), groups = c("YEAR", "SUPPL", "HAB"))
+# 3. AN + SUPPL + HABITAT + HABITAT*SUPPL
+M03 <- mark(geese, nocc = nocc, model = "Nest", model.parameters = list(S = list(formula = ~ YEAR + HAB*SUPPL)), groups = c("YEAR", "SUPPL", "HAB"))
 
 # To obtain a plot
 M04 <- geese.results$M04
