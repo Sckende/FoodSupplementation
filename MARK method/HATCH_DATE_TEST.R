@@ -65,6 +65,8 @@ for (i in hh$X) {
   
 #### Supplementation effect on the hatching date ####
 #### MODELS - STEPWISE METHOD ####
+  
+  #### CAREFUL - TEMPERATURE DATA IS INCOMPLETE FOR THE 2018 SUMMER ####
   # Distribution of the response variable
 plot(hh$INCUB)
 hist(hh$INCUB)
