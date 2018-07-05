@@ -250,3 +250,39 @@ list.files()
 temp <- read.table("TEMP_Tair moy 1989-2017 BYLCAMP.txt", sep = "\t", dec = ",", h = T)
 summary(temp)
 temp$pH2O <- 0.61121 * exp((18.678 - temp$TEMP / 234.5) * (temp$TEMP/(257.14 + temp$TEMP)))
+
+
+#### AIR TEMPERATURE ####
+
+temp <- read.table("TEMP_Tair moy 1989-2017 BYLCAMP.txt", h = T, sep = "\t", dec = ",")
+head(temp)
+summary(temp)
+
+  # JJ date
+temp$JJ <- strptime(paste(temp$DAY, temp$MONTH, temp$YEAR, sep = "-"), format = "%d-%m-%Y")
+temp$JJ <- temp$JJ$yday + 1 #comme dates continues pas besoin de traiter separemment annees bissextiles et annees ordinaires
+
+  # Calcul
+t <- NULL
+for (i in 1996:2016) {
+  YEAR <- i
+  INI <- nidi$moy_ponte[nidi$year == i]
+  ECLO <- nidi$moy_eclos[nidi$year == i]
+  
+  meanTEMP <- mean(temp$TEMP[temp$YEAR == i & temp$JJ >= INI & temp$JJ <= ECLO], na.rm = T)
+  sdTEMP <- sd(temp$TEMP[temp$YEAR == i & temp$JJ >= INI & temp$JJ <= ECLO], na.rm = T)
+  
+  TAB <- data.frame(YEAR, INI, ECLO, meanTEMP, sdTEMP)
+  
+  t <- rbind(t, TAB)
+}
+
+
+# Check the duration of each nesting season
+cum2$NEST_DURATION <- cum2$ECLO - cum2$INI
+
+# cumRAIN/day to compensate the different length of nesing period
+cum2$cumRAIN_DAY <- cum2$cumRAIN / cum2$NEST_DURATION
+
+#write.table(cum2, "PREC_cum2.txt", dec = ".")
+
