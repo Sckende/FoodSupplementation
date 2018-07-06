@@ -67,7 +67,8 @@ suppl$SUPPL_DATE <- as.numeric(suppl$SUPPL_DATE)
 suppl$PRED1 <- as.factor(suppl$PRED1)
 suppl$PRED2 <- as.factor(suppl$PRED2)
 suppl$PRED_DATE <- as.numeric(suppl$PRED_DATE)
-suppl$Groupe <- as.factor(suppl$Groupe)
+
+
 suppl$HATCH_STATUS <- as.factor(suppl$HATCH_STATUS)
 suppl$INI_STATUS <- as.factor(suppl$INI_STATUS)
 
@@ -79,7 +80,9 @@ summary(tem)
 names(suppl)
 names(tem)
 suppl$Groupe <- "EXPE"
+suppl$Groupe <- as.factor(suppl$Groupe)
 tem$Groupe <- "COLONY"
+tem$Groupe <- as.factor(tem$Groupe)
 
 names(tem)[c(1:3, 5, 6, 11)] <- c("YEAR", "ID", "HAB", "INITIATION", "SUPPL_DATE", "NIDIF")
 names(suppl)[25] <- "LastChecked"
@@ -92,7 +95,6 @@ tem$Fate[is.na(tem$Fate)] <- 1
 tem$ID <- as.factor(tem$ID)
 tem$HAB <- as.factor(tem$HAB)
 tem$SUPPL <- as.factor(tem$SUPPL)
-tem$Groupe <- as.factor(tem$Groupe)
 tem$Fate <- as.factor(tem$Fate)
 
 tem$SUPPL_DATE <- 9999
@@ -136,9 +138,11 @@ gsg <- gsg[!is.na(gsg$Fate),]
 gsg <- gsg[!is.na(gsg$LastPresent),]
 
 gsg <- droplevels(gsg)
+
+#write.csv(gsg, "GOOSE_MARK_Complete_data.txt")
 # **** WARNING ! Here we deleted some failed nests ==> underestimation of failed nests number **** #
 
-####Data exploration - Basic NS computation#####
+####Data exploration - Basic (AND FALSE) NS computation#####
 #####--------------------------------------#####
 SNgeeseTEM <- dim(gsg[gsg$SUPPL == "TEM" & gsg$Fate == "0",])[1] / dim(gsg[gsg$SUPPL == "TEM",])[1]
 
@@ -275,6 +279,22 @@ text(9.9, 1.1, labels = 2016, cex = 2)
 text(16.5, 1.1, labels = 2017, cex = 2)
 
 dev.off()
+
+#### Add type of rainfall year ####
+cum2 <- read.table("PREC_cum2.txt",  dec = ".", h = T)
+gsg$RAINFALL <- cum2$RAINFALL[match(gsg$YEAR, cum2$YEAR)]
+
+#### Add cumulative precipitation for each nests ####
+rain <- read.table("PREC_precipitation_Bylot_1995-2017.txt", sep = "\t", dec = ",", h = T)
+rain <- rain[!is.na(rain$RAIN),]
+gsg$YEAR <- as.numeric(as.character(gsg$YEAR))
+
+gsg$X <- 1:dim(gsg)[1]
+for (i in gsg$X) {
+gsg$prec[i] <- 
+  sum(rain$RAIN[which(rain$YEAR == gsg$YEAR[i] & rain$JJ >= gsg$INITIATION[i] & rain$JJ<= gsg$LastPresent[i])])
+}
+
 #### Data Analyses ####
 # Here choose one specific year or not
 geese <- gsg[gsg$YEAR == "2015" | gsg$YEAR == "2016" | gsg$YEAR == "2017",]
@@ -314,8 +334,7 @@ table(geese$LastChecked[which(geese$Fate == "1")] == geese$LastPresent[which(gee
 geese[geese$Fate == "1" & geese$LastPresent==geese$LastChecked,]
 geese$LastChecked[geese$Fate == "1" & geese$LastPresent==geese$LastChecked] <- geese$LastChecked[geese$Fate == "1" & geese$LastPresent==geese$LastChecked] + 1 # correction of LastChecked == LAstPresent for failed nests
 
-#Add type of rainfall year
-cum2 <- read.table("PREC_cum2.txt", sep = "\t", dec = ".", h = T)
+
 
 
 
