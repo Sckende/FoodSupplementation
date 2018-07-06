@@ -164,13 +164,28 @@ cum2$cumRAIN_DAY <- cum2$cumRAIN / cum2$NEST_DURATION
 
 
 # Plot
+png("GOOSE_prec.tiff",
+    res=300,
+    width=20,
+    height=15,
+    pointsize=12,
+    unit="cm",
+    bg="transparent")
+
+#x11()
+par(mar=c(5,5,1,1)) # inner margin - default parameter is par("mar") <- 5.1 4.1 4.1 2.1
 my_vector <- cum2$cumRAIN
 names(my_vector) <- cum2$YEAR
 barplot(my_vector,
         col = "olivedrab3",
         border = "olivedrab3",
-        main = "Trend for specific dates for each goose nesting period",
-        ylab = "Cumulative precipitation (mm)")
+       # main = "Trend for specific dates for each goose nesting period",
+       # ylab = "Cumulative precipitation (mm)",
+        yaxt = "n",
+       ylim = c(0, 70))
+axis(side = 2,
+     lwd = 1,
+     las = 2)
 abline(h = mean(cum2$cumRAIN),
        col = "darkolivegreen",
        lwd = 3,
@@ -183,6 +198,8 @@ abline(h = mean(cum2$cumRAIN) + sd(cum2$cumRAIN),
        col = "darkolivegreen",
        lwd = 1.5,
        lty = "dotdash")
+
+dev.off()
 
 #### Correlation between cum11$cumRAIN (cumulative rain between same dates for each nesting season) and cum2$cumRAIN (cumulative rain specific to each nesting season)
 plot(cum11$cumRAIN, cum2$cumRAIN)
