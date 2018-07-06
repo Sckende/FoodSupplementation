@@ -201,6 +201,28 @@ abline(h = mean(cum2$cumRAIN) + sd(cum2$cumRAIN),
 
 dev.off()
 
+#### cum3 - Annual cumulation prec between the earliest initiation and latest hatching ####
+
+ni <- read.table("GOOSE_MARK_Complete_data.txt", h = T, sep = ",")
+ni2<- as.data.frame(tapply(ni$INITIATION, ni$YEAR, min))
+ni2 <- cbind(1995:2017, ni2)
+ni2 <- cbind(ni2, as.data.frame(tapply(ni$LastChecked, ni$YEAR, max)))
+names(ni2) <- c("YEAR", "early_INI", "late_HATCH")
+
+cum3 <- NULL
+for (i in unique(rain$YEAR)) {
+  YEAR <- i
+  INI <- ni2$early_INI[ni2$YEAR == i] 
+  ECLO <- ni2$late_HATCH[ni2$YEAR == i]
+  
+  cumRAIN <- sum(rain$RAIN[rain$YEAR == i & rain$JJ >= INI & rain$JJ <= ECLO])
+  
+  TAB <- data.frame(YEAR, INI, ECLO, cumRAIN)
+  
+  cum3 <- rbind(cum3, TAB)
+}
+
+
 #### Correlation between cum11$cumRAIN (cumulative rain between same dates for each nesting season) and cum2$cumRAIN (cumulative rain specific to each nesting season)
 plot(cum11$cumRAIN, cum2$cumRAIN)
 cor.test(cum11$cumRAIN, cum2$cumRAIN)
