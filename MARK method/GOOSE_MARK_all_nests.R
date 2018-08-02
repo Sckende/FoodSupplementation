@@ -254,7 +254,19 @@ for (i in 2015:2017){
 }
 #View(prop2)
 # Graphic (for experiment nests)
-X11()
+#png("C:/Users/HP_9470m/Dropbox/PHD. Claire/Chapitres de thèse/CHAPTER 1 - Geese nesting success & supplemented nests/RESULTS figures/RAW_goose_nesting_success.tiff", # C:/Users/HP_9470m/Dropbox/PHD. Claire/Chapitres de thèse/CHAPTER 1 - Geese nesting success & supplemented nests/RESULTS figures
+    #res=300,
+    #width=30,
+   # height=15,
+    #pointsize=12,
+    #unit="cm",
+    #bg="transparent")
+
+x11()
+
+#par(oma=c(0,0,0,3)) # outer margin
+par(mar=c(5,5,1,5)) # inner margin - default parameter is par("mar") <- 5.1 4.1 4.1 2.1
+
 color <- c("olivedrab3", "olivedrab4", "aquamarine3", "aquamarine4", "darkgoldenrod2", "darkgoldenrod3")
 
 barCenters <- barplot(prop2$PROP, 
@@ -268,7 +280,7 @@ barCenters <- barplot(prop2$PROP,
                       space = c(0.2, rep(c(0,0.1,0,0.1,0,0.4), 2) , c(0,0.1,0,0.1,0)), 
                       las = 2)
 
-legend("topright", 
+legend("topleft", 
        #inset = c(0, -0,05),
        legend = c("CONTROL", "WATER", "FOOD"), 
        fill = c("olivedrab3", "aquamarine3", "darkgoldenrod2"), bty = "n", cex = 1)
@@ -333,7 +345,7 @@ require(RMark)
 table(geese$LastChecked[which(geese$Fate == "1")] == geese$LastPresent[which(geese$Fate == "1")], useNA = "always")
 geese[geese$Fate == "1" & geese$LastPresent==geese$LastChecked,]
 geese$LastChecked[geese$Fate == "1" & geese$LastPresent==geese$LastChecked] <- geese$LastChecked[geese$Fate == "1" & geese$LastPresent==geese$LastChecked] + 1 # correction of LastChecked == LAstPresent for failed nests
-
+geese$YEAR <- as.factor(geese$YEAR)
 
 
 
@@ -401,14 +413,15 @@ geese.results <- run.geese()
 # Examine table of model-selection results #
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~#
 geese.results # print model-selection table to screen
+save(geese.results, file = "MARK_models.rda")
 
 #################### Best model for full database ####################
 ############## only considering models without interaction ##########
 # Two best model
 # 4. YEAR + SUPPL + HABITAT + NestAge
 M04 <- mark(geese, nocc = nocc, model = "Nest", model.parameters = list(S = list(formula = ~ YEAR + SUPPL + HAB + NestAge)), groups = c("YEAR", "SUPPL", "HAB"))
-# 3. AN + SUPPL + HABITAT + HABITAT*SUPPL
-M03 <- mark(geese, nocc = nocc, model = "Nest", model.parameters = list(S = list(formula = ~ YEAR + HAB*SUPPL)), groups = c("YEAR", "SUPPL", "HAB"))
+# 5. AN + NestAge + HABITAT*SUPPL
+M05 <- mark(geese, nocc = nocc, model = "Nest", model.parameters = list(S = list(formula = ~ YEAR + NestAge + HAB*SUPPL)), groups = c("YEAR", "SUPPL", "HAB"))
 
 # To obtain a plot
 M04 <- geese.results$M04

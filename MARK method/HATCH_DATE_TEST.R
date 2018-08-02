@@ -4,7 +4,8 @@ setwd("C:/Users/HP_9470m/OneDrive - Université de Moncton/Doc doc doc/Ph.D. - A
 rm(list = ls())
 list.files()
 
-h <- read.table("GOOSE-Supl_Nests_2015-2016-2017_LAST_version.txt", h = T, dec = ".", sep = "\t") # all years, with and without supplemented nests
+h <- read.table("GOOSE_MARK_all_SUPPL_nests_all_years.txt", h = T, dec = ".", sep = "\t")
+# all years, with and without supplemented nests
 str(h)
 dim(h)
 summary(h) 
@@ -61,7 +62,8 @@ for (i in hh$X) {
 
 # Creation of fake supplementation date for TEMOIN
   hh$SUPPL_DATE <- as.numeric(as.character(hh$SUPPL_DATE))
-  hh$SUPPL_DATE[hh$SUPPL == "TEM"] <- "999"
+  hh$SUPPL_DATE[hh$SUPPL == "TEM"] <- 999
+
   
 #### Supplementation effect on the hatching date ####
 #### MODELS - STEPWISE METHOD ####
