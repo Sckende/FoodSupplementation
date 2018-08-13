@@ -355,54 +355,66 @@ run.geese=function()
 {
   
 # 0. A model of constant daily survival rate (DSR)
-M0 <- mark(geese, nocc = nocc, model = "Nest", model.parameters = list(S = list(formula = ~1)))
+M0 <- mark(geese, nocc = nocc, model = "Nest", model.parameters = list(S = list(formula = ~1)), delete = TRUE)
 
 # 00. year effect
-M00 <- mark(geese, nocc = nocc, model = "Nest", model.parameters = list(S = list(formula = ~ YEAR)), groups = "YEAR")
+M00 <- mark(geese, nocc = nocc, model = "Nest", model.parameters = list(S = list(formula = ~ YEAR)), groups = "YEAR", delete = TRUE)
 
 # 000. habitat effect
-M000 <- mark(geese, nocc = nocc, model = "Nest", model.parameters = list(S = list(formula = ~ HAB)), groups = "HAB")
+M000 <- mark(geese, nocc = nocc, model = "Nest", model.parameters = list(S = list(formula = ~ HAB)), groups = "HAB", delete = TRUE)
 
 # 0000. supplementation effect
-M0000 <- mark(geese, nocc = nocc, model = "Nest", model.parameters = list(S = list(formula = ~ SUPPL)), groups = "SUPPL")
+M0000 <- mark(geese, nocc = nocc, model = "Nest", model.parameters = list(S = list(formula = ~ SUPPL)), groups = "SUPPL", delete = TRUE)
 
 # 00000. NestAge effect
-M00000 <- mark(geese, nocc = nocc, model = "Nest", model.parameters = list(S = list(formula = ~ NestAge)))
+M00000 <- mark(geese, nocc = nocc, model = "Nest", model.parameters = list(S = list(formula = ~ NestAge)), delete = TRUE)
 
 # 000000. habitat*NestAge
-M000000 <- mark(geese, nocc = nocc, model = "Nest", model.parameters = list(S = list(formula = ~ HAB*NestAge)), groups = "HAB")
+M000000 <- mark(geese, nocc = nocc, model = "Nest", model.parameters = list(S = list(formula = ~ HAB*NestAge)), groups = "HAB", delete = TRUE)
 
 # 1. AN + SUPPL
-M01 <- mark(geese, nocc = nocc, model = "Nest", model.parameters = list(S = list(formula = ~ YEAR + SUPPL)), groups = c("YEAR", "SUPPL"))
+M01 <- mark(geese, nocc = nocc, model = "Nest", model.parameters = list(S = list(formula = ~ YEAR + SUPPL)), groups = c("YEAR", "SUPPL"), delete = TRUE)
 
 
 # 2. AN + SUPPL + HABITAT
-M02 <- mark(geese, nocc = nocc, model = "Nest", model.parameters = list(S = list(formula = ~ YEAR + SUPPL + HAB)), groups = c("YEAR", "SUPPL", "HAB"))
+M02 <- mark(geese, nocc = nocc, model = "Nest", model.parameters = list(S = list(formula = ~ YEAR + SUPPL + HAB)), groups = c("YEAR", "SUPPL", "HAB"), delete = TRUE)
 
 # 3. AN + SUPPL + HABITAT + HABITAT*SUPPL
-M03 <- mark(geese, nocc = nocc, model = "Nest", model.parameters = list(S = list(formula = ~ YEAR + HAB*SUPPL)), groups = c("YEAR", "SUPPL", "HAB"))
+M03 <- mark(geese, nocc = nocc, model = "Nest", model.parameters = list(S = list(formula = ~ YEAR + HAB*SUPPL)), groups = c("YEAR", "SUPPL", "HAB"), delete = TRUE)
 
 # 4. AN + SUPPL + HABITAT + NestAge
-M04 <- mark(geese, nocc = nocc, model = "Nest", model.parameters = list(S = list(formula = ~ YEAR + SUPPL + HAB + NestAge)), groups = c("YEAR", "SUPPL", "HAB"))
+M04 <- mark(geese, nocc = nocc, model = "Nest", model.parameters = list(S = list(formula = ~ YEAR + SUPPL + HAB + NestAge)), groups = c("YEAR", "SUPPL", "HAB"), delete = TRUE)
 
 # 5. AN + NestAge + HABITAT*SUPPL
-M05 <- mark(geese, nocc = nocc, model = "Nest", model.parameters = list(S = list(formula = ~ YEAR + NestAge + HAB*SUPPL)), groups = c("YEAR", "SUPPL", "HAB"))
+M05 <- mark(geese, nocc = nocc, model = "Nest", model.parameters = list(S = list(formula = ~ YEAR + NestAge + HAB*SUPPL)), groups = c("YEAR", "SUPPL", "HAB"), delete = TRUE)
 
 # 8. AN + HABITAT
-M08 <- mark(geese, nocc = nocc, model = "Nest", model.parameters = list(S = list(formula = ~ YEAR + HAB)), groups = c("YEAR", "HAB"))
+M08 <- mark(geese, nocc = nocc, model = "Nest", model.parameters = list(S = list(formula = ~ YEAR + HAB)), groups = c("YEAR", "HAB"), delete = TRUE)
 
 # 9. AN + HABITAT + NestAge
-M09 <- mark(geese, nocc = nocc, model = "Nest", model.parameters = list(S = list(formula = ~ YEAR + HAB + NestAge)), groups = c("YEAR", "HAB"))
+M09 <- mark(geese, nocc = nocc, model = "Nest", model.parameters = list(S = list(formula = ~ YEAR + HAB + NestAge)), groups = c("YEAR", "HAB"), delete = TRUE)
 
 # 11. AN + NestAge
-M11 <- mark(geese, nocc = nocc, model = "Nest", model.parameters = list(S = list(formula = ~ YEAR + NestAge)), groups = "YEAR")
+M11 <- mark(geese, nocc = nocc, model = "Nest", model.parameters = list(S = list(formula = ~ YEAR + NestAge)), groups = "YEAR", delete = TRUE)
 
 # 14. AN + SUPPL + NestAge
-M14 <- mark(geese, nocc = nocc, model = "Nest", model.parameters = list(S = list(formula = ~ YEAR + SUPPL + NestAge)), groups = c("YEAR", "SUPPL"))
+M14 <- mark(geese, nocc = nocc, model = "Nest", model.parameters = list(S = list(formula = ~ YEAR + SUPPL + NestAge)), groups = c("YEAR", "SUPPL"), delete = TRUE)
 
 # 15. AN * SUPPL
-M15 <- mark(geese, nocc = nocc, model = "Nest", model.parameters = list(S = list(formula = ~ YEAR * SUPPL)), groups = c("YEAR", "SUPPL"))
+M15 <- mark(geese, nocc = nocc, model = "Nest", model.parameters = list(S = list(formula = ~ YEAR * SUPPL)), groups = c("YEAR", "SUPPL"), delete = TRUE)
 
+# 16. AN*SUPPL + HAB*SUPPL
+M16 <- mark(geese, nocc = nocc, model = "Nest", model.parameters = list(S = list(formula = ~ YEAR * SUPPL + HAB*SUPPL)), groups = c("YEAR", "SUPPL", "HAB"), delete = TRUE)
+
+# 17. AN*SUPPL + HAB*SUPPL + NestAGe
+M17 <- mark(geese, nocc = nocc, model = "Nest", model.parameters = list(S = list(formula = ~ YEAR*SUPPL + HAB*SUPPL + NestAge)), groups = c("YEAR", "SUPPL", "HAB"), delete = TRUE)
+
+# 18. AN*SUPPL + HAB + NestAge
+M18 <- mark(geese, nocc = nocc, model = "Nest", model.parameters = list(S = list(formula = ~ YEAR*SUPPL + HAB + NestAge)), groups = c("YEAR", "SUPPL", "HAB"), delete = TRUE)
+  
+# 20. AN*SUPPL + HAB
+M20 <- mark(geese, nocc = nocc, model = "Nest", model.parameters = list(S = list(formula = ~ YEAR*SUPPL + HAB)), groups = c("YEAR", "SUPPL", "HAB"), delete = TRUE)
+  
 return(collect.models() )
 }
 
