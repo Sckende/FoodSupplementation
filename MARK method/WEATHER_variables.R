@@ -316,7 +316,39 @@ for (i in 1996:2016) {
   t <- rbind(t, TAB)
 }
 
+# Correlation between both spring and summer temperature ???
 
+cal <- split(temp, temp$YEAR)
+summary(cal)
+#str(cal)
+
+# Years with different day number between spring and summer (so, impossible to apply a correlation test)
+TABcor <- as.data.frame(matrix(data = NA, nrow = 29, ncol = 4))
+names(TABcor) <- c("year", "cor_est", "p_val", "STARS")
+TABcor$year <- 1989:2017
+
+x11()
+par(mfrow = c(5, 5))
+for (i in 1:29) {
+  if (dim(cal[[i]][cal[[i]]$SAISON == "E",])[1] != dim(cal[[i]][cal[[i]]$SAISON == "P",])[1]) {
+    print(unique(cal[[i]]$YEAR))
+    print(i)
+    TABcor$cor_est[TABcor$year == unique(cal[[i]]$YEAR)] <- "-"
+    TABcor$p_val[TABcor$year == unique(cal[[i]]$YEAR)] <- "-"
+    TABcor$STARS[TABcor$year == unique(cal[[i]]$YEAR)] <- "-"
+  } else {
+    plot(cal[[i]]$TEMP[cal[[i]]$SAISON == "P"], cal[[i]]$TEMP[cal[[i]]$SAISON == "E"], main = unique(cal[[i]]$YEAR), xlab = "SPRING", ylab ="SUMMER")
+    p <- cor.test(cal[[i]]$TEMP[cal[[i]]$SAISON == "P"], cal[[i]]$TEMP[cal[[i]]$SAISON == "E"], method = "spearman")
+    TABcor$cor_est[TABcor$year == unique(cal[[i]]$YEAR)] <- as.numeric(as.character(p$estimate))
+    TABcor$p_val[TABcor$year == unique(cal[[i]]$YEAR)] <- as.numeric(as.character(p$p.value))
+    if (p$p.value <= 0.001) {TABcor$STARS[TABcor$year == unique(cal[[i]]$YEAR)] ="***"
+    } else {
+      if(p$p.value <= 0.01 ) {TABcor$STARS[TABcor$year == unique(cal[[i]]$YEAR)] ="**"
+      } else {
+        if(p$p.value <= 0.05 ) {TABcor$STARS[TABcor$year == unique(cal[[i]]$YEAR)] ="*"
+        } else { TABcor$STARS[TABcor$year == unique(cal[[i]]$YEAR)] ="NS"}
+  }}       
+}}
 # Check the duration of each nesting season
 cum2$NEST_DURATION <- cum2$ECLO - cum2$INI
 
