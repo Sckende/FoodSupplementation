@@ -350,6 +350,8 @@ for (i in 1:29) {
   }}       
   }}
 
+View(TABcor[TABcor$STARS != "NS" & TABcor$STARS != "-",])
+
 # Check the duration of each nesting season
 cum2$NEST_DURATION <- cum2$ECLO - cum2$INI
 
