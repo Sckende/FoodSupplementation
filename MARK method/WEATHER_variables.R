@@ -348,7 +348,8 @@ for (i in 1:29) {
         if(p$p.value <= 0.05 ) {TABcor$STARS[TABcor$year == unique(cal[[i]]$YEAR)] ="*"
         } else { TABcor$STARS[TABcor$year == unique(cal[[i]]$YEAR)] ="NS"}
   }}       
-}}
+  }}
+
 # Check the duration of each nesting season
 cum2$NEST_DURATION <- cum2$ECLO - cum2$INI
 
