@@ -292,7 +292,7 @@ temp$pH2O <- 0.61121 * exp((18.678 - temp$TEMP / 234.5) * (temp$TEMP/(257.14 + t
 
 
 #### AIR TEMPERATURE ####
-
+### BYLCAMP station data ####
 temp <- read.table("TEMP_Tair moy 1989-2017 BYLCAMP.txt", h = T, sep = "\t", dec = ",")
 head(temp)
 summary(temp)
@@ -316,7 +316,11 @@ for (i in 1996:2016) {
   t <- rbind(t, TAB)
 }
 
-# Correlation between both spring and summer temperature ???
+
+### To cope with temperature missing data of BYLCAMP station ####
+
+
+########### Correlation between both spring and summer temperature ???
 
 cal <- split(temp, temp$YEAR)
 summary(cal)
@@ -351,6 +355,89 @@ for (i in 1:29) {
   }}
 
 View(TABcor[TABcor$STARS != "NS" & TABcor$STARS != "-",])
+
+########## Use the Pond Inlet temperature data (Governement of Canada) 
+rm(list = ls())
+setwd("C:/Users/HP_9470m/OneDrive - Université de Moncton/Doc doc doc/Ph.D. - ANALYSES/R analysis/Data")
+list.files()
+deg <- read.table("TEMP_PondInlet_2015-2017.txt", h = T, dec =".", sep = "\t")
+summary(deg)
+
+deg$JJ <- strptime(as.character(deg$Date), format = "%Y-%m-%d")
+deg$JJ <- deg$JJ$yday + 1 #comme dates continues pas besoin de traiter separemment annees bissextiles et annees ordinaires
+
+# Supplemented nests data
+suppl <- read.table("GOOSE_MARK_all_SUPPL_nests_all_years.txt", h = T, dec = ".", sep = "\t", stringsAsFactors = FALSE) # Supplemented nests data
+# Conversion of data
+# SUPPL_DATE
+table(suppl$SUPPL_DATE, useNA = "always")
+suppl$SUPPL_DATE[suppl$SUPPL_DATE == "NONE"] <- "999"
+
+# INITIATION
+table(suppl$INITIATION, useNA = "always")
+suppl$INITIATION <- as.numeric(suppl$INITIATION)
+summary(suppl$INITIATION)
+
+# HATCH
+table(suppl$HATCH, useNA = "always")
+suppl$HATCH <- as.numeric(suppl$HATCH)
+summary(suppl$HATCH)
+
+# NIDIF
+# S = success = 0 in MARK
+# F = fail = 1 in MARK
+
+suppl$Fate[which(suppl$NIDIF == "S")] <- 0
+suppl$Fate[which(suppl$NIDIF == "F")] <- 1
+
+table(suppl$Fate, useNA = "always")
+
+# Need to correct the "LastPresent" and "LastVisit" date by the hatching date ONLY FOR SUCCESSFUL NESTS
+suppl$LastPresent[which(suppl$NIDIF == "S")] <- suppl$HATCH[which(suppl$NIDIF == "S")]
+
+suppl$LastVisit[which(suppl$NIDIF == "S")] <- suppl$HATCH[which(suppl$NIDIF == "S")]
+
+# Check point
+# For successful nests, LastVisit == LastPresent == HATCH
+table(suppl$HATCH[which(suppl$Fate == 0)] == suppl$LastPresent[which(suppl$Fate == 0)], useNA = "always")
+table(suppl$LastVisit[which(suppl$Fate == 0)] == suppl$LastPresent[which(suppl$Fate == 0)], useNA = "always")
+
+# For unsuccessful nests, LastVisit != LastPresent
+table(suppl$LastVisit[which(suppl$Fate == 1)] == suppl$LastPresent[which(suppl$Fate == 1)], useNA = "always") # here there are 3 TRUE. Need to treat these nests cause it can be integrate by MARK analyses
+suppl[which(suppl$Fate == 1 & suppl$LastPresent == suppl$LastVisit),]
+
+# Correction of LastVisit date for lihes # 69, 74 & 83 (cause LastVisit == LastPresent is impossible in MARK)
+suppl$LastVisit[which(suppl$Fate == 1 & suppl$LastPresent == suppl$LastVisit)] <- suppl$LastVisit[which(suppl$Fate == 1 & suppl$LastPresent == suppl$LastVisit)] + 1
+
+# Class of variables
+suppl$Fate <- as.factor(suppl$Fate)
+suppl$ID <- as.factor(suppl$ID)
+suppl$SUPPL <- as.factor(suppl$SUPPL)
+suppl$HAB <- as.factor(suppl$HAB)
+suppl$ZONE <- as.factor(suppl$ZONE)
+suppl$SUPPL_DATE <- as.numeric(suppl$SUPPL_DATE)
+suppl$PRED1 <- as.factor(suppl$PRED1)
+suppl$PRED2 <- as.factor(suppl$PRED2)
+suppl$PRED_DATE <- as.numeric(suppl$PRED_DATE)
+
+
+suppl$HATCH_STATUS <- as.factor(suppl$HATCH_STATUS)
+suppl$INI_STATUS <- as.factor(suppl$INI_STATUS)
+
+
+# Estimation of exposition day number for supplemented nests -- TO CONTINUE !!!!!!
+for (i in 1:length(suppl$ID)) {
+  if (suppl$LastPresent[i] == suppl$LastVisit[i]) 
+    suppl$difference[i] <- 0
+    suppl$EXPO[i] <- suppl$HATCH[i] - suppl$INITIATION[i] + 1 
+} else {
+  suppl$difference[i] <- suppl$LastVisit[i] - suppl$LastPresent[i]
+  suppl$EXPO[i] <- (suppl$LastPresent + ((suppl$LastVisit - suppl$LastPresent) / 2)) - suppl$INITIATION + 1 
+  
+}
+}
+
+
 
 # Check the duration of each nesting season
 cum2$NEST_DURATION <- cum2$ECLO - cum2$INI

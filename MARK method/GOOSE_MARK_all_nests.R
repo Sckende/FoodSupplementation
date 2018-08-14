@@ -307,6 +307,9 @@ gsg$prec[i] <-
   sum(rain$RAIN[which(rain$YEAR == gsg$YEAR[i] & rain$JJ >= gsg$INITIATION[i] & rain$JJ<= gsg$LastPresent[i])])
 }
 
+#### Add temperature variables for each nests - TO UPDATE WHEN THE DOWNLOAD OF LAST BYLCAMP DATA WILL BE DONE #####
+deg <- read.table("TEMP_PondInlet_2015-2017.txt")
+
 #### Data Analyses ####
 # Here choose one specific year or not
 geese <- gsg[gsg$YEAR == "2015" | gsg$YEAR == "2016" | gsg$YEAR == "2017",]
@@ -355,7 +358,7 @@ run.geese=function()
 {
   
 # 0. A model of constant daily survival rate (DSR)
-M0 <- mark(geese, nocc = nocc, model = "Nest", model.parameters = list(S = list(formula = ~1)), delete = TRUE)
+M0 <- mark(geese, nocc = nocc, model = "Nest", model.parameters = list(S = list(formula = ~1)), delete = TRUE) # delete = TRUE erases the output files
 
 # 00. year effect
 M00 <- mark(geese, nocc = nocc, model = "Nest", model.parameters = list(S = list(formula = ~ YEAR)), groups = "YEAR", delete = TRUE)
@@ -401,20 +404,22 @@ M11 <- mark(geese, nocc = nocc, model = "Nest", model.parameters = list(S = list
 M14 <- mark(geese, nocc = nocc, model = "Nest", model.parameters = list(S = list(formula = ~ YEAR + SUPPL + NestAge)), groups = c("YEAR", "SUPPL"), delete = TRUE)
 
 # 15. AN * SUPPL
-M15 <- mark(geese, nocc = nocc, model = "Nest", model.parameters = list(S = list(formula = ~ YEAR * SUPPL)), groups = c("YEAR", "SUPPL"), delete = TRUE)
+M15 <- mark(geese, nocc = nocc, model = "Nest", model.parameters = list(S = list(formula = ~ -1 + YEAR:SUPPL)), groups = c("YEAR", "SUPPL"), delete = TRUE)
 
 # 16. AN*SUPPL + HAB*SUPPL
-M16 <- mark(geese, nocc = nocc, model = "Nest", model.parameters = list(S = list(formula = ~ YEAR * SUPPL + HAB*SUPPL)), groups = c("YEAR", "SUPPL", "HAB"), delete = TRUE)
+#M16 <- mark(geese, nocc = nocc, model = "Nest", model.parameters = list(S = list(formula = ~ YEAR * SUPPL + HAB*SUPPL)), groups = c("YEAR", "SUPPL", "HAB"), delete = TRUE)
 
 # 17. AN*SUPPL + HAB*SUPPL + NestAGe
-M17 <- mark(geese, nocc = nocc, model = "Nest", model.parameters = list(S = list(formula = ~ YEAR*SUPPL + HAB*SUPPL + NestAge)), groups = c("YEAR", "SUPPL", "HAB"), delete = TRUE)
+#M17 <- mark(geese, nocc = nocc, model = "Nest", model.parameters = list(S = list(formula = ~ YEAR*SUPPL + HAB*SUPPL + NestAge)), groups = c("YEAR", "SUPPL", "HAB"), delete = TRUE)
 
 # 18. AN*SUPPL + HAB + NestAge
-M18 <- mark(geese, nocc = nocc, model = "Nest", model.parameters = list(S = list(formula = ~ YEAR*SUPPL + HAB + NestAge)), groups = c("YEAR", "SUPPL", "HAB"), delete = TRUE)
+#M18 <- mark(geese, nocc = nocc, model = "Nest", model.parameters = list(S = list(formula = ~ YEAR*SUPPL + HAB + NestAge)), groups = c("YEAR", "SUPPL", "HAB"), delete = TRUE)
   
-# 20. AN*SUPPL + HAB
-M20 <- mark(geese, nocc = nocc, model = "Nest", model.parameters = list(S = list(formula = ~ YEAR*SUPPL + HAB)), groups = c("YEAR", "SUPPL", "HAB"), delete = TRUE)
-  
+# 19. AN*SUPPL + HAB
+#M19 <- mark(geese, nocc = nocc, model = "Nest", model.parameters = list(S = list(formula = ~ YEAR*SUPPL + HAB)), groups = c("YEAR", "SUPPL", "HAB"), delete = TRUE)
+
+# 20. SUPPL*HAB
+M20 <- mark(geese, nocc = nocc, model = "Nest", model.parameters = list(S = list(formula = ~ SUPPL*HAB)), groups = c("SUPPL", "HAB"), delete = TRUE)
 return(collect.models() )
 }
 
@@ -425,15 +430,15 @@ geese.results <- run.geese()
 # Examine table of model-selection results #
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~#
 geese.results # print model-selection table to screen
-save(geese.results, file = "MARK_models.rda")
+#save(geese.results, file = "MARK_models_V2.rda")
 
 #################### Best model for full database ####################
 ############## only considering models without interaction ##########
 # Two best model
-# 4. YEAR + SUPPL + HABITAT + NestAge
-M04 <- mark(geese, nocc = nocc, model = "Nest", model.parameters = list(S = list(formula = ~ YEAR + SUPPL + HAB + NestAge)), groups = c("YEAR", "SUPPL", "HAB"))
-# 5. AN + NestAge + HABITAT*SUPPL
-M05 <- mark(geese, nocc = nocc, model = "Nest", model.parameters = list(S = list(formula = ~ YEAR + NestAge + HAB*SUPPL)), groups = c("YEAR", "SUPPL", "HAB"))
+# 18. AN*SUPPL + HAB + NestAge
+M18 <- mark(geese, nocc = nocc, model = "Nest", model.parameters = list(S = list(formula = ~ YEAR*SUPPL + HAB + NestAge)), groups = c("YEAR", "SUPPL", "HAB"), delete = TRUE)
+# 17. AN*SUPPL + HAB*SUPPL + NestAGe
+M17 <- mark(geese, nocc = nocc, model = "Nest", model.parameters = list(S = list(formula = ~ YEAR*SUPPL + HAB*SUPPL + NestAge)), groups = c("YEAR", "SUPPL", "HAB"), delete = TRUE)
 
 # To obtain a plot
 M04 <- geese.results$M04
