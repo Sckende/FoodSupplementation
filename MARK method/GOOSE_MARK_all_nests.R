@@ -113,7 +113,6 @@ table(gsg$LastChecked[which(gsg$Fate == "0")] == gsg$LastPresent[which(gsg$Fate 
 
     # For unsuccessful nests, LastVisit != LastPresent
 table(gsg$LastChecked[which(gsg$Fate == "1")] == gsg$LastPresent[which(gsg$Fate == "1")], useNA = "always")
- ############## ATTENTION' VOIR ICI POUR LES ÉGALITÉS ENTRE LES DATES !!!!! ##################
 
 # Cleaning of dataframe
 gsg$YEAR <- as.factor(gsg$YEAR)
@@ -138,6 +137,19 @@ gsg <- gsg[!is.na(gsg$Fate),]
 gsg <- gsg[!is.na(gsg$LastPresent),]
 
 gsg <- droplevels(gsg)
+
+# Obtaining the EXPO variable
+# For successful nest <- (LastPresent - FirstFound + 1)
+# For unsuccessful nest <- (LastPresent - FirstFound + 1) + (LastChecked - LastPresent) / 2
+gsg$X <- 1:dim(gsg)[1]
+for(i in gsg$X) {
+  if (gsg$LastPresent[i] == gsg$LastChecked[i]) {
+    gsg$EXPO[i] <- gsg$LastPresent[i] - gsg$INITIATION[i] + 1
+  } else {
+    gsg$EXPO[i] <- (gsg$LastPresent[i] - gsg$INITIATION[i] + 1) + (gsg$LastChecked[i] - gsg$LastPresent[i]) / 2
+  }
+}
+#### !!!!!! WARNING !!!!!! RANGE DE DONNEES ETRANGE POUR DUREE D'EXPO (au delà du range biologique - cf duree d'exposition pour les nids à succes) !!!!! ######
 
 #write.csv(gsg, "GOOSE_MARK_Complete_data.txt")
 # **** WARNING ! Here we deleted some failed nests ==> underestimation of failed nests number **** #
@@ -211,7 +223,7 @@ head(prop)
 summary(prop)
 
 # Graphic (for experiment nests)
-x11()
+#x11()
 color <- c("olivedrab3", "aquamarine3", "darkgoldenrod2")
 
 barCenters <- barplot(prop$PROP,
@@ -262,7 +274,7 @@ for (i in 2015:2017){
     #unit="cm",
     #bg="transparent")
 
-x11()
+#x11()
 
 #par(oma=c(0,0,0,3)) # outer margin
 par(mar=c(5,5,1,5)) # inner margin - default parameter is par("mar") <- 5.1 4.1 4.1 2.1
@@ -290,27 +302,10 @@ text(3.3, 1.1, labels = 2015, cex = 2)
 text(9.9, 1.1, labels = 2016, cex = 2)
 text(16.5, 1.1, labels = 2017, cex = 2)
 
-dev.off()
+#dev.off()
 
-#### Add type of rainfall year ####
-cum2 <- read.table("PREC_cum2.txt",  dec = ".", h = T)
-gsg$RAINFALL <- cum2$RAINFALL[match(gsg$YEAR, cum2$YEAR)]
 
-#### Add cumulative precipitation for each nests ####
-rain <- read.table("PREC_precipitation_Bylot_1995-2017.txt", sep = "\t", dec = ",", h = T)
-rain <- rain[!is.na(rain$RAIN),]
-gsg$YEAR <- as.numeric(as.character(gsg$YEAR))
-
-gsg$X <- 1:dim(gsg)[1]
-for (i in gsg$X) {
-gsg$prec[i] <- 
-  sum(rain$RAIN[which(rain$YEAR == gsg$YEAR[i] & rain$JJ >= gsg$INITIATION[i] & rain$JJ<= gsg$LastPresent[i])])
-}
-
-#### Add temperature variables for each nests - TO UPDATE WHEN THE DOWNLOAD OF LAST BYLCAMP DATA WILL BE DONE #####
-deg <- read.table("TEMP_PondInlet_2015-2017.txt")
-
-#### Data Analyses ####
+#### Formating data for MARK analysis ####
 # Here choose one specific year or not
 geese <- gsg[gsg$YEAR == "2015" | gsg$YEAR == "2016" | gsg$YEAR == "2017",]
 geese <- droplevels(geese)
@@ -348,14 +343,113 @@ require(RMark)
 table(geese$LastChecked[which(geese$Fate == "1")] == geese$LastPresent[which(geese$Fate == "1")], useNA = "always")
 geese[geese$Fate == "1" & geese$LastPresent==geese$LastChecked,]
 geese$LastChecked[geese$Fate == "1" & geese$LastPresent==geese$LastChecked] <- geese$LastChecked[geese$Fate == "1" & geese$LastPresent==geese$LastChecked] + 1 # correction of LastChecked == LAstPresent for failed nests
+
+
+
+#### Add type of rainfall year ####
+cum2 <- read.table("PREC_cum2.txt",  dec = ".", h = T)
+geese$RAINFALL <- cum2$RAINFALL[match(geese$YEAR, cum2$YEAR)]
+
+#### Add cumulative precipitation for each nests ####
+rain <- read.table("PREC_precipitation_Bylot_1995-2017.txt", sep = "\t", dec = ",", h = T)
+rain <- rain[!is.na(rain$RAIN),]
+
+# Data exploration
+  # Cumulative rain far all the season and for each year
+div <- split(rain, rain$YEAR)
+for (i in 1:23){
+  div[[i]]$cumRAIN <- div[[i]]$RAIN
+  for (j in 2:dim(div[[i]])[1]) {
+    div[[i]]$cumRAIN[j] <- div[[i]]$cumRAIN[j - 1] + div[[i]]$RAIN[j]
+  }
+  
+}
+  # Plots of cumulative rainfall for each year
+#dev.off()
+#x11()
+par(mfrow = c(5, 5), mar = c(4, 5, 1, 1))
+for(i in 1:23){
+  plot(div[[i]]$JJ, div[[i]]$cumRAIN, xlab = unique(div[[i]]$YEAR), ylab = "cum. Prec. (mm)", type = "h", bty = "n")
+  legend
+
+}
+
+# Need to round EXPO variable to the superior integer
+geese$EXPO2 <- ceiling(geese$EXPO)
+
+# Compute the cumulative rainfall per nest & cumulative rainfal per nest / per day
+geese$X <- 1:dim(geese)[1] #new number for the X variable
+for (i in geese$X) {
+  geese$cumPREC[i] <- 
+    sum(rain$RAIN[which(rain$YEAR == geese$YEAR[i] & rain$JJ >= geese$INITIATION[i] & rain$JJ <= geese$INITIATION[i] + geese$EXPO2[i] - 1)])
+  geese$cumPREC_rate[i] <- 
+    sum(rain$RAIN[which(rain$YEAR == geese$YEAR[i] & rain$JJ >= geese$INITIATION[i] & rain$JJ <= geese$INITIATION[i] + geese$EXPO2[i] - 1)]/geese$EXPO2[i])
+
+}
+
+# Exploration of cumPREC variable
+dev.off()
+boxplot(geese$cumPREC ~ geese$YEAR)
+boxplot(geese$cumPREC_rate ~ geese$YEAR)
+plot(geese$cumPREC_rate[geese$Fate == 0])
+
+#x11()
+par(mfrow = c(1, 3))
+#dev.off()
+
+for (i in unique(geese$YEAR)) {
+  plot(geese$EXPO2[geese$YEAR == i],geese$cumPREC[geese$YEAR == i], main = i, ylab = "cumulative prec", xlab = "Number of exposition days", bty = "n", ylim = c(0, 8.5))
+}
+
+  # Visualisation des cumPREC_rate pour les nids successfull
+succ_nest <- geese[geese$Fate == 0,]
+succ_list <- split(succ_nest, succ_nest$YEAR)
+
+dev.off()
+par(mfrow = c(1, 3))
+for (i in 1:3) {
+  plot(succ_list[[i]]$EXPO2, succ_list[[i]]$cumPREC_rate, main = unique(succ_list[[i]]$YEAR), bty = "n", xlab = "Exposition time", ylab = "Cum. Prec. per day (mm/day)")
+}
+
+
+#### Add temperature variables for each nests - TO UPDATE WHEN THE DOWNLOAD OF LAST BYLCAMP DATA WILL BE DONE #####
+deg <- read.table("TEMP_PondInlet_2015-2017.txt", h = T, dec =".", sep = "\t")
+summary(deg)
+
+deg$JJ <- strptime(as.character(deg$Date), format = "%Y-%m-%d")
+deg$JJ <- deg$JJ$yday + 1 #comme dates continues pas besoin de traiter separemment annees bissextiles et annees ordinaires
+
+deg <- deg[!is.na(deg$Mean_Temp),]
+
+for(i in geese$X){
+  geese$meanTEMP[i] <- mean(deg$Mean_Temp[which(deg$Year == geese$YEAR[i] & deg$JJ >= geese$INITIATION[i] & deg$JJ <= geese$INITIATION[i] + geese$EXPO2[i] - 1)])
+  geese$sdTEMP[i] <- sd(deg$Mean_Temp[which(deg$Year == geese$YEAR[i] & deg$JJ >= geese$INITIATION[i] & deg$JJ <= geese$INITIATION[i] + geese$EXPO2[i] - 1)])
+  geese$cumulTEMP[i] <- sum(deg$Mean_Temp[which(deg$Year == geese$YEAR[i] & deg$JJ >= geese$INITIATION[i] & deg$JJ <= geese$INITIATION[i] + geese$EXPO2[i] - 1)])
+}
+
+# Data eploration
+div <- split(geese, geese$YEAR)
+
+cols <- ifelse(div[[i]]$Fate == "0", "olivedrab3", "darkgoldenrod2")
+pchs <- ifelse(div[[i]]$Fate == "0", 20, 8)
+x11()
+par(mfrow = c(2, 3), mar = c(5, 5, 1, 1))
+for (i in 1:3){
+  plot(div[[i]]$EXPO, div[[i]]$cumulTEMP, bty = "n", xlab = unique(div[[i]]$YEAR),col = cols, pch = pchs, ylab = "Cum. Temp", ylim = c(min(geese$cumulTEMP), max(geese$cumulTEMP)), cex = 1.5)}
+for (i in 1:3){
+  plot(div[[i]]$EXPO, div[[i]]$meanTEMP, bty = "n",col = cols, pch = pchs, xlab = unique(div[[i]]$YEAR), ylab = "Mean Temp",  ylim = c(min(geese$meanTEMP), max(geese$meanTEMP)), cex = 1.5)
+  
+}
+
+#### Data Analyses ####
+# Setting factors
 geese$YEAR <- as.factor(geese$YEAR)
-
-
-
-
 
 run.geese=function()
 {
+  
+# Weather model
+Mtemp <- mark(geese, nocc = nocc, model = "Nest", model.parameters = list(S = list(formula = ~ meanTEMP)), groups = "meanTEMP", delete = TRUE)
   
 # 0. A model of constant daily survival rate (DSR)
 M0 <- mark(geese, nocc = nocc, model = "Nest", model.parameters = list(S = list(formula = ~1)), delete = TRUE) # delete = TRUE erases the output files
