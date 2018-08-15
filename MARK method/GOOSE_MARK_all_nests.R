@@ -449,7 +449,7 @@ run.geese=function()
 {
   
 # Weather model
-Mtemp <- mark(geese, nocc = nocc, model = "Nest", model.parameters = list(S = list(formula = ~ meanTEMP)), groups = "meanTEMP", delete = TRUE)
+Mtemp <- mark(geese, nocc = nocc, model = "Nest", model.parameters = list(S = list(formula = ~ meanTEMP + cumPREC)), delete = TRUE)
   
 # 0. A model of constant daily survival rate (DSR)
 M0 <- mark(geese, nocc = nocc, model = "Nest", model.parameters = list(S = list(formula = ~1)), delete = TRUE) # delete = TRUE erases the output files
