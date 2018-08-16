@@ -164,15 +164,15 @@ cum2$cumRAIN_DAY <- cum2$cumRAIN / cum2$NEST_DURATION
 
 
 # Plot
-png("GOOSE_prec.tiff",
-    res=300,
-    width=20,
-    height=15,
-    pointsize=12,
-    unit="cm",
-    bg="transparent")
+#png("GOOSE_prec.tiff",
+    #res=300,
+    #width=20,
+    #height=15,
+    #pointsize=12,
+    #unit="cm",
+    #bg="transparent")
 
-#x11()
+x11()
 par(mar=c(5,5,1,1)) # inner margin - default parameter is par("mar") <- 5.1 4.1 4.1 2.1
 my_vector <- cum2$cumRAIN
 names(my_vector) <- cum2$YEAR
@@ -199,7 +199,7 @@ abline(h = mean(cum2$cumRAIN) + sd(cum2$cumRAIN),
        lwd = 1.5,
        lty = "dotdash")
 
-dev.off()
+#dev.off()
 
 #### cum3 - Annual cumulation prec between the earliest initiation and latest hatching ####
 
@@ -288,8 +288,24 @@ abline(h = mean(cum$cumRAIN[cum$YEAR >= 2005]) + sd(cum$cumRAIN[cum$YEAR >= 2005
 list.files()
 temp <- read.table("TEMP_Tair moy 1989-2017 BYLCAMP.txt", sep = "\t", dec = ",", h = T)
 summary(temp)
+
+deg <- read.table("TEMP_PondInlet_2015-2017.txt", h = T, dec =".", sep = "\t")
+summary(deg)
+
+
 temp$pH2O <- 0.61121 * exp((18.678 - temp$TEMP / 234.5) * (temp$TEMP/(257.14 + temp$TEMP)))
 
+# Goff-Gratch equation
+
+Tst <- 373.15
+#T0 <- temp$TEMP
+T0 <- deg$Mean_Temp
+Est <- 1013.25
+
+deg$log_pH2O <- - 7.90298 * (Tst / (T0 - 1)) + 5.02808 * log(Tst / T0) - 1.3816 * 10^(-7) * (10^(11.344 * ((1 - T0)/Tst)) - 1) + 8.1328 * 10^(-3) * (10^(-3.49149 * (Tst / (T0-1))) - 1) + log(Est)
+
+deg$pH2O <- 10^(deg$log_pH2O) 
+#### WEIRDO RESULTS !!!!!!!!!!! #####
 
 #### AIR TEMPERATURE ####
 ### BYLCAMP station data ####
