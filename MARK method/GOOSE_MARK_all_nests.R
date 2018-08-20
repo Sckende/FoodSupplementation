@@ -393,12 +393,16 @@ boxplot(geese$cumPREC ~ geese$YEAR)
 boxplot(geese$PREC_day ~ geese$YEAR)
 plot(geese$PREC_day[geese$Fate == 0])
 
+
+# Data eploration
+div <- split(geese, geese$YEAR)
 #x11()
 par(mfrow = c(1, 3))
 #dev.off()
-
-for (i in unique(geese$YEAR)) {
-  plot(geese$EXPO2[geese$YEAR == i],geese$cumPREC[geese$YEAR == i], main = i, ylab = "cumulative prec", xlab = "Number of exposition days", bty = "n", ylim = c(0, 8.5))
+for (i in 1:3) {
+  cols <- ifelse(div[[i]]$Fate == "0", "olivedrab3", "darkgoldenrod2")
+  pchs <- ifelse(div[[i]]$Fate == "0", 20, 8)
+  plot(div[[i]]$EXPO2, div[[i]]$cumPREC, main = unique(div[[i]]$YEAR), ylab = "cumulative prec", xlab = "Number of exposition days", bty = "n", ylim = c(min(geese$cumPREC), max(geese$cumPREC)), pch = pchs, col = cols, cex = 2)
 }
 
   # Visualisation des cumPREC_rate pour les nids successfull
@@ -435,9 +439,9 @@ par(mfrow = c(2, 3), mar = c(5, 5, 1, 1))
 for (i in 1:3){
   cols <- ifelse(div[[i]]$Fate == "0", "olivedrab3", "darkgoldenrod2")
   pchs <- ifelse(div[[i]]$Fate == "0", 20, 8)
-  plot(div[[i]]$EXPO, div[[i]]$cumTEMP, bty = "n", xlab = unique(div[[i]]$YEAR),col = cols, pch = pchs, ylab = "Cum. Temp", ylim = c(min(geese$cumTEMP), max(geese$cumTEMP)), cex = 1.5)}
+  plot(div[[i]]$EXPO, div[[i]]$cumTEMP, bty = "n", xlab = unique(div[[i]]$YEAR),col = cols, pch = pchs, ylab = "Cum. Temp", ylim = c(min(geese$cumTEMP), max(geese$cumTEMP)), cex = 2)}
 for (i in 1:3){
-  plot(div[[i]]$EXPO, div[[i]]$meanTEMP, bty = "n",col = cols, pch = pchs, xlab = unique(div[[i]]$YEAR), ylab = "Mean Temp",  ylim = c(min(geese$meanTEMP), max(geese$meanTEMP)), cex = 1.5)
+  plot(div[[i]]$EXPO, div[[i]]$meanTEMP, bty = "n",col = cols, pch = pchs, xlab = unique(div[[i]]$YEAR), ylab = "Mean Temp",  ylim = c(min(geese$meanTEMP), max(geese$meanTEMP)), cex = 2)
   
 }
 
@@ -452,6 +456,14 @@ for(i in geese$X){
   geese$sdPh2o[i] <- sd(deg$pH2O[which(deg$Year == geese$YEAR[i] & deg$JJ >= geese$INITIATION[i] & deg$JJ <= geese$INITIATION[i] + geese$EXPO2[i] - 1)])
 }
 
+# Data eploration
+div <- split(geese, geese$YEAR)
+par(mfrow = c(1, 3), mar = c(5, 5, 1, 1))
+for (i in 1:3){
+  cols <- ifelse(div[[i]]$Fate == "0", "olivedrab3", "darkgoldenrod2")
+  pchs <- ifelse(div[[i]]$Fate == "0", 20, 8)
+  plot(div[[i]]$EXPO, div[[i]]$meanPh2o, bty = "n", xlab = unique(div[[i]]$YEAR),col = cols, pch = pchs, ylab = "Mean p(H2O)", ylim = c(min(geese$meanPh2o), max(geese$meanPh2o)), cex = 2)}
+
 #### Data Analyses ####
 # Setting factors
 geese$YEAR <- as.factor(geese$YEAR)
@@ -463,31 +475,46 @@ run.geese=function()
 {
   
 # Complete model with prec-temp interaction
-MtotalINTER <- mark(geese, nocc = nocc, model = "Nest", model.parameters = list(S = list(formula = ~ meanTEMP * cumPREC + SUPPL + HAB + YEAR + NestAge)), groups = c("SUPPL", "HAB", "YEAR"), delete = T)
+#MtotalINTER <- mark(geese, nocc = nocc, model = "Nest", model.parameters = list(S = list(formula = ~ meanTEMP * cumPREC + SUPPL + HAB + YEAR + NestAge)), groups = c("SUPPL", "HAB", "YEAR"), delete = T)
 
 # Complete model with prec-temp interaction
-Mtotal <- mark(geese, nocc = nocc, model = "Nest", model.parameters = list(S = list(formula = ~ meanTEMP + cumPREC + SUPPL + HAB + YEAR + NestAge)), groups = c("SUPPL", "HAB", "YEAR"), delete = T)
+#Mtotal <- mark(geese, nocc = nocc, model = "Nest", model.parameters = list(S = list(formula = ~ meanTEMP + cumPREC + SUPPL + HAB + YEAR + NestAge)), groups = c("SUPPL", "HAB", "YEAR"), delete = T)
 
-Mt <- mark(geese, nocc = nocc, model = "Nest", model.parameters = list(S = list(formula = ~ cumPREC + SUPPL + HAB + YEAR + NestAge)), groups = c("SUPPL", "HAB", "YEAR"), delete = T)
+#Mt <- mark(geese, nocc = nocc, model = "Nest", model.parameters = list(S = list(formula = ~ cumPREC + SUPPL + HAB + YEAR + NestAge)), groups = c("SUPPL", "HAB", "YEAR"), delete = T)
 
-Mtt <- mark(geese, nocc = nocc, model = "Nest", model.parameters = list(S = list(formula = ~ cumPREC + SUPPL*HAB + YEAR + NestAge)), groups = c("SUPPL", "HAB", "YEAR"), delete = T)
+#Mtt <- mark(geese, nocc = nocc, model = "Nest", model.parameters = list(S = list(formula = ~ cumPREC + SUPPL*HAB + YEAR + NestAge)), groups = c("SUPPL", "HAB", "YEAR"), delete = T)
 
-# Weather model
-Mtemp <- mark(geese, nocc = nocc, model = "Nest", model.parameters = list(S = list(formula = ~ meanTEMP)), delete = T, groups = "YEAR")
+# Temperature model
+Mtemp0 <- mark(geese, nocc = nocc, model = "Nest", model.parameters = list(S = list(formula = ~ meanTEMP)), delete = T, groups = "YEAR")
+
+# Temperature model
+Mtemp1 <- mark(geese, nocc = nocc, model = "Nest", model.parameters = list(S = list(formula = ~ meanTEMP + SUPPL + HAB + YEAR + NestAge)), delete = T, groups = c( "YEAR", "HAB", "SUPPL"))
+
+# Temperature model
+Mtemp2 <- mark(geese, nocc = nocc, model = "Nest", model.parameters = list(S = list(formula = ~ meanTEMP + SUPPL*HAB + YEAR + NestAge)), delete = T, groups = c( "YEAR", "HAB", "SUPPL"))
+
+# Temperature model
+Mtemp3 <- mark(geese, nocc = nocc, model = "Nest", model.parameters = list(S = list(formula = ~ meanTEMP + SUPPL + HAB + YEAR )), delete = T, groups = c( "YEAR", "HAB", "SUPPL"))
+
+# Temperature model
+Mtemp4 <- mark(geese, nocc = nocc, model = "Nest", model.parameters = list(S = list(formula = ~ meanTEMP + SUPPL + HAB)), delete = T, groups = c("HAB", "SUPPL"))
+
+# Temperature model
+Mtemp5 <- mark(geese, nocc = nocc, model = "Nest", model.parameters = list(S = list(formula = ~ meanTEMP + SUPPL + HAB + NestAge)), delete = T, groups = c("HAB", "SUPPL"))
 
 #MpH2O <- mark(geese, nocc = nocc, model = "Nest", model.parameters = list(S = list(formula = ~ meanPh2o + NestAge)), delete = T, groups = "YEAR")
 #
-Mprec1 <- mark(geese, nocc = nocc, model = "Nest", model.parameters = list(S = list(formula = ~ cumPREC)), delete = T)
+#Mprec1 <- mark(geese, nocc = nocc, model = "Nest", model.parameters = list(S = list(formula = ~ cumPREC)), delete = T)
 
 #Mprec2 <- mark(geese, nocc = nocc, model = "Nest", model.parameters = list(S = list(formula = ~ PREC_day)), delete = T)
 
-Mtemp_prec1 <- mark(geese, nocc = nocc, model = "Nest", model.parameters = list(S = list(formula = ~ meanTEMP + cumPREC )), delete = T)
+#Mtemp_prec1 <- mark(geese, nocc = nocc, model = "Nest", model.parameters = list(S = list(formula = ~ meanTEMP + cumPREC )), delete = T)
 
-Mtemp_prec2 <- mark(geese, nocc = nocc, model = "Nest", model.parameters = list(S = list(formula = ~ meanTEMP + PREC_day)), delete = T)
+#Mtemp_prec2 <- mark(geese, nocc = nocc, model = "Nest", model.parameters = list(S = list(formula = ~ meanTEMP + PREC_day)), delete = T)
   
-Mprec_temp_suppl <- mark(geese, nocc = nocc, model = "Nest", model.parameters = list(S = list(formula = ~ meanTEMP + cumPREC + SUPPL)), groups = "SUPPL", delete = T)
+#Mprec_temp_suppl <- mark(geese, nocc = nocc, model = "Nest", model.parameters = list(S = list(formula = ~ meanTEMP + cumPREC + SUPPL)), groups = "SUPPL", delete = T)
 
-Mprec_temp_suppl_NestAge <- mark(geese, nocc = nocc, model = "Nest", model.parameters = list(S = list(formula = ~ meanTEMP + cumPREC + SUPPL + NestAge)), groups = "SUPPL", delete = T)
+#Mprec_temp_suppl_NestAge <- mark(geese, nocc = nocc, model = "Nest", model.parameters = list(S = list(formula = ~ meanTEMP + cumPREC + SUPPL + NestAge)), groups = "SUPPL", delete = T)
 
 # 0. A model of constant daily survival rate (DSR)
 M0 <- mark(geese, nocc = nocc, model = "Nest", model.parameters = list(S = list(formula = ~1)), delete = T) # delete = TRUE erases the output files
@@ -568,6 +595,7 @@ geese.results # print model-selection table to screen
 #save(geese.results, file = "MARK_models_V2.rda") # without weather variables
 #save(geese.results, file = "MARK_models_V3.rda") # with temperature and precipitation variables
 #save(geese.results, file = "MARK_models_V4.rda") # only with precipitation variable
+#save(geese.results, file = "MARK_models_V5.rda") # only with temperature variable
 
 #################### Best model for full database ####################
 ############## only considering models without interaction ##########
