@@ -467,6 +467,8 @@ for (i in 1:3){
 #### Data Analyses ####
 # Setting factors
 geese$YEAR <- as.factor(geese$YEAR)
+geese$RAINFALL <- relevel(geese$RAINFALL, "LOW")
+geese <- droplevels(geese)
 
 # meanTEMP & cumTEMP <-- high correlated, so keep only meanTEMP in models
 # cumPREC & cumPREC_rate
@@ -503,7 +505,11 @@ Mtemp4 <- mark(geese, nocc = nocc, model = "Nest", model.parameters = list(S = l
 Mtemp5 <- mark(geese, nocc = nocc, model = "Nest", model.parameters = list(S = list(formula = ~ meanTEMP + SUPPL + HAB + NestAge)), delete = T, groups = c("HAB", "SUPPL"))
 
 #MpH2O <- mark(geese, nocc = nocc, model = "Nest", model.parameters = list(S = list(formula = ~ meanPh2o + NestAge)), delete = T, groups = "YEAR")
-#
+
+#Precipitation model
+Mrain <- mark(geese, nocc = nocc, model = "Nest", model.parameters = list(S = list(formula = ~ RAINFALL)), groups = "RAINFALL", delete = T)
+
+#Precipitation model
 #Mprec1 <- mark(geese, nocc = nocc, model = "Nest", model.parameters = list(S = list(formula = ~ cumPREC)), delete = T)
 
 #Mprec2 <- mark(geese, nocc = nocc, model = "Nest", model.parameters = list(S = list(formula = ~ PREC_day)), delete = T)
@@ -575,7 +581,7 @@ M14 <- mark(geese, nocc = nocc, model = "Nest", model.parameters = list(S = list
 #M18 <- mark(geese, nocc = nocc, model = "Nest", model.parameters = list(S = list(formula = ~ YEAR*SUPPL + HAB + NestAge)), groups = c("YEAR", "SUPPL", "HAB"), delete = TRUE)
   
 # 19. AN*SUPPL + HAB
-#M19 <- mark(geese, nocc = nocc, model = "Nest", model.parameters = list(S = list(formula = ~ YEAR*SUPPL + HAB)), groups = c("YEAR", "SUPPL", "HAB"), delete = TRUE)
+M19 <- mark(geese, nocc = nocc, model = "Nest", model.parameters = list(S = list(formula = ~ YEAR*SUPPL)), groups = c("YEAR", "SUPPL"), delete = TRUE)
 
 # 20. SUPPL*HAB
 M20 <- mark(geese, nocc = nocc, model = "Nest", model.parameters = list(S = list(formula = ~ SUPPL*HAB)), groups = c("SUPPL", "HAB"), delete = TRUE)
