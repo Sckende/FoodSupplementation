@@ -507,26 +507,24 @@ barCenters <- barplot(exi$estimate,
                       col = color,
                       xlab = "", 
                       ylab = "Nesting success", 
-                      ylim = c(0.9, 1), 
+                      ylim = c(0.96, 1.01),
+                      #beside = TRUE,
+                      xpd = FALSE,
                       names.arg = exi$HAB, 
                       main = "", 
                       legend.text = TRUE, 
                       space = c(0.2, rep(c(0,0.1,0,0.1,0,0.4), 2) , c(0,0.1,0,0.1,0)), 
                       las = 2)
 
-require(plotrix)
-gap.barplot( exi$estimate, 
-             gap = c(0.1,0.9))
-
-legend("topleft", 
+legend("topright", 
        #inset = c(0, -0,05),
        legend = c("CONTROL", "WATER", "FOOD"), 
        fill = c("olivedrab3", "aquamarine3", "darkgoldenrod2"), bty = "n", cex = 1)
 segments(barCenters, exi$estimate - exi$se, barCenters, exi$estimate + exi$se, lwd = 1.5)
 text(barCenters,0.2, labels = paste("(", as.character(exi$N), ")", sep = ""), cex = 1)
-text(3.3, 1.1, labels = 2015, cex = 2)
-text(9.9, 1.1, labels = 2016, cex = 2)
-text(16.5, 1.1, labels = 2017, cex = 2)
+text(3.3, 0.965, labels = 2015, cex = 2)
+text(9.9, 0.965, labels = 2016, cex = 2)
+text(16.5, 0.965, labels = 2017, cex = 2)
 
 #### Competitive models ####
 run.geese=function()
