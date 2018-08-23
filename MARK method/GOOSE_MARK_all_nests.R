@@ -308,6 +308,10 @@ text(16.5, 1.1, labels = 2017, cex = 2)
 #### Formating data for MARK analysis ####
 # Here choose one specific year or not
 geese <- gsg[gsg$YEAR == "2015" | gsg$YEAR == "2016" | gsg$YEAR == "2017",]
+
+# DELETE EXTREM DATA - n = 2 for 2015 & n = 2 for 2017
+geese <- geese[-c(671, 673, 222, 244),]
+
 geese <- droplevels(geese)
 summary(geese)
 dim(geese)
@@ -465,14 +469,66 @@ for (i in 1:3){
   plot(div[[i]]$EXPO, div[[i]]$meanPh2o, bty = "n", xlab = unique(div[[i]]$YEAR),col = cols, pch = pchs, ylab = "Mean p(H2O)", ylim = c(min(geese$meanPh2o), max(geese$meanPh2o)), cex = 2)}
 
 #### Data Analyses ####
-# Setting factors
+  # Setting factors
 geese$YEAR <- as.factor(geese$YEAR)
 geese$RAINFALL <- relevel(geese$RAINFALL, "LOW")
 geese <- droplevels(geese)
 
-# meanTEMP & cumTEMP <-- high correlated, so keep only meanTEMP in models
-# cumPREC & cumPREC_rate
+#### True nesting success per habitat / treatment / year ####
 
+nest_succ <- mark(geese, nocc = nocc, model = "Nest", model.parameters = list(S = list(formula = ~ SUPPL + HAB + YEAR)), groups = c("SUPPL", "HAB", "YEAR"), delete = T)
+
+nest_succ$results$beta # view estimated beta for model in R
+nest_succ$results$real
+
+exi <- as.data.frame(nest_succ$results$real)
+exi <- exi[, -c(5:6)]
+exi$SUPPL <- rep(c("TEM", "F", "W"), 6)
+exi$SUPPL <- ordered(exi$SUPPL, levels = c("TEM", "W", "F"))
+exi$HAB <- rep(c("MES", "MES", "MES", "WET", "WET", "WET"), 3)
+exi$YEAR <- c(rep(2015, 6), rep(2016, 6), rep(2017,6))
+
+div <- split(exi, exi$YEAR)
+for(i in 1:3){
+  div[[i]]$SUPPL <- ordered(div[[i]]$SUPPL, levels = c("TEM", "W", "F"))
+  div[[i]] <- div[[i]][order(div[[i]]$SUPPL),]
+}
+
+exi <- do.call("rbind", div)
+
+# Plot
+
+x11()
+par(mar=c(5,5,1,5)) # inner margin - default parameter is par("mar") <- 5.1 4.1 4.1 2.1
+
+color <- c("olivedrab3", "olivedrab4", "aquamarine3", "aquamarine4", "darkgoldenrod2", "darkgoldenrod3")
+
+barCenters <- barplot(exi$estimate, 
+                      col = color,
+                      xlab = "", 
+                      ylab = "Nesting success", 
+                      ylim = c(0.9, 1), 
+                      names.arg = exi$HAB, 
+                      main = "", 
+                      legend.text = TRUE, 
+                      space = c(0.2, rep(c(0,0.1,0,0.1,0,0.4), 2) , c(0,0.1,0,0.1,0)), 
+                      las = 2)
+
+require(plotrix)
+gap.barplot( exi$estimate, 
+             gap = c(0.1,0.9))
+
+legend("topleft", 
+       #inset = c(0, -0,05),
+       legend = c("CONTROL", "WATER", "FOOD"), 
+       fill = c("olivedrab3", "aquamarine3", "darkgoldenrod2"), bty = "n", cex = 1)
+segments(barCenters, exi$estimate - exi$se, barCenters, exi$estimate + exi$se, lwd = 1.5)
+text(barCenters,0.2, labels = paste("(", as.character(exi$N), ")", sep = ""), cex = 1)
+text(3.3, 1.1, labels = 2015, cex = 2)
+text(9.9, 1.1, labels = 2016, cex = 2)
+text(16.5, 1.1, labels = 2017, cex = 2)
+
+#### Competitive models ####
 run.geese=function()
 {
   
@@ -592,6 +648,10 @@ return(collect.models() )
 
 # run defined models
 geese.results <- run.geese()
+
+#### FULL TIME MODELS ####
+
+run.geese.FULL-TIME
 
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~#
 # Examine table of model-selection results #
