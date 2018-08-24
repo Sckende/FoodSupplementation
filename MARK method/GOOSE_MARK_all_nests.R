@@ -533,36 +533,84 @@ text(16.5, 1, labels = 2017, cex = 2)
 
 #### Competitive models ####
 
-#### Models per year
+#### Models per YEAR - 2015/2016/2017 ####
 
-# YEAR 2015
-geese2015 <- geese[geese$YEAR == "2015",]
-run.geese2015 = function()
+geeseYEAR <- geese[geese$YEAR == "2015",]
+geeseYEAR <- geese[geese$YEAR == "2016",]
+geeseYEAR <- geese[geese$YEAR == "2017",]
+
+# valeur de "nocc" varie selon le nombre d'occasion de capture, soit du premier au dernier jour du suivi, correspond au max de "LastChecked"
+nocc <- max(geeseYEAR$LastChecked)
+
+# PART 1
+run.geese.YEAR.1 = function()
 {
-  m2015_0 <- mark(geese2015, nocc = nocc, model = "Nest", model.parameters = list(S = list(formula = ~ 1)), delete = T)
+mYEAR_0 <- mark(geeseYEAR, nocc = nocc, model = "Nest", model.parameters = list(S = list(formula = ~ 1)), delete = T)
   
-  m2015_1 <- mark(geese2015, nocc = nocc, model = "Nest", model.parameters = list(S = list(formula = ~ SUPPL + HAB + NestAge)), groups = c("SUPPL", "HAB"), delete = T)  
+# BEST MODEL 2 ***
+mYEAR_1 <- mark(geeseYEAR, nocc = nocc, model = "Nest", model.parameters = list(S = list(formula = ~ SUPPL + HAB + NestAge)), groups = c("SUPPL", "HAB"), delete = T)  
+
+mYEAR_2 <- mark(geeseYEAR, nocc = nocc, model = "Nest", model.parameters = list(S = list(formula = ~ SUPPL*HAB + NestAge)), groups = c("SUPPL", "HAB"), delete = T) 
+# PROBLEME DE MODELE
+
+mYEAR_3 <- mark(geeseYEAR, nocc = nocc, model = "Nest", model.parameters = list(S = list(formula = ~ SUPPL + HAB)), groups = c("SUPPL", "HAB"), delete = T)
+
+mYEAR_4 <- mark(geeseYEAR, nocc = nocc, model = "Nest", model.parameters = list(S = list(formula = ~ SUPPL*HAB)), groups = c("SUPPL", "HAB"), delete = T)
   
-  m2015_2 <- mark(geese2015, nocc = nocc, model = "Nest", model.parameters = list(S = list(formula = ~ SUPPL + HAB + NestAge + meanTEMP)), groups = c("SUPPL", "HAB"), delete = T)
+mYEAR_5 <- mark(geeseYEAR, nocc = nocc, model = "Nest", model.parameters = list(S = list(formula = ~ SUPPL)), groups = "SUPPL", delete = T)
   
-  m2015_3 <- mark(geese2015, nocc = nocc, model = "Nest", model.parameters = list(S = list(formula = ~ SUPPL + HAB + NestAge + cumPREC)), groups = c("SUPPL", "HAB"), delete = T)
-  
-  m2015_4 <- mark(geese2015, nocc = nocc, model = "Nest", model.parameters = list(S = list(formula = ~ SUPPL + HAB + NestAge + meanPh2o)), groups = c("SUPPL", "HAB"), delete = T)
-  
-  m2015_5 <- mark(geese2015, nocc = nocc, model = "Nest", model.parameters = list(S = list(formula = ~ SUPPL)), groups = "SUPPL", delete = T)
-  
-  m2015_6 <- mark(geese2015, nocc = nocc, model = "Nest", model.parameters = list(S = list(formula = ~ HAB)), groups = "HAB", delete = T)
-  
-  m2015_7 <- mark(geese2015, nocc = nocc, model = "Nest", model.parameters = list(S = list(formula = ~ NestAge)), delete = T)
+mYEAR_6 <- mark(geeseYEAR, nocc = nocc, model = "Nest", model.parameters = list(S = list(formula = ~ HAB)), groups = "HAB", delete = T)
+   
+mYEAR_7 <- mark(geeseYEAR, nocc = nocc, model = "Nest", model.parameters = list(S = list(formula = ~ NestAge)), delete = T)
+
+mYEAR_8 <- mark(geeseYEAR, nocc = nocc, model = "Nest", model.parameters = list(S = list(formula = ~ SUPPL + NestAge)), groups = "SUPPL", delete = T)
+
+# BEST MODEL 1 *** 
+mYEAR_9 <- mark(geeseYEAR, nocc = nocc, model = "Nest", model.parameters = list(S = list(formula = ~ HAB + NestAge)), groups = "HAB", delete = T)
+
+return(collect.models() )
 }
 
-geese2015.results <- run.geese2015()
-geese2015.results
+geese.YEAR.1.results <- run.geese.YEAR.1()
+geese.YEAR.1.results
+
+# Save models list and est model
+#save(geese.YEAR.1.results, file = "geese2017.rda")
+#save(mYEAR_1, file = "geese2017_1.rda")
+#save(mYEAR_8, file = "geese2017_2.rda")
+
+# PART 2
+run.geese.YEAR.2 = function()
+{
+  mYEAR_0 <- mark(geeseYEAR, nocc = nocc, model = "Nest", model.parameters = list(S = list(formula = ~ 1)), delete = T)
+  
+  mYEAR_10 <- mark(geeseYEAR, nocc = nocc, model = "Nest", model.parameters = list(S = list(formula = ~ SUPPL + HAB + cumPREC + meanTEMP)), groups = c("SUPPL", "HAB"), delete = T)
+  
+  mYEAR_11 <- mark(geeseYEAR, nocc = nocc, model = "Nest", model.parameters = list(S = list(formula = ~ SUPPL + HAB + cumPREC*meanTEMP)), groups = c("SUPPL", "HAB"), delete = T)
+  
+  mYEAR_12 <- mark(geeseYEAR, nocc = nocc, model = "Nest", model.parameters = list(S = list(formula = ~ SUPPL + HAB + cumPREC)), groups = c("SUPPL", "HAB"), delete = T)
+  
+  mYEAR_13 <- mark(geeseYEAR, nocc = nocc, model = "Nest", model.parameters = list(S = list(formula = ~ SUPPL + HAB + meanTEMP)), groups = c("SUPPL", "HAB"), delete = T)
+  
+  mYEAR_14 <- mark(geeseYEAR, nocc = nocc, model = "Nest", model.parameters = list(S = list(formula = ~ SUPPL + HAB + NestAge)), groups = c("SUPPL", "HAB"), delete = T)
+  
+  return(collect.models() )
+}
+
+geese.YEAR.2.results <- run.geese.YEAR.2()
+geese.YEAR.2.results
+
+
+#Save models list and est model
+#save(geese.YEAR.2.results, file = "geese2017bis.rda")
+#save(mYEAR_11, file = "geese2017_1bis.rda")
+
 
 #### FULL TIME MODELS ####
 
 run.geese.FULL.TIME = function()
 {
+
 time0 <- mark(geese, nocc = nocc, model = "Nest", model.parameters = list(S = list(formula = ~ 1)), delete = T)
   
 time1 <- mark(geese, nocc = nocc, model = "Nest", model.parameters = list(S = list(formula = ~ YEAR + NestAge)), groups = "YEAR", delete = T)
