@@ -474,6 +474,8 @@ geese$YEAR <- as.factor(geese$YEAR)
 geese$RAINFALL <- relevel(geese$RAINFALL, "LOW")
 geese <- droplevels(geese)
 
+#write.csv(geese, "GOOSE_geese.txt") # For Rmarkdown document
+
 #### True nesting success per habitat / treatment / year ####
 
 nest_succ <- mark(geese, nocc = nocc, model = "Nest", model.parameters = list(S = list(formula = ~ SUPPL + HAB + YEAR)), groups = c("SUPPL", "HAB", "YEAR"), delete = T)
@@ -488,13 +490,16 @@ exi$SUPPL <- ordered(exi$SUPPL, levels = c("TEM", "W", "F"))
 exi$HAB <- rep(c("MES", "MES", "MES", "WET", "WET", "WET"), 3)
 exi$YEAR <- c(rep(2015, 6), rep(2016, 6), rep(2017,6))
 
+
 div <- split(exi, exi$YEAR)
 for(i in 1:3){
   div[[i]]$SUPPL <- ordered(div[[i]]$SUPPL, levels = c("TEM", "W", "F"))
   div[[i]] <- div[[i]][order(div[[i]]$SUPPL),]
+  div[[i]]$N <- c(dim(geese[geese$YEAR == unique(div[[i]]$YEAR) & geese$SUPPL == "TEM" & geese$HAB == "MES",])[1], dim(geese[geese$YEAR == unique(div[[i]]$YEAR) & geese$SUPPL == "TEM" & geese$HAB == "WET",])[1], dim(geese[geese$YEAR == unique(div[[i]]$YEAR) & geese$SUPPL == "W" & geese$HAB == "MES",])[1], dim(geese[geese$YEAR == unique(div[[i]]$YEAR) & geese$SUPPL == "W" & geese$HAB == "WET",])[1], dim(geese[geese$YEAR == unique(div[[i]]$YEAR) & geese$SUPPL == "F" & geese$HAB == "MES",])[1], dim(geese[geese$YEAR == unique(div[[i]]$YEAR) & geese$SUPPL == "F" & geese$HAB == "WET",])[1])
 }
 
 exi <- do.call("rbind", div)
+#write.csv(exi, "GOOSE_exi.csv") #For Rmarkdown document
 
 # Plot
 
@@ -507,7 +512,7 @@ barCenters <- barplot(exi$estimate,
                       col = color,
                       xlab = "", 
                       ylab = "Nesting success", 
-                      ylim = c(0.96, 1.01),
+                      ylim = c(0.96, 1.015),
                       #beside = TRUE,
                       xpd = FALSE,
                       names.arg = exi$HAB, 
@@ -521,12 +526,65 @@ legend("topright",
        legend = c("CONTROL", "WATER", "FOOD"), 
        fill = c("olivedrab3", "aquamarine3", "darkgoldenrod2"), bty = "n", cex = 1)
 segments(barCenters, exi$estimate - exi$se, barCenters, exi$estimate + exi$se, lwd = 1.5)
-text(barCenters,0.2, labels = paste("(", as.character(exi$N), ")", sep = ""), cex = 1)
-text(3.3, 0.965, labels = 2015, cex = 2)
-text(9.9, 0.965, labels = 2016, cex = 2)
-text(16.5, 0.965, labels = 2017, cex = 2)
+text(barCenters,0.965, labels = paste("(", as.character(exi$N), ")", sep = ""), cex = 1)
+text(3.3, 1, labels = 2015, cex = 2)
+text(9.9, 1, labels = 2016, cex = 2)
+text(16.5, 1, labels = 2017, cex = 2)
 
 #### Competitive models ####
+
+#### Models per year
+
+# YEAR 2015
+geese2015 <- geese[geese$YEAR == "2015",]
+run.geese2015 = function()
+{
+  m2015_0 <- mark(geese2015, nocc = nocc, model = "Nest", model.parameters = list(S = list(formula = ~ 1)), delete = T)
+  
+  m2015_1 <- mark(geese2015, nocc = nocc, model = "Nest", model.parameters = list(S = list(formula = ~ SUPPL + HAB + NestAge)), groups = c("SUPPL", "HAB"), delete = T)  
+  
+  m2015_2 <- mark(geese2015, nocc = nocc, model = "Nest", model.parameters = list(S = list(formula = ~ SUPPL + HAB + NestAge + meanTEMP)), groups = c("SUPPL", "HAB"), delete = T)
+  
+  m2015_3 <- mark(geese2015, nocc = nocc, model = "Nest", model.parameters = list(S = list(formula = ~ SUPPL + HAB + NestAge + cumPREC)), groups = c("SUPPL", "HAB"), delete = T)
+  
+  m2015_4 <- mark(geese2015, nocc = nocc, model = "Nest", model.parameters = list(S = list(formula = ~ SUPPL + HAB + NestAge + meanPh2o)), groups = c("SUPPL", "HAB"), delete = T)
+  
+  m2015_5 <- mark(geese2015, nocc = nocc, model = "Nest", model.parameters = list(S = list(formula = ~ SUPPL)), groups = "SUPPL", delete = T)
+  
+  m2015_6 <- mark(geese2015, nocc = nocc, model = "Nest", model.parameters = list(S = list(formula = ~ HAB)), groups = "HAB", delete = T)
+  
+  m2015_7 <- mark(geese2015, nocc = nocc, model = "Nest", model.parameters = list(S = list(formula = ~ NestAge)), delete = T)
+}
+
+geese2015.results <- run.geese2015()
+geese2015.results
+
+#### FULL TIME MODELS ####
+
+run.geese.FULL.TIME = function()
+{
+time0 <- mark(geese, nocc = nocc, model = "Nest", model.parameters = list(S = list(formula = ~ 1)), delete = T)
+  
+time1 <- mark(geese, nocc = nocc, model = "Nest", model.parameters = list(S = list(formula = ~ YEAR + NestAge)), groups = "YEAR", delete = T)
+  
+time2 <- mark(geese, nocc = nocc, model = "Nest", model.parameters = list(S = list(formula = ~ YEAR * NestAge)), groups = "YEAR", delete = T)
+
+time3 <- mark(geese, nocc = nocc, model = "Nest", model.parameters = list(S = list(formula = ~ YEAR )), groups = "YEAR", delete = T)
+
+time4 <- mark(geese, nocc = nocc, model = "Nest", model.parameters = list(S = list(formula = ~ NestAge)), delete = T)
+
+time5 <- mark(geese, nocc = nocc, model = "Nest", model.parameters = list(S = list(formula = ~ YEAR + NestAge + FindNest)), groups = "YEAR", delete = T)
+
+return(collect.models() )
+}
+
+# run defined models
+geese.FULL.TIME.results <- run.geese.FULL.TIME()
+geese.FULL.TIME.results
+
+
+
+#### WEATHER/SUPPLEMENTATION models
 run.geese=function()
 {
   
@@ -647,9 +705,7 @@ return(collect.models() )
 # run defined models
 geese.results <- run.geese()
 
-#### FULL TIME MODELS ####
 
-run.geese.FULL-TIME
 
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~#
 # Examine table of model-selection results #
