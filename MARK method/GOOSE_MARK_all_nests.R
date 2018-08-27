@@ -547,11 +547,10 @@ run.geese.YEAR.1 = function()
 {
 mYEAR_0 <- mark(geeseYEAR, nocc = nocc, model = "Nest", model.parameters = list(S = list(formula = ~ 1)), delete = T)
   
-# BEST MODEL 2 ***
+# BEST MODEL 2 
 mYEAR_1 <- mark(geeseYEAR, nocc = nocc, model = "Nest", model.parameters = list(S = list(formula = ~ SUPPL + HAB + NestAge)), groups = c("SUPPL", "HAB"), delete = T)  
 
 mYEAR_2 <- mark(geeseYEAR, nocc = nocc, model = "Nest", model.parameters = list(S = list(formula = ~ SUPPL*HAB + NestAge)), groups = c("SUPPL", "HAB"), delete = T) 
-# PROBLEME DE MODELE
 
 mYEAR_3 <- mark(geeseYEAR, nocc = nocc, model = "Nest", model.parameters = list(S = list(formula = ~ SUPPL + HAB)), groups = c("SUPPL", "HAB"), delete = T)
 
@@ -565,7 +564,7 @@ mYEAR_7 <- mark(geeseYEAR, nocc = nocc, model = "Nest", model.parameters = list(
 
 mYEAR_8 <- mark(geeseYEAR, nocc = nocc, model = "Nest", model.parameters = list(S = list(formula = ~ SUPPL + NestAge)), groups = "SUPPL", delete = T)
 
-# BEST MODEL 1 *** 
+# BEST MODEL 1 
 mYEAR_9 <- mark(geeseYEAR, nocc = nocc, model = "Nest", model.parameters = list(S = list(formula = ~ HAB + NestAge)), groups = "HAB", delete = T)
 
 return(collect.models() )
@@ -608,6 +607,9 @@ geese.YEAR.2.results
 
 #### FULL TIME MODELS ####
 
+# valeur de "nocc" varie selon le nombre d'occasion de capture, soit du premier au dernier jour du suivi, correspond au max de "LastChecked"
+nocc <- max(geese$LastChecked)
+
 run.geese.FULL.TIME = function()
 {
 
@@ -615,13 +617,13 @@ time0 <- mark(geese, nocc = nocc, model = "Nest", model.parameters = list(S = li
   
 time1 <- mark(geese, nocc = nocc, model = "Nest", model.parameters = list(S = list(formula = ~ YEAR + NestAge)), groups = "YEAR", delete = T)
   
-time2 <- mark(geese, nocc = nocc, model = "Nest", model.parameters = list(S = list(formula = ~ YEAR * NestAge)), groups = "YEAR", delete = T)
+#time2 <- mark(geese, nocc = nocc, model = "Nest", model.parameters = list(S = list(formula = ~ YEAR * NestAge)), groups = "YEAR", delete = T)
 
 time3 <- mark(geese, nocc = nocc, model = "Nest", model.parameters = list(S = list(formula = ~ YEAR )), groups = "YEAR", delete = T)
 
 time4 <- mark(geese, nocc = nocc, model = "Nest", model.parameters = list(S = list(formula = ~ NestAge)), delete = T)
 
-time5 <- mark(geese, nocc = nocc, model = "Nest", model.parameters = list(S = list(formula = ~ YEAR + NestAge + FindNest)), groups = "YEAR", delete = T)
+#time5 <- mark(geese, nocc = nocc, model = "Nest", model.parameters = list(S = list(formula = ~ YEAR + NestAge + FindNest)), groups = "YEAR", delete = T) # MESSAGE D'ERREUR
 
 return(collect.models() )
 }
@@ -631,8 +633,16 @@ geese.FULL.TIME.results <- run.geese.FULL.TIME()
 geese.FULL.TIME.results
 
 
+#Save models list and est model
+#save(geese.FULL.TIME.results, file = "geeseFULLTIME.rda")
+#save(time1, file = "geeseFULLTIME_1.rda")
 
-#### WEATHER/SUPPLEMENTATION models
+
+#### WEATHER/SUPPLEMENTATION models ####
+
+# valeur de "nocc" varie selon le nombre d'occasion de capture, soit du premier au dernier jour du suivi, correspond au max de "LastChecked"
+nocc <- max(geese$LastChecked)
+
 run.geese=function()
 {
   
