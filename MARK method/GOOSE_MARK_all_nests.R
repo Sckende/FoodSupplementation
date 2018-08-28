@@ -704,6 +704,9 @@ run.geese.WEATHER.SUPPL=function()
   
   mix8 <-  mark(geese, nocc = nocc, model = "Nest", model.parameters = list(S = list(formula = ~ meanTEMP + cumPREC)), delete = T)
   
+  
+  mix9 <-  mark(geese, nocc = nocc, model = "Nest", model.parameters = list(S = list(formula = ~ meanTEMP*cumPREC + SUPPL + HAB)), groups = c("SUPPL", "HAB"), delete = T)
+  
   return(collect.models())
 }
 
@@ -852,8 +855,19 @@ geese.results # print model-selection table to screen
 #################### Best model for full database ####################
 ############## only considering models without interaction ##########
 
+x11()
 
+#Test on mYEAR_5 model
+plot(mYEAR_5$results$real$estimate, pch = 16, xlim = c(0, 3), ylim = c(0.95, 1))
+arrows(1, mYEAR_5$results$real$estimate[1], x1=1, y1=mYEAR_5$results$real$lcl[1], length=0.1,angle=90, lwd=1)
+arrows(1, mYEAR_5$results$real$estimate[1], x1=1, y1=mYEAR_5$results$real$lcl[1], length=0.1,angle=90, lwd=1)
+arrows(1, mYEAR_5$results$real$estimate[1], x1=1, y1=mYEAR_5$results$real$ucl[1], length=0.1,angle=90, lwd=1)
+arrows(2, mYEAR_5$results$real$estimate[2], x1=2, y1=mYEAR_5$results$real$lcl[2], length=0.1,angle=90, lwd=1)
+arrows(2, mYEAR_5$results$real$estimate[2], x1=2, y1=mYEAR_5$results$real$ucl[2], length=0.1,angle=90, lwd=1)
+arrows(3, mYEAR_5$results$real$estimate[3], x1=3, y1=mYEAR_5$results$real$lcl[3], length=0.1,angle=90, lwd=1)
+arrows(3, mYEAR_5$results$real$estimate[3], x1=3, y1=mYEAR_5$results$real$ucl[3], length=0.1,angle=90, lwd=1)
 
+dev.off()
 
 #### Plot visualization - to end the CODE #### 
 # To obtain a plot
