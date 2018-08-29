@@ -345,6 +345,17 @@ div[[i]]$EXPO2 <- ceiling(div[[i]]$EXPO)
 
 geese <- do.call("rbind", div)
 
+#Check point #1
+table(geese$LastChecked[which(geese$Fate == "1")] == geese$LastPresent[which(geese$Fate == "1")], useNA = "always")
+#geese[geese$Fate == "1" & geese$LastPresent==geese$LastChecked,]
+geese$LastChecked[geese$Fate == "1" & geese$LastPresent==geese$LastChecked] <- geese$LastChecked[geese$Fate == "1" & geese$LastPresent==geese$LastChecked] + 1 # correction of LastChecked == LAstPresent for failed nests
+
+#Check point #2
+table(geese$LastChecked[which(geese$LastPresent == geese$LastChecked & geese$LastPresent == geese$FirstFound)], useNA = "always")
+geese[which(geese$LastPresent == geese$LastChecked & geese$LastPresent == geese$FirstFound),]
+geese <- geese[!(geese$X == 3144 | geese$X == 4330),] # Delete nest with FirstFound = LastPresent = LastVisit
+geese <- droplevels(geese)
+
 # DELETE EXTREM DATA for exposition > 35 days - n = 1 for 2000, n = 1 for 2008, n = 2 for 2010, n = 1 for 2011, n = 2 for 2015 & n = 2 for 2017
 geese[geese$EXPO2 > 35,]
 geese <- geese[!(geese$X == 222 | geese$X == 244 | geese$X == 671 | geese$X == 673 | geese$X == 2012 | geese$X == 4110 | geese$X == 4668 | geese$X == 4686 | geese$X == 4869),]
@@ -373,13 +384,6 @@ for (i in 1:nlevels(geese$YEAR)){
          col = cols
          )
 }
-
- #Check point
-table(geese$LastChecked[which(geese$Fate == "1")] == geese$LastPresent[which(geese$Fate == "1")], useNA = "always")
-geese[geese$Fate == "1" & geese$LastPresent==geese$LastChecked,]
-geese$LastChecked[geese$Fate == "1" & geese$LastPresent==geese$LastChecked] <- geese$LastChecked[geese$Fate == "1" & geese$LastPresent==geese$LastChecked] + 1 # correction of LastChecked == LAstPresent for failed nests
-
-
 
 #### Add type of rainfall year ####
 cum2 <- read.table("PREC_cum2.txt",  dec = ".", h = T)
@@ -507,6 +511,10 @@ geese <- droplevels(geese)
 #write.csv(geese, "GOOSE_geese.txt") # For Rmarkdown document
 
 #### True nesting success per habitat / treatment / year ####
+require(RMark)
+
+# valeur de "nocc" varie selon le nombre d'occasion de capture, soit du premier au dernier jour du suivi, correspond au max de "LastChecked"
+nocc <- max(geese$LastChecked)
 
 nest_succ <- mark(geese, nocc = nocc, model = "Nest", model.parameters = list(S = list(formula = ~ SUPPL + HAB + YEAR)), groups = c("SUPPL", "HAB", "YEAR"), delete = T)
 
