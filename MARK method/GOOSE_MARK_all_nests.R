@@ -307,42 +307,73 @@ text(16.5, 1.1, labels = 2017, cex = 2)
 
 #### Formating data for MARK analysis ####
 # Here choose one specific year or not
-geese <- gsg[gsg$YEAR == "2015" | gsg$YEAR == "2016" | gsg$YEAR == "2017",]
-
-# DELETE EXTREM DATA - n = 2 for 2015 & n = 2 for 2017
-geese <- geese[-c(671, 673, 222, 244),]
-
+geese <- gsg
 geese <- droplevels(geese)
+#geese <- gsg[gsg$YEAR == "2015" | gsg$YEAR == "2016" | gsg$YEAR == "2017",]
 summary(geese)
 dim(geese)
+
+div <- split(geese, geese$YEAR)
+
+for(i in 1:nlevels(geese$YEAR)){
 
 #Creation of AgeFound variable#
 #--------------------------------#
 #WARNING ! It has to be done before the modification of the FirstFound variable
-geese$AgeFound <- (geese$FirstFound - geese$INITIATION) + 1 #...+1 cause age 0 is impossible
-geese$FindNest <- geese$FirstFound
+div[[i]]$AgeFound <- (div[[i]]$FirstFound - div[[i]]$INITIATION) + 1 #...+1 cause age 0 is impossible
+div[[i]]$FindNest <- div[[i]]$FirstFound
 
 #Modification des dates de la variables FirstFound (la date minimale = Jour 1)#
 #-----------------------------------------------------------------------------#
 #Attention ici valeur change selon les annees
-FF <- min(geese$FirstFound) #date minimum = 160
-geese$FirstFound <- geese$FirstFound - (FF - 1) #ici 159 = 160 - 1 (pour Day 1)
+FF <- min(div[[i]]$FirstFound) #date minimum = 160
+div[[i]]$FirstFound <- div[[i]]$FirstFound - (FF - 1) #ici 159 = 160 - 1 (pour Day 1)
 
 #Idem pour les variables LastPresent, LastChecked#
 #-------------------------------------------------#
-geese$LastPresent <- geese$LastPresent - (FF - 1)
-geese$LastChecked <- geese$LastChecked - (FF - 1)
+div[[i]]$LastPresent <- div[[i]]$LastPresent - (FF - 1)
+div[[i]]$LastChecked <- div[[i]]$LastChecked - (FF - 1)
 
 #Obtention de la variable AgeDay1#
 #--------------------------------#
 #correspond à l'âge du nid lors du premier jour du suivi de nids
-geese$AgeDay1 <- (geese$AgeFound - geese$FirstFound) + 1
+div[[i]]$AgeDay1 <- (div[[i]]$AgeFound - div[[i]]$FirstFound) + 1
+
+# Need to round EXPO variable to the superior integer
+div[[i]]$EXPO2 <- ceiling(div[[i]]$EXPO)
+}
+
+geese <- do.call("rbind", div)
+
+# DELETE EXTREM DATA for exposition > 35 days - n = 1 for 2000, n = 1 for 2008, n = 2 for 2010, n = 1 for 2011, n = 2 for 2015 & n = 2 for 2017
+geese[geese$EXPO2 > 35,]
+geese <- geese[!(geese$X == 222 | geese$X == 244 | geese$X == 671 | geese$X == 673 | geese$X == 2012 | geese$X == 4110 | geese$X == 4668 | geese$X == 4686 | geese$X == 4869),]
+geese <- droplevels(geese)
+
+# Minimal values of exposition nests for successful ones
+x11()
+boxplot(geese$EXPO2[geese$Fate == "0"] ~ geese$YEAR[geese$Fate == "0"], ylim = c(8, 36))
 
 
-# valeur de "nocc" varie selon le nombre d'occasion de capture, soit du premier au dernier jour du suivi, correspond au max de "LastChecked"
-nocc <- max(geese$LastChecked)
+# Treshold value for minimal of day exposure
+tr <- 20; col1 <- "olivedrab3"; y <- 8
+tr <- 24; col1 <- "aquamarine3"; y <- 10
 
-require(RMark)
+
+minima <- geese[geese$Fate == "0" & geese$EXPO2 < tr,]
+m <- as.data.frame(table(minima$YEAR), 1995:2017)
+minima$N <- m$Freq[match(minima$YEAR, m$Var1)]
+abline( h = tr, col = col1, lty = "longdash", lwd = 2)
+for (i in 1:nlevels(geese$YEAR)){
+  cols <- ifelse(m$Freq[i] > 10, "red", col1)
+    text(x = i, 
+         y = y, 
+         labels = m$Freq[i], 
+         cex = 1,
+         col = cols
+         )
+}
+
  #Check point
 table(geese$LastChecked[which(geese$Fate == "1")] == geese$LastPresent[which(geese$Fate == "1")], useNA = "always")
 geese[geese$Fate == "1" & geese$LastPresent==geese$LastChecked,]
@@ -378,9 +409,6 @@ for(i in 1:23){
 
 }
 
-# Need to round EXPO variable to the superior integer
-geese$EXPO2 <- ceiling(geese$EXPO)
-
 # Compute the cumulative rainfall per nest & cumulative rainfal per nest / per day
 geese$X <- 1:dim(geese)[1] #new number for the X variable
 for (i in geese$X) {
@@ -393,6 +421,7 @@ for (i in geese$X) {
 
 # Exploration of cumPREC variable
 dev.off()
+x11()
 boxplot(geese$cumPREC ~ geese$YEAR)
 boxplot(geese$PREC_day ~ geese$YEAR)
 plot(geese$PREC_day[geese$Fate == 0])
@@ -400,10 +429,10 @@ plot(geese$PREC_day[geese$Fate == 0])
 
 # Data eploration
 div <- split(geese, geese$YEAR)
-#x11()
-par(mfrow = c(1, 3))
+x11()
+par(mfrow = c(5, 5))
 #dev.off()
-for (i in 1:3) {
+for (i in 1:nlevels(geese$YEAR)) {
   cols <- ifelse(div[[i]]$Fate == "0", "olivedrab3", "darkgoldenrod2")
   pchs <- ifelse(div[[i]]$Fate == "0", 20, 8)
   plot(div[[i]]$EXPO2, div[[i]]$cumPREC, main = unique(div[[i]]$YEAR), ylab = "cumulative prec", xlab = "Number of exposition days", bty = "n", ylim = c(min(geese$cumPREC), max(geese$cumPREC)), pch = pchs, col = cols, cex = 2)
@@ -413,10 +442,11 @@ for (i in 1:3) {
 succ_nest <- geese[geese$Fate == 0,]
 succ_list <- split(succ_nest, succ_nest$YEAR)
 
+x11()
 dev.off()
-par(mfrow = c(1, 3))
-for (i in 1:3) {
-  plot(succ_list[[i]]$EXPO2, succ_list[[i]]$PREC_day, main = unique(succ_list[[i]]$YEAR), bty = "n", xlab = "Exposition time", ylab = "Cum. Prec. per day (mm/day)")
+par(mfrow = c(5, 5))
+for (i in 1:nlevels(geese$YEAR)) {
+  plot(succ_list[[i]]$EXPO2, succ_list[[i]]$PREC_day, main = unique(succ_list[[i]]$YEAR), bty = "n", xlab = "Exposition time", ylab = "Cum. Prec. per day (mm/day)", xlim = c(min(succ_nest$EXPO2), max(succ_nest$EXPO2)))
 }
 
 
@@ -605,32 +635,50 @@ geese.YEAR.2.results
 #save(mYEAR_11, file = "geese2017_1bis.rda")
 
 
-#### FULL TIME MODELS ####
+#### FULL MODELS ####
+# Models explaining maximal of variation of explained response with the time effect (YEAR, NestAge) and the habitat effect. Models including ALL MONITORED GOOSE NESTS IN COLONY since 1995
+
+full_goo <- tem
 
 # valeur de "nocc" varie selon le nombre d'occasion de capture, soit du premier au dernier jour du suivi, correspond au max de "LastChecked"
 nocc <- max(geese$LastChecked)
 
-run.geese.FULL.TIME = function()
+run.geese.FULL = function()
 {
 
-time0 <- mark(geese, nocc = nocc, model = "Nest", model.parameters = list(S = list(formula = ~ 1)), delete = T)
+full0 <- mark(geese, nocc = nocc, model = "Nest", model.parameters = list(S = list(formula = ~ 1)), delete = T)
   
-time1 <- mark(geese, nocc = nocc, model = "Nest", model.parameters = list(S = list(formula = ~ YEAR + NestAge)), groups = "YEAR", delete = T)
-  
-#time2 <- mark(geese, nocc = nocc, model = "Nest", model.parameters = list(S = list(formula = ~ YEAR * NestAge)), groups = "YEAR", delete = T)
+full1 <- mark(geese, nocc = nocc, model = "Nest", model.parameters = list(S = list(formula = ~ YEAR + NestAge)), groups = "YEAR", delete = T)
 
-time3 <- mark(geese, nocc = nocc, model = "Nest", model.parameters = list(S = list(formula = ~ YEAR )), groups = "YEAR", delete = T)
+full3 <- mark(geese, nocc = nocc, model = "Nest", model.parameters = list(S = list(formula = ~ YEAR )), groups = "YEAR", delete = T)
 
-time4 <- mark(geese, nocc = nocc, model = "Nest", model.parameters = list(S = list(formula = ~ NestAge)), delete = T)
+full4 <- mark(geese, nocc = nocc, model = "Nest", model.parameters = list(S = list(formula = ~ NestAge)), delete = T)
 
-#time5 <- mark(geese, nocc = nocc, model = "Nest", model.parameters = list(S = list(formula = ~ YEAR + NestAge + FindNest)), groups = "YEAR", delete = T) # MESSAGE D'ERREUR
+full5 <- mark(geese, nocc = nocc, model = "Nest", model.parameters = list(S = list(formula = ~ YEAR + NestAge + HAB)), groups = c("YEAR", "HAB"), delete = T)
+
+full6 <- mark(geese, nocc = nocc, model = "Nest", model.parameters = list(S = list(formula = ~ YEAR + HAB)), groups = c("YEAR", "HAB"), delete = T)
+
+full7 <- mark(geese, nocc = nocc, model = "Nest", model.parameters = list(S = list(formula = ~ NestAge + HAB)), groups = "HAB", delete = T)
+
+full8 <- mark(geese, nocc = nocc, model = "Nest", model.parameters = list(S = list(formula = ~ HAB)), groups = "HAB", delete = T)
+
+# INTERACTION
+full2 <- mark(geese, nocc = nocc, model = "Nest", model.parameters = list(S = list(formula = ~ YEAR * NestAge)), groups = "YEAR", delete = T)
+
+full9 <- mark(geese, nocc = nocc, model = "Nest", model.parameters = list(S = list(formula = ~ YEAR*HAB)), groups = c("YEAR", "HAB"), delete = T)
+
+full10 <- mark(geese, nocc = nocc, model = "Nest", model.parameters = list(S = list(formula = ~ YEAR*HAB + NestAge)), groups = c("YEAR", "HAB"), delete = T)
+
+full11 <- mark(geese, nocc = nocc, model = "Nest", model.parameters = list(S = list(formula = ~ YEAR*NestAge + HAB)), groups = c("YEAR", "HAB"), delete = T)
+
+full12 <- mark(geese, nocc = nocc, model = "Nest", model.parameters = list(S = list(formula = ~ YEAR*NestAge + YEAR*HAB)), groups = c("YEAR", "HAB"), delete = T)
 
 return(collect.models() )
 }
 
 # run defined models
-geese.FULL.TIME.results <- run.geese.FULL.TIME()
-geese.FULL.TIME.results
+geese.FULL.results <- run.geese.FULL()
+geese.FULL.results
 
 
 #Save models list and est model
