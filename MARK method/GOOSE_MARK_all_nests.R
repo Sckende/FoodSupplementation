@@ -511,12 +511,14 @@ geese <- droplevels(geese)
 #write.csv(geese, "GOOSE_geese.txt") # For Rmarkdown document
 
 #### True nesting success per habitat / treatment / year ####
+geese_SUPPL <- geese[geese$YEAR == "2015" | geese$YEAR == "2016" | geese$YEAR == "2017",]
+geese_SUPPL <- droplevels(geese_SUPPL)
+
 require(RMark)
-
 # valeur de "nocc" varie selon le nombre d'occasion de capture, soit du premier au dernier jour du suivi, correspond au max de "LastChecked"
-nocc <- max(geese$LastChecked)
+nocc <- max(geese_SUPPL$LastChecked)
 
-nest_succ <- mark(geese, nocc = nocc, model = "Nest", model.parameters = list(S = list(formula = ~ SUPPL + HAB + YEAR)), groups = c("SUPPL", "HAB", "YEAR"), delete = T)
+nest_succ <- mark(geese_SUPPL, nocc = nocc, model = "Nest", model.parameters = list(S = list(formula = ~ SUPPL + HAB + YEAR)), groups = c("SUPPL", "HAB", "YEAR"), delete = T)
 
 nest_succ$results$beta # view estimated beta for model in R
 nest_succ$results$real
@@ -646,40 +648,40 @@ geese.YEAR.2.results
 #### FULL MODELS ####
 # Models explaining maximal of variation of explained response with the time effect (YEAR, NestAge) and the habitat effect. Models including ALL MONITORED GOOSE NESTS IN COLONY since 1995
 
-full_goo <- tem
+full_goo <- geese[geese$SUPPL == "TEM",]
 
 # valeur de "nocc" varie selon le nombre d'occasion de capture, soit du premier au dernier jour du suivi, correspond au max de "LastChecked"
-nocc <- max(geese$LastChecked)
+nocc <- max(full_goo$LastChecked)
 
 run.geese.FULL = function()
 {
 
-full0 <- mark(geese, nocc = nocc, model = "Nest", model.parameters = list(S = list(formula = ~ 1)), delete = T)
+full0 <- mark(full_goo, nocc = nocc, model = "Nest", model.parameters = list(S = list(formula = ~ 1)), delete = T)
   
-full1 <- mark(geese, nocc = nocc, model = "Nest", model.parameters = list(S = list(formula = ~ YEAR + NestAge)), groups = "YEAR", delete = T)
+full1 <- mark(full_goo, nocc = nocc, model = "Nest", model.parameters = list(S = list(formula = ~ YEAR + NestAge)), groups = "YEAR", delete = T)
 
-full3 <- mark(geese, nocc = nocc, model = "Nest", model.parameters = list(S = list(formula = ~ YEAR )), groups = "YEAR", delete = T)
+full3 <- mark(full_goo, nocc = nocc, model = "Nest", model.parameters = list(S = list(formula = ~ YEAR )), groups = "YEAR", delete = T)
 
-full4 <- mark(geese, nocc = nocc, model = "Nest", model.parameters = list(S = list(formula = ~ NestAge)), delete = T)
+full4 <- mark(full_goo, nocc = nocc, model = "Nest", model.parameters = list(S = list(formula = ~ NestAge)), delete = T)
 
-full5 <- mark(geese, nocc = nocc, model = "Nest", model.parameters = list(S = list(formula = ~ YEAR + NestAge + HAB)), groups = c("YEAR", "HAB"), delete = T)
+full5 <- mark(full_goo, nocc = nocc, model = "Nest", model.parameters = list(S = list(formula = ~ YEAR + NestAge + HAB)), groups = c("YEAR", "HAB"), delete = T)
 
-full6 <- mark(geese, nocc = nocc, model = "Nest", model.parameters = list(S = list(formula = ~ YEAR + HAB)), groups = c("YEAR", "HAB"), delete = T)
+full6 <- mark(full_goo, nocc = nocc, model = "Nest", model.parameters = list(S = list(formula = ~ YEAR + HAB)), groups = c("YEAR", "HAB"), delete = T)
 
-full7 <- mark(geese, nocc = nocc, model = "Nest", model.parameters = list(S = list(formula = ~ NestAge + HAB)), groups = "HAB", delete = T)
+full7 <- mark(full_goo, nocc = nocc, model = "Nest", model.parameters = list(S = list(formula = ~ NestAge + HAB)), groups = "HAB", delete = T)
 
-full8 <- mark(geese, nocc = nocc, model = "Nest", model.parameters = list(S = list(formula = ~ HAB)), groups = "HAB", delete = T)
+full8 <- mark(full_goo, nocc = nocc, model = "Nest", model.parameters = list(S = list(formula = ~ HAB)), groups = "HAB", delete = T)
 
 # INTERACTION
-full2 <- mark(geese, nocc = nocc, model = "Nest", model.parameters = list(S = list(formula = ~ YEAR * NestAge)), groups = "YEAR", delete = T)
+full2 <- mark(full_goo, nocc = nocc, model = "Nest", model.parameters = list(S = list(formula = ~ YEAR * NestAge)), groups = "YEAR", delete = T)
 
-full9 <- mark(geese, nocc = nocc, model = "Nest", model.parameters = list(S = list(formula = ~ YEAR*HAB)), groups = c("YEAR", "HAB"), delete = T)
+full9 <- mark(full_goo, nocc = nocc, model = "Nest", model.parameters = list(S = list(formula = ~ YEAR*HAB)), groups = c("YEAR", "HAB"), delete = T)
 
-full10 <- mark(geese, nocc = nocc, model = "Nest", model.parameters = list(S = list(formula = ~ YEAR*HAB + NestAge)), groups = c("YEAR", "HAB"), delete = T)
+full10 <- mark(full_goo, nocc = nocc, model = "Nest", model.parameters = list(S = list(formula = ~ YEAR*HAB + NestAge)), groups = c("YEAR", "HAB"), delete = T)
 
-full11 <- mark(geese, nocc = nocc, model = "Nest", model.parameters = list(S = list(formula = ~ YEAR*NestAge + HAB)), groups = c("YEAR", "HAB"), delete = T)
+full11 <- mark(full_goo, nocc = nocc, model = "Nest", model.parameters = list(S = list(formula = ~ YEAR*NestAge + HAB)), groups = c("YEAR", "HAB"), delete = T)
 
-full12 <- mark(geese, nocc = nocc, model = "Nest", model.parameters = list(S = list(formula = ~ YEAR*NestAge + YEAR*HAB)), groups = c("YEAR", "HAB"), delete = T)
+full12 <- mark(full_goo, nocc = nocc, model = "Nest", model.parameters = list(S = list(formula = ~ YEAR*NestAge + YEAR*HAB)), groups = c("YEAR", "HAB"), delete = T)
 
 return(collect.models() )
 }
