@@ -529,6 +529,8 @@ exi$SUPPL <- rep(c("TEM", "F", "W"), 6)
 exi$SUPPL <- ordered(exi$SUPPL, levels = c("TEM", "W", "F"))
 exi$HAB <- rep(c("MES", "MES", "MES", "WET", "WET", "WET"), 3)
 exi$YEAR <- c(rep(2015, 6), rep(2016, 6), rep(2017,6))
+exi$SN <- exi$estimate^27
+exi$SN_se <- exi$se^27
 
 
 div <- split(exi, exi$YEAR)
@@ -544,15 +546,17 @@ exi <- do.call("rbind", div)
 # Plot
 
 x11()
-par(mar=c(5,5,1,5)) # inner margin - default parameter is par("mar") <- 5.1 4.1 4.1 2.1
+par(mfrow = c(1, 2), mar=c(5,5,1,5)) # inner margin - default parameter is par("mar") <- 5.1 4.1 4.1 2.1
 
 color <- c("olivedrab3", "olivedrab4", "aquamarine3", "aquamarine4", "darkgoldenrod2", "darkgoldenrod3")
 
-barCenters <- barplot(exi$estimate, 
+barCenters <- barplot(exi$estimate,
+                      #exi$SN,
                       col = color,
                       xlab = "", 
                       ylab = "Nesting success", 
                       ylim = c(0.96, 1.015),
+                      #ylim = c(0.4, 1.015),
                       #beside = TRUE,
                       xpd = FALSE,
                       names.arg = exi$HAB, 
@@ -565,7 +569,13 @@ legend("topright",
        #inset = c(0, -0,05),
        legend = c("CONTROL", "WATER", "FOOD"), 
        fill = c("olivedrab3", "aquamarine3", "darkgoldenrod2"), bty = "n", cex = 1)
-segments(barCenters, exi$estimate - exi$se, barCenters, exi$estimate + exi$se, lwd = 1.5)
+segments(barCenters,
+         exi$estimate - exi$se, 
+         #exi$SN - exi$SN_se,
+         barCenters, 
+         exi$estimate + exi$se, 
+         #exi$SN + exi$SN_se,
+         lwd = 1.5)
 text(barCenters,0.965, labels = paste("(", as.character(exi$N), ")", sep = ""), cex = 1)
 text(3.3, 1, labels = 2015, cex = 2)
 text(9.9, 1, labels = 2016, cex = 2)
