@@ -149,7 +149,6 @@ for(i in gsg$X) {
     gsg$EXPO[i] <- (gsg$LastPresent[i] - gsg$INITIATION[i] + 1) + (gsg$LastChecked[i] - gsg$LastPresent[i]) / 2
   }
 }
-#### !!!!!! WARNING !!!!!! RANGE DE DONNEES ETRANGE POUR DUREE D'EXPO (au delà du range biologique - cf duree d'exposition pour les nids à succes) !!!!! ######
 
 #write.csv(gsg, "GOOSE_MARK_Complete_data.txt")
 # **** WARNING ! Here we deleted some failed nests ==> underestimation of failed nests number **** #
@@ -362,6 +361,8 @@ geese <- geese[!(geese$X == 222 | geese$X == 244 | geese$X == 671 | geese$X == 6
 geese <- droplevels(geese)
 
 # Minimal values of exposition nests for successful ones
+
+#### CF COURRIEL OF NICOLAS !!! ####
 x11()
 boxplot(geese$EXPO2[geese$Fate == "0"] ~ geese$YEAR[geese$Fate == "0"], ylim = c(8, 36))
 
@@ -455,7 +456,8 @@ for (i in 1:nlevels(geese$YEAR)) {
 
 
 #### Add temperature variables for each nests - TO UPDATE WHEN THE DOWNLOAD OF LAST BYLCAMP DATA WILL BE DONE #####
-deg <- read.table("TEMP_PondInlet_2015-2017.txt", h = T, dec =".", sep = "\t")
+#deg <- read.table("TEMP_PondInlet_2015-2017.txt", h = T, dec =".", sep = "\t")
+deg <- read.csv("TEMP_PondInlet_1995-2017.csv", h = T, sep = ";")
 summary(deg)
 
 deg$JJ <- strptime(as.character(deg$Date), format = "%Y-%m-%d")
@@ -463,6 +465,26 @@ deg$JJ <- deg$JJ$yday + 1 #comme dates continues pas besoin de traiter separemme
 
 deg <- deg[!is.na(deg$Mean_Temp),]
 
+# Data exploration
+# Cumulative Mean temperature during the nesting season (JJ 163 - 12 June to JJ 206 - 25 July) and for each year
+div <- split(deg, deg$Year)
+for (i in 1:23){
+  div[[i]]$cumTEMP <- div[[i]]$Mean_Temp
+  for (j in 2:dim(div[[i]])[1]) {
+    div[[i]]$cumTEMP[j] <- div[[i]]$cumTEMP[j - 1] + div[[i]]$Mean_Temp[j]
+  }
+  
+}
+
+x11()
+par(mfrow = c(5, 5), mar = c(4, 5, 1, 1))
+for(i in 1:23){
+  plot(div[[i]]$JJ[div[[i]]$JJ <= 206 & div[[i]]$JJ >= 163], div[[i]]$cumTEMP[div[[i]]$JJ <= 206 & div[[i]]$JJ >= 163], main = unique(div[[i]]$Year), xlab = "JJ", ylab = "cum. Temp.", type = "b", bty = "n")
+  
+}
+dev.off()
+
+# Computation of new variables
 for(i in geese$X){
   geese$meanTEMP[i] <- mean(deg$Mean_Temp[which(deg$Year == geese$YEAR[i] & deg$JJ >= geese$INITIATION[i] & deg$JJ <= geese$INITIATION[i] + geese$EXPO2[i] - 1)])
   geese$sdTEMP[i] <- sd(deg$Mean_Temp[which(deg$Year == geese$YEAR[i] & deg$JJ >= geese$INITIATION[i] & deg$JJ <= geese$INITIATION[i] + geese$EXPO2[i] - 1)])
@@ -472,13 +494,18 @@ for(i in geese$X){
 # Data eploration
 div <- split(geese, geese$YEAR)
 
-#x11()
-par(mfrow = c(2, 3), mar = c(5, 5, 1, 1))
-for (i in 1:3){
+x11()
+par(mfrow = c(5, 5), mar = c(5, 5, 1, 1))
+for (i in 1:23){
   cols <- ifelse(div[[i]]$Fate == "0", "olivedrab3", "darkgoldenrod2")
   pchs <- ifelse(div[[i]]$Fate == "0", 20, 8)
   plot(div[[i]]$EXPO, div[[i]]$cumTEMP, bty = "n", xlab = unique(div[[i]]$YEAR),col = cols, pch = pchs, ylab = "Cum. Temp", ylim = c(min(geese$cumTEMP), max(geese$cumTEMP)), cex = 2)}
-for (i in 1:3){
+
+x11()
+par(mfrow = c(5, 5), mar = c(5, 5, 1, 1))
+for (i in 1:23){
+  cols <- ifelse(div[[i]]$Fate == "0", "olivedrab3", "darkgoldenrod2")
+  pchs <- ifelse(div[[i]]$Fate == "0", 20, 8)
   plot(div[[i]]$EXPO, div[[i]]$meanTEMP, bty = "n",col = cols, pch = pchs, xlab = unique(div[[i]]$YEAR), ylab = "Mean Temp",  ylim = c(min(geese$meanTEMP), max(geese$meanTEMP)), cex = 2)
   
 }
@@ -496,8 +523,10 @@ for(i in geese$X){
 
 # Data eploration
 div <- split(geese, geese$YEAR)
-par(mfrow = c(1, 3), mar = c(5, 5, 1, 1))
-for (i in 1:3){
+
+x11()
+par(mfrow = c(5, 5), mar = c(5, 5, 1, 1))
+for (i in 1:23){
   cols <- ifelse(div[[i]]$Fate == "0", "olivedrab3", "darkgoldenrod2")
   pchs <- ifelse(div[[i]]$Fate == "0", 20, 8)
   plot(div[[i]]$EXPO, div[[i]]$meanPh2o, bty = "n", xlab = unique(div[[i]]$YEAR),col = cols, pch = pchs, ylab = "Mean p(H2O)", ylim = c(min(geese$meanPh2o), max(geese$meanPh2o)), cex = 2)}
