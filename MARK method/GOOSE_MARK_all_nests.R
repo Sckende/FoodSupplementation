@@ -363,6 +363,8 @@ geese <- droplevels(geese)
 # Minimal values of exposition nests for successful ones
 
 #### CF COURRIEL OF NICOLAS !!! ####
+#### retrait des nids à succès avec EXPO < 20 ####
+
 x11()
 boxplot(geese$EXPO2[geese$Fate == "0"] ~ geese$YEAR[geese$Fate == "0"], ylim = c(8, 36))
 
@@ -385,6 +387,9 @@ for (i in 1:nlevels(geese$YEAR)){
          col = cols
          )
 }
+
+geese <- geese[!(geese$Fate == "0" & geese$EXPO < 20),]
+geese <- droplevels(geese)
 
 #### Add type of rainfall year ####
 cum2 <- read.table("PREC_cum2.txt",  dec = ".", h = T)
@@ -448,7 +453,7 @@ succ_nest <- geese[geese$Fate == 0,]
 succ_list <- split(succ_nest, succ_nest$YEAR)
 
 x11()
-dev.off()
+#dev.off()
 par(mfrow = c(5, 5))
 for (i in 1:nlevels(geese$YEAR)) {
   plot(succ_list[[i]]$EXPO2, succ_list[[i]]$PREC_day, main = unique(succ_list[[i]]$YEAR), bty = "n", xlab = "Exposition time", ylab = "Cum. Prec. per day (mm/day)", xlim = c(min(succ_nest$EXPO2), max(succ_nest$EXPO2)))
@@ -513,15 +518,15 @@ for (i in 1:23){
 #### Partial pressure of water ####
 #Buck equation - the simpliest one
 
-deg$pH2O <- 0.61121 * exp((18.678 - deg$Mean_Temp / 234.5) * (deg$Mean_Temp/(257.14 + deg$Mean_Temp)))
+deg$pH2O_Buck <- 0.61121 * exp((18.678 - deg$Mean_Temp / 234.5) * (deg$Mean_Temp/(257.14 + deg$Mean_Temp)))
 
 
 for(i in geese$X){
-  geese$meanPh2o[i] <- mean(deg$pH2O[which(deg$Year == geese$YEAR[i] & deg$JJ >= geese$INITIATION[i] & deg$JJ <= geese$INITIATION[i] + geese$EXPO2[i] - 1)])
-  geese$sdPh2o[i] <- sd(deg$pH2O[which(deg$Year == geese$YEAR[i] & deg$JJ >= geese$INITIATION[i] & deg$JJ <= geese$INITIATION[i] + geese$EXPO2[i] - 1)])
+  geese$meanPh2o_Buck[i] <- mean(deg$pH2O_Buck[which(deg$Year == geese$YEAR[i] & deg$JJ >= geese$INITIATION[i] & deg$JJ <= geese$INITIATION[i] + geese$EXPO2[i] - 1)])
+  geese$sdPh2o_Buck[i] <- sd(deg$pH2O_Buck[which(deg$Year == geese$YEAR[i] & deg$JJ >= geese$INITIATION[i] & deg$JJ <= geese$INITIATION[i] + geese$EXPO2[i] - 1)])
 }
 
-# Data eploration
+# Data exploration
 div <- split(geese, geese$YEAR)
 
 x11()
@@ -529,7 +534,35 @@ par(mfrow = c(5, 5), mar = c(5, 5, 1, 1))
 for (i in 1:23){
   cols <- ifelse(div[[i]]$Fate == "0", "olivedrab3", "darkgoldenrod2")
   pchs <- ifelse(div[[i]]$Fate == "0", 20, 8)
-  plot(div[[i]]$EXPO, div[[i]]$meanPh2o, bty = "n", xlab = unique(div[[i]]$YEAR),col = cols, pch = pchs, ylab = "Mean p(H2O)", ylim = c(min(geese$meanPh2o), max(geese$meanPh2o)), cex = 2)}
+  plot(div[[i]]$EXPO, div[[i]]$meanPh2o_Buck, bty = "n", xlab = unique(div[[i]]$YEAR),col = cols, pch = pchs, ylab = "Buck Mean p(H2O)", ylim = c(min(geese$meanPh2o_Buck), max(geese$meanPh2o_Buck)), cex = 2)}
+
+# Goff-Gratch equation 
+
+#e is the saturation water vapor pressure in hPa
+t <- deg$Mean_Temp + 273.15 #the absolute air temperature in kelvins
+tst <- 373.15 #the steam-point (i.e. boiling point at 1 atm) temperature = 373.15 K 
+est <- 1013.25 #the steam-point pressure (1 atm = 1013.25 hPa)
+
+log_e <- -7.90298 * (tst/(t - 1)) + 5.02808 * log(tst / t) - 1.3816 * 10^-7 * (10^(11.344 * ((1 - t)/tst)) - 1) + 8.1328 * 10^-3 * (10^(-3.49149 * (tst/(t-1)))- 1) + log(est)
+
+deg$pH2O_GG <- exp(log_e)
+
+# Mean of pH2O computation per nest
+for(i in geese$X){
+  geese$meanPh2o_GG[i] <- mean(deg$pH2O_GG[which(deg$Year == geese$YEAR[i] & deg$JJ >= geese$INITIATION[i] & deg$JJ <= geese$INITIATION[i] + geese$EXPO2[i] - 1)])
+  geese$sdPh2o_GG[i] <- sd(deg$pH2O_GG[which(deg$Year == geese$YEAR[i] & deg$JJ >= geese$INITIATION[i] & deg$JJ <= geese$INITIATION[i] + geese$EXPO2[i] - 1)])
+}
+
+# Data exploration
+div <- split(geese, geese$YEAR)
+
+x11()
+par(mfrow = c(5, 5), mar = c(5, 5, 1, 1))
+for (i in 1:23){
+  cols <- ifelse(div[[i]]$Fate == "0", "olivedrab3", "darkgoldenrod2")
+  pchs <- ifelse(div[[i]]$Fate == "0", 20, 8)
+  plot(div[[i]]$EXPO, div[[i]]$meanPh2o_GG, bty = "n", xlab = unique(div[[i]]$YEAR),col = cols, pch = pchs, ylab = "GG Mean p(H2O)", ylim = c(min(geese$meanPh2o_GG), max(geese$meanPh2o_GG)), cex = 2)}
+
 
 #### Data Analyses ####
   # Setting factors
