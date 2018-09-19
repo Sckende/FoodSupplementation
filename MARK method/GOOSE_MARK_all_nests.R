@@ -459,6 +459,8 @@ for (i in 1:nlevels(geese$YEAR)) {
   plot(succ_list[[i]]$EXPO2, succ_list[[i]]$PREC_day, main = unique(succ_list[[i]]$YEAR), bty = "n", xlab = "Exposition time", ylab = "Cum. Prec. per day (mm/day)", xlim = c(min(succ_nest$EXPO2), max(succ_nest$EXPO2)))
 }
 
+# Compute the cumulative rainfall per year between the both mean date of initiation and hatchling
+geese$cumPREC_year <- cum2$cumRAIN[match(geese$YEAR, cum2$YEAR)]
 
 #### Add temperature variables for each nests - TO UPDATE WHEN THE DOWNLOAD OF LAST BYLCAMP DATA WILL BE DONE #####
 #deg <- read.table("TEMP_PondInlet_2015-2017.txt", h = T, dec =".", sep = "\t")
@@ -489,13 +491,34 @@ for(i in 1:23){
 }
 dev.off()
 
-# Computation of new variables
+# Computation of new variables - mean temperature per nest
 for(i in geese$X){
   geese$meanTEMP[i] <- mean(deg$Mean_Temp[which(deg$Year == geese$YEAR[i] & deg$JJ >= geese$INITIATION[i] & deg$JJ <= geese$INITIATION[i] + geese$EXPO2[i] - 1)])
   geese$sdTEMP[i] <- sd(deg$Mean_Temp[which(deg$Year == geese$YEAR[i] & deg$JJ >= geese$INITIATION[i] & deg$JJ <= geese$INITIATION[i] + geese$EXPO2[i] - 1)])
   geese$cumTEMP[i] <- sum(deg$Mean_Temp[which(deg$Year == geese$YEAR[i] & deg$JJ >= geese$INITIATION[i] & deg$JJ <= geese$INITIATION[i] + geese$EXPO2[i] - 1)])
 }
 
+# Computation of new variables - mean temperature per year
+deg <- read.csv("TEMP_PondInlet_1995-2017.csv", h = T, sep = ";")
+deg$JJ <- strptime(as.character(deg$Date), format = "%Y-%m-%d")
+deg$JJ <- deg$JJ$yday + 1 #comme dates continues pas besoin de traiter 
+ #### ICI LE BORDEL DE MERDE #####
+deg2 <- NULL
+for (i in unique(deg$Year)) {
+  YEAR <- i
+  INI <- nidi$moy_ponte[nidi$year == i]
+  ECLO <- nidi$moy_eclos[nidi$year == i]
+  
+  temp1 <- deg$Mean_Temp[deg$Year == i & deg$JJ == INI]
+  temp2 <- deg$Mean_Temp[deg$Year == i & deg$JJ == ECLO]
+  
+  meanTEMP_year <- mean(deg$Mean_Temp[deg$year == i & deg$JJ >= INI & deg$JJ <= ECLO], na.rm = TRUE)
+  sdTEMP_year <- sd(deg$Mean_Temp[deg$year == i & deg$JJ >= INI & deg$JJ <= ECLO])
+  
+  TAB <- data.frame(YEAR, INI, ECLO, temp1, temp2, meanTEMP_year, sdTEMP_year)
+  
+  deg2 <- rbind(deg2, TAB)
+}
 # Data eploration
 div <- split(geese, geese$YEAR)
 
@@ -505,6 +528,7 @@ for (i in 1:23){
   cols <- ifelse(div[[i]]$Fate == "0", "olivedrab3", "darkgoldenrod2")
   pchs <- ifelse(div[[i]]$Fate == "0", 20, 8)
   plot(div[[i]]$EXPO, div[[i]]$cumTEMP, bty = "n", xlab = unique(div[[i]]$YEAR),col = cols, pch = pchs, ylab = "Cum. Temp", ylim = c(min(geese$cumTEMP), max(geese$cumTEMP)), cex = 2)}
+
 
 x11()
 par(mfrow = c(5, 5), mar = c(5, 5, 1, 1))
