@@ -502,23 +502,29 @@ for(i in geese$X){
 deg <- read.csv("TEMP_PondInlet_1995-2017.csv", h = T, sep = ";")
 deg$JJ <- strptime(as.character(deg$Date), format = "%Y-%m-%d")
 deg$JJ <- deg$JJ$yday + 1 #comme dates continues pas besoin de traiter 
- #### ICI LE BORDEL DE MERDE #####
+ 
+
+# Compute the mean temperature per year between the both mean date of initiation and hatchling
+
 deg2 <- NULL
 for (i in unique(deg$Year)) {
   YEAR <- i
-  INI <- nidi$moy_ponte[nidi$year == i]
-  ECLO <- nidi$moy_eclos[nidi$year == i]
+  INI <- cum2$INI[cum2$YEAR == i]
+  ECLO <- cum2$ECLO[cum2$YEAR == i]
   
   temp1 <- deg$Mean_Temp[deg$Year == i & deg$JJ == INI]
   temp2 <- deg$Mean_Temp[deg$Year == i & deg$JJ == ECLO]
   
-  meanTEMP_year <- mean(deg$Mean_Temp[deg$year == i & deg$JJ >= INI & deg$JJ <= ECLO], na.rm = TRUE)
-  sdTEMP_year <- sd(deg$Mean_Temp[deg$year == i & deg$JJ >= INI & deg$JJ <= ECLO])
+  meanTEMP_year <- mean(deg$Mean_Temp[deg$Year == i & deg$JJ >= INI & deg$JJ <= ECLO], na.rm = TRUE)
+  sdTEMP_year <- sd(deg$Mean_Temp[deg$Year == i & deg$JJ >= INI & deg$JJ <= ECLO], na.rm = TRUE)
   
   TAB <- data.frame(YEAR, INI, ECLO, temp1, temp2, meanTEMP_year, sdTEMP_year)
   
   deg2 <- rbind(deg2, TAB)
 }
+
+geese$meanTEMP_year <- deg2$meanTEMP_year[match(geese$YEAR, deg2$YEAR)]
+
 # Data eploration
 div <- split(geese, geese$YEAR)
 
@@ -587,6 +593,25 @@ for (i in 1:23){
   pchs <- ifelse(div[[i]]$Fate == "0", 20, 8)
   plot(div[[i]]$EXPO, div[[i]]$meanPh2o_GG, bty = "n", xlab = unique(div[[i]]$YEAR),col = cols, pch = pchs, ylab = "GG Mean p(H2O)", ylim = c(min(geese$meanPh2o_GG), max(geese$meanPh2o_GG)), cex = 2)}
 
+# computation of one value per year
+ph <- NULL
+for (i in unique(deg$Year)) {
+  YEAR <- i
+  INI <- cum2$INI[cum2$YEAR == i]
+  ECLO <- cum2$ECLO[cum2$YEAR == i]
+  
+  pH2O1 <- deg$pH2O_GG[deg$Year == i & deg$JJ == INI]
+  pH2O2 <- deg$pH2O_GG[deg$Year == i & deg$JJ == ECLO]
+  
+  meanPH2O_year <- mean(deg$pH2O_GG[deg$Year == i & deg$JJ >= INI & deg$JJ <= ECLO], na.rm = TRUE)
+  sdPH2O_year <- sd(deg$pH2O_GG[deg$Year == i & deg$JJ >= INI & deg$JJ <= ECLO], na.rm = TRUE)
+  
+  TAB <- data.frame(YEAR, INI, ECLO, pH2O1, pH2O2, meanPH2O_year, sdPH2O_year)
+  
+  ph <- rbind(ph, TAB)
+}
+
+geese$meanPH2O_year <- deg2$meanPH2O_year[match(geese$YEAR, deg2$YEAR)]
 
 #### Data Analyses ####
   # Setting factors
