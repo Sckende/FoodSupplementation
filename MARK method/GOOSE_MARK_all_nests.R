@@ -391,11 +391,11 @@ for (i in 1:nlevels(geese$YEAR)){
 geese <- geese[!(geese$Fate == "0" & geese$EXPO < 20),]
 geese <- droplevels(geese)
 
-#### Add type of rainfall year ####
+#### Type of rainfall year ####
 cum2 <- read.table("PREC_cum2.txt",  dec = ".", h = T)
 geese$RAINFALL <- cum2$RAINFALL[match(geese$YEAR, cum2$YEAR)]
 
-#### Add cumulative precipitation for each nests ####
+#### Cumulative precipitation for each nests ####
 rain <- read.table("PREC_precipitation_Bylot_1995-2017.txt", sep = "\t", dec = ",", h = T)
 rain <- rain[!is.na(rain$RAIN),]
 
@@ -459,10 +459,11 @@ for (i in 1:nlevels(geese$YEAR)) {
   plot(succ_list[[i]]$EXPO2, succ_list[[i]]$PREC_day, main = unique(succ_list[[i]]$YEAR), bty = "n", xlab = "Exposition time", ylab = "Cum. Prec. per day (mm/day)", xlim = c(min(succ_nest$EXPO2), max(succ_nest$EXPO2)))
 }
 
+### Cumulative precipitation per year ####
 # Compute the cumulative rainfall per year between the both mean date of initiation and hatchling
-geese$cumPREC_year <- cum2$cumRAIN[match(geese$YEAR, cum2$YEAR)]
+geese$PREC_Y <- cum2$cumRAIN[match(geese$YEAR, cum2$YEAR)]
 
-#### Add temperature variables for each nests - TO UPDATE WHEN THE DOWNLOAD OF LAST BYLCAMP DATA WILL BE DONE #####
+#### Temperature variables for each nests - TO UPDATE WHEN THE DOWNLOAD OF LAST BYLCAMP DATA WILL BE DONE #####
 #deg <- read.table("TEMP_PondInlet_2015-2017.txt", h = T, dec =".", sep = "\t")
 deg <- read.csv("TEMP_PondInlet_1995-2017.csv", h = T, sep = ";")
 summary(deg)
@@ -498,33 +499,6 @@ for(i in geese$X){
   geese$cumTEMP[i] <- sum(deg$Mean_Temp[which(deg$Year == geese$YEAR[i] & deg$JJ >= geese$INITIATION[i] & deg$JJ <= geese$INITIATION[i] + geese$EXPO2[i] - 1)])
 }
 
-# Computation of new variables - mean temperature per year
-deg <- read.csv("TEMP_PondInlet_1995-2017.csv", h = T, sep = ";")
-deg$JJ <- strptime(as.character(deg$Date), format = "%Y-%m-%d")
-deg$JJ <- deg$JJ$yday + 1 #comme dates continues pas besoin de traiter 
- 
-
-# Compute the mean temperature per year between the both mean date of initiation and hatchling
-
-deg2 <- NULL
-for (i in unique(deg$Year)) {
-  YEAR <- i
-  INI <- cum2$INI[cum2$YEAR == i]
-  ECLO <- cum2$ECLO[cum2$YEAR == i]
-  
-  temp1 <- deg$Mean_Temp[deg$Year == i & deg$JJ == INI]
-  temp2 <- deg$Mean_Temp[deg$Year == i & deg$JJ == ECLO]
-  
-  meanTEMP_year <- mean(deg$Mean_Temp[deg$Year == i & deg$JJ >= INI & deg$JJ <= ECLO], na.rm = TRUE)
-  sdTEMP_year <- sd(deg$Mean_Temp[deg$Year == i & deg$JJ >= INI & deg$JJ <= ECLO], na.rm = TRUE)
-  
-  TAB <- data.frame(YEAR, INI, ECLO, temp1, temp2, meanTEMP_year, sdTEMP_year)
-  
-  deg2 <- rbind(deg2, TAB)
-}
-
-geese$meanTEMP_year <- deg2$meanTEMP_year[match(geese$YEAR, deg2$YEAR)]
-
 # Data eploration
 div <- split(geese, geese$YEAR)
 
@@ -545,15 +519,43 @@ for (i in 1:23){
   
 }
 
-#### Partial pressure of water ####
-#Buck equation - the simpliest one
+#### Mean temperature per year ####
+# Computation of new variables - mean temperature per year
+deg <- read.csv("TEMP_PondInlet_1995-2017.csv", h = T, sep = ";")
+deg$JJ <- strptime(as.character(deg$Date), format = "%Y-%m-%d")
+deg$JJ <- deg$JJ$yday + 1 #comme dates continues pas besoin de traiter 
+ 
+# Compute the mean temperature per year between the both mean date of initiation and hatchling
+
+deg2 <- NULL
+for (i in unique(deg$Year)) {
+  YEAR <- i
+  INI <- cum2$INI[cum2$YEAR == i]
+  ECLO <- cum2$ECLO[cum2$YEAR == i]
+  
+  temp1 <- deg$Mean_Temp[deg$Year == i & deg$JJ == INI]
+  temp2 <- deg$Mean_Temp[deg$Year == i & deg$JJ == ECLO]
+  
+  meanTEMP_year <- mean(deg$Mean_Temp[deg$Year == i & deg$JJ >= INI & deg$JJ <= ECLO], na.rm = TRUE)
+  sdTEMP_year <- sd(deg$Mean_Temp[deg$Year == i & deg$JJ >= INI & deg$JJ <= ECLO], na.rm = TRUE)
+  
+  TAB <- data.frame(YEAR, INI, ECLO, temp1, temp2, meanTEMP_year, sdTEMP_year)
+  
+  deg2 <- rbind(deg2, TAB)
+}
+
+geese$TEMP_Y <- deg2$meanTEMP_year[match(geese$YEAR, deg2$YEAR)]
+
+#### Partial pressure of water per nest ####
+#######----Buck equation----#######
+# the simpliest one
 
 deg$pH2O_Buck <- 0.61121 * exp((18.678 - deg$Mean_Temp / 234.5) * (deg$Mean_Temp/(257.14 + deg$Mean_Temp)))
 
 
 for(i in geese$X){
-  geese$meanPh2o_Buck[i] <- mean(deg$pH2O_Buck[which(deg$Year == geese$YEAR[i] & deg$JJ >= geese$INITIATION[i] & deg$JJ <= geese$INITIATION[i] + geese$EXPO2[i] - 1)])
-  geese$sdPh2o_Buck[i] <- sd(deg$pH2O_Buck[which(deg$Year == geese$YEAR[i] & deg$JJ >= geese$INITIATION[i] & deg$JJ <= geese$INITIATION[i] + geese$EXPO2[i] - 1)])
+  geese$meanPh2o_Buck[i] <- mean(deg$pH2O_Buck[which(deg$Year == geese$YEAR[i] & deg$JJ >= geese$INITIATION[i] & deg$JJ <= geese$INITIATION[i] + geese$EXPO2[i] - 1)], na.rm = T)
+  geese$sdPh2o_Buck[i] <- sd(deg$pH2O_Buck[which(deg$Year == geese$YEAR[i] & deg$JJ >= geese$INITIATION[i] & deg$JJ <= geese$INITIATION[i] + geese$EXPO2[i] - 1)], na.rm = T)
 }
 
 # Data exploration
@@ -566,7 +568,7 @@ for (i in 1:23){
   pchs <- ifelse(div[[i]]$Fate == "0", 20, 8)
   plot(div[[i]]$EXPO, div[[i]]$meanPh2o_Buck, bty = "n", xlab = unique(div[[i]]$YEAR),col = cols, pch = pchs, ylab = "Buck Mean p(H2O)", ylim = c(min(geese$meanPh2o_Buck), max(geese$meanPh2o_Buck)), cex = 2)}
 
-# Goff-Gratch equation 
+#######----Goff-Gratch equation ***----####### 
 
 #e is the saturation water vapor pressure in hPa
 t <- deg$Mean_Temp + 273.15 #the absolute air temperature in kelvins
@@ -579,8 +581,8 @@ deg$pH2O_GG <- exp(log_e)
 
 # Mean of pH2O computation per nest
 for(i in geese$X){
-  geese$meanPh2o_GG[i] <- mean(deg$pH2O_GG[which(deg$Year == geese$YEAR[i] & deg$JJ >= geese$INITIATION[i] & deg$JJ <= geese$INITIATION[i] + geese$EXPO2[i] - 1)])
-  geese$sdPh2o_GG[i] <- sd(deg$pH2O_GG[which(deg$Year == geese$YEAR[i] & deg$JJ >= geese$INITIATION[i] & deg$JJ <= geese$INITIATION[i] + geese$EXPO2[i] - 1)])
+  geese$meanPh2o_GG[i] <- mean(deg$pH2O_GG[which(deg$Year == geese$YEAR[i] & deg$JJ >= geese$INITIATION[i] & deg$JJ <= geese$INITIATION[i] + geese$EXPO2[i] - 1)], na.rm = T)
+  geese$sdPh2o_GG[i] <- sd(deg$pH2O_GG[which(deg$Year == geese$YEAR[i] & deg$JJ >= geese$INITIATION[i] & deg$JJ <= geese$INITIATION[i] + geese$EXPO2[i] - 1)], na.rm = T)
 }
 
 # Data exploration
@@ -593,7 +595,27 @@ for (i in 1:23){
   pchs <- ifelse(div[[i]]$Fate == "0", 20, 8)
   plot(div[[i]]$EXPO, div[[i]]$meanPh2o_GG, bty = "n", xlab = unique(div[[i]]$YEAR),col = cols, pch = pchs, ylab = "GG Mean p(H2O)", ylim = c(min(geese$meanPh2o_GG), max(geese$meanPh2o_GG)), cex = 2)}
 
-# computation of one value per year
+#### Partial pressure of water per year --- Buck equation ####
+phh <- NULL
+for (i in unique(deg$Year)) {
+  YEAR <- i
+  INI <- cum2$INI[cum2$YEAR == i]
+  ECLO <- cum2$ECLO[cum2$YEAR == i]
+  
+  pH2O1 <- deg$pH2O_Buck[deg$Year == i & deg$JJ == INI]
+  pH2O2 <- deg$pH2O_Buck[deg$Year == i & deg$JJ == ECLO]
+  
+  meanPH2O_year <- mean(deg$pH2O_Buck[deg$Year == i & deg$JJ >= INI & deg$JJ <= ECLO], na.rm = TRUE)
+  sdPH2O_year <- sd(deg$pH2O_Buck[deg$Year == i & deg$JJ >= INI & deg$JJ <= ECLO], na.rm = TRUE)
+  
+  TAB <- data.frame(YEAR, INI, ECLO, pH2O1, pH2O2, meanPH2O_year, sdPH2O_year)
+  
+  phh <- rbind(phh, TAB)
+}
+
+geese$PH2O_B_Y <- phh$meanPH2O_year[match(geese$YEAR, phh$YEAR)]
+
+#### Partial pressure of water per year --- GG equation ####
 ph <- NULL
 for (i in unique(deg$Year)) {
   YEAR <- i
@@ -611,7 +633,34 @@ for (i in unique(deg$Year)) {
   ph <- rbind(ph, TAB)
 }
 
-geese$meanPH2O_year <- deg2$meanPH2O_year[match(geese$YEAR, deg2$YEAR)]
+geese$PH2O_GG_Y <- ph$meanPH2O_year[match(geese$YEAR, ph$YEAR)]
+
+#### Check point for the climate variables per year ####
+check <- as.data.frame(1995:2017)
+names(check) <- "YEAR"
+check$GG_Ph2o <- ph$meanPH2O_year[match(check$YEAR, ph$YEAR)]
+check$Buck_Ph2o <- phh$meanPH2O_year[match(check$YEAR, phh$YEAR)]
+check$cumPREC <- geese$cumPREC_year[match(check$YEAR, geese$YEAR)]
+check$meanTEMP <- geese$meanTEMP_year[match(check$YEAR, geese$YEAR)]
+head(check)
+
+x11()
+par(mfrow = c(3, 1), mar = c(4, 4, 0, 4))
+plot(check$YEAR, check$meanTEMP, col = "red", type = "l", xlab = "Year", ylab = "Seasonal mean temperature", bty = "n", lwd = 2)
+plot(check$YEAR, check$cumPREC, col = "blue", type = "l", xlab = "Year", ylab = "Seasonal cumulative precipitation", bty = "n", lwd = 2)
+
+plot(check$YEAR, check$GG_Ph2o, col = "green", type = "l", xlab = "Year", ylab = "Seas. mean pH2O (GG equation)", bty = "n", lwd = 2, col.lab = "green")
+par(new = T)
+plot(check$YEAR, check$Buck_Ph2o, col = "darkgreen", type = "l", xlab = "", ylab = "", bty = "n", xaxt = "n", yaxt = "n",lwd = 2)
+axis(side = 4,
+     lwd = 1,
+     #las = 2,
+     cex.axis = 1)
+mtext(side = 4,
+      #cex.lab = 0.5,
+      line = 3,
+      "Seas. mean pH2O - Buck equation",
+      col.lab = "darkgreen")
 
 #### Data Analyses ####
   # Setting factors
