@@ -554,8 +554,8 @@ deg$pH2O_Buck <- 0.61121 * exp((18.678 - deg$Mean_Temp / 234.5) * (deg$Mean_Temp
 
 
 for(i in geese$X){
-  geese$meanPh2o_Buck[i] <- mean(deg$pH2O_Buck[which(deg$Year == geese$YEAR[i] & deg$JJ >= geese$INITIATION[i] & deg$JJ <= geese$INITIATION[i] + geese$EXPO2[i] - 1)], na.rm = T)
-  geese$sdPh2o_Buck[i] <- sd(deg$pH2O_Buck[which(deg$Year == geese$YEAR[i] & deg$JJ >= geese$INITIATION[i] & deg$JJ <= geese$INITIATION[i] + geese$EXPO2[i] - 1)], na.rm = T)
+  geese$mPh2o_B[i] <- mean(deg$pH2O_Buck[which(deg$Year == geese$YEAR[i] & deg$JJ >= geese$INITIATION[i] & deg$JJ <= geese$INITIATION[i] + geese$EXPO2[i] - 1)], na.rm = T)
+  geese$sdPh2o_B[i] <- sd(deg$pH2O_Buck[which(deg$Year == geese$YEAR[i] & deg$JJ >= geese$INITIATION[i] & deg$JJ <= geese$INITIATION[i] + geese$EXPO2[i] - 1)], na.rm = T)
 }
 
 # Data exploration
@@ -581,7 +581,7 @@ deg$pH2O_GG <- exp(log_e)
 
 # Mean of pH2O computation per nest
 for(i in geese$X){
-  geese$meanPh2o_GG[i] <- mean(deg$pH2O_GG[which(deg$Year == geese$YEAR[i] & deg$JJ >= geese$INITIATION[i] & deg$JJ <= geese$INITIATION[i] + geese$EXPO2[i] - 1)], na.rm = T)
+  geese$mPh2o_GG[i] <- mean(deg$pH2O_GG[which(deg$Year == geese$YEAR[i] & deg$JJ >= geese$INITIATION[i] & deg$JJ <= geese$INITIATION[i] + geese$EXPO2[i] - 1)], na.rm = T)
   geese$sdPh2o_GG[i] <- sd(deg$pH2O_GG[which(deg$Year == geese$YEAR[i] & deg$JJ >= geese$INITIATION[i] & deg$JJ <= geese$INITIATION[i] + geese$EXPO2[i] - 1)], na.rm = T)
 }
 
@@ -593,7 +593,7 @@ par(mfrow = c(5, 5), mar = c(5, 5, 1, 1))
 for (i in 1:23){
   cols <- ifelse(div[[i]]$Fate == "0", "olivedrab3", "darkgoldenrod2")
   pchs <- ifelse(div[[i]]$Fate == "0", 20, 8)
-  plot(div[[i]]$EXPO, div[[i]]$meanPh2o_GG, bty = "n", xlab = unique(div[[i]]$YEAR),col = cols, pch = pchs, ylab = "GG Mean p(H2O)", ylim = c(min(geese$meanPh2o_GG), max(geese$meanPh2o_GG)), cex = 2)}
+  plot(div[[i]]$EXPO, div[[i]]$mPh2o_GG, bty = "n", xlab = unique(div[[i]]$YEAR),col = cols, pch = pchs, ylab = "GG Mean p(H2O)", ylim = c(min(geese$mPh2o_GG), max(geese$mPh2o_GG)), cex = 2)}
 
 #### Partial pressure of water per year --- Buck equation ####
 phh <- NULL
@@ -668,7 +668,7 @@ geese$YEAR <- as.factor(geese$YEAR)
 geese$RAINFALL <- relevel(geese$RAINFALL, "LOW")
 geese <- droplevels(geese)
 
-#write.csv(geese, "GOOSE_geese.txt") # For Rmarkdown document
+#write.csv(geese, "GOOSE_geese.txt") # For Rmarkdown document & analysis on VAIO
 
 #### True nesting success per habitat / treatment / year ####
 geese_SUPPL <- geese[geese$YEAR == "2015" | geese$YEAR == "2016" | geese$YEAR == "2017",]
