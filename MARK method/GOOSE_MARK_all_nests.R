@@ -669,6 +669,7 @@ geese$RAINFALL <- relevel(geese$RAINFALL, "LOW")
 geese <- droplevels(geese)
 
 #write.csv(geese, "GOOSE_geese.txt") # For Rmarkdown document & analysis on VAIO
+#write.csv(geese, "GOOSE_geese_with_WF.txt") # Same than before PLUS WF supplemented nests - For analysis in GOOSE_MARK_suppl_nests.R
 
 #### True nesting success per habitat / treatment / year ####
 geese_SUPPL <- geese[geese$YEAR == "2015" | geese$YEAR == "2016" | geese$YEAR == "2017",]
