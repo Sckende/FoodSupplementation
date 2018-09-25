@@ -74,14 +74,15 @@ WATER.1.results
 
 
 #Save models list and est model
-#save(WATER.1.results, file = "waterGEESE_2015-2017.rda")
-#save(wat8, file = "waterGEESE_2015-2017_1.rda")
-#save(wat9, file = "waterGEESE_2015-2017_2.rda")
+save(WATER.1.results, file = "waterGEESE_2015-2017.rda")
+save(wat8, file = "waterGEESE_2015-2017_1.rda")
+save(wat7, file = "waterGEESE_2015-2017_2.rda")
+save(wat9, file = "waterGEESE_2015-2017_3.rda")
 
 #### Second WATER models - 2005, 2015 to 2017 ####
 w05 <- read.table("GOOSE_Lecomte_supp_nests_2005.txt", h = T )
 #Obtention de la variable AgeDay1 = correspond à l'âge du nid lors du premier jour du suivi de nids
-w05$AgeDay1 <- (w05$AgeFound - w05$FirstFound) + 1
+w05$AgeDay1 <- (w05$AgeFound - w05$FirstFound)
 
 supW1 <- sup[which(sup$YEAR == 2015 | sup$YEAR == 2016 | sup$YEAR == 2017),]
 supW1 <- supW1[which(supW1$SUPPL == "W" | supW1$SUPPL == "TEM"),]
@@ -145,9 +146,9 @@ WATER.2.results
 
 
 #Save models list and est model
-#save(WATER.2.results, file = "waterGEESE_2005-2017.rda")
-#save(wat8, file = "waterGEESE_2005-2017_1.rda")
-#save(wat9, file = "waterGEESE_2005-2017_2.rda")
+save(WATER.2.results, file = "waterGEESE_2005-2017.rda")
+save(wat8, file = "waterGEESE_2005-2017_1.rda")
+save(wat9, file = "waterGEESE_2005-2017_2.rda")
 
 #### Food models ####
 # Concerning years : 2015, 2016 & 2017
@@ -216,12 +217,12 @@ FOOD.results
 
 
 #Save models list and est model
-#save(FOOD.results, file = "foodGEESE.rda")
-#save(foo8, file = "foodGEESE_1.rda")
-#save(foo7, file = "foodGEESE_2.rda")
-#save(foo9, file = "foodGEESE_3.rda")
-#save(foo12, file = "foodGEESE_4.rda")
-#save(foo11, file = "foodGEESE_5.rda")
+save(FOOD.results, file = "foodGEESE.rda")
+save(foo8, file = "foodGEESE_1.rda")
+save(foo7, file = "foodGEESE_2.rda")
+save(foo9, file = "foodGEESE_3.rda")
+save(foo12, file = "foodGEESE_4.rda")
+save(foo11, file = "foodGEESE_5.rda")
 
 
 #### WATER/FOOD models ####
@@ -259,6 +260,8 @@ run.WATFOO = function()
   
   # SUPPL + HAB + NestAge + INITIATION
   watfoo6 <- mark(supWF, nocc = nocc, model = "Nest", model.parameters = list(S = list(formula = ~ SUPPL + HAB + NestAge + INITIATION)), groups = c("SUPPL", "HAB"), delete = T)
+  
+  # ** WARNING message **
   
   # SUPPL + HAB + NestAge
   watfoo7 <- mark(supWF, nocc = nocc, model = "Nest", model.parameters = list(S = list(formula = ~ SUPPL + HAB + NestAge)), groups = c("SUPPL", "HAB"), delete = T)
