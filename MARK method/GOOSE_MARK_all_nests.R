@@ -319,7 +319,7 @@ for(i in 1:nlevels(geese$YEAR)){
 #Creation of AgeFound variable#
 #--------------------------------#
 #WARNING ! It has to be done before the modification of the FirstFound variable
-div[[i]]$AgeFound <- (div[[i]]$FirstFound - div[[i]]$INITIATION) + 1 #...+1 cause age 0 is impossible
+div[[i]]$AgeFound <- (div[[i]]$FirstFound - div[[i]]$INITIATION)
 div[[i]]$FindNest <- div[[i]]$FirstFound
 
 #Modification des dates de la variables FirstFound (la date minimale = Jour 1)#
@@ -640,8 +640,8 @@ check <- as.data.frame(1995:2017)
 names(check) <- "YEAR"
 check$GG_Ph2o <- ph$meanPH2O_year[match(check$YEAR, ph$YEAR)]
 check$Buck_Ph2o <- phh$meanPH2O_year[match(check$YEAR, phh$YEAR)]
-check$cumPREC <- geese$cumPREC_year[match(check$YEAR, geese$YEAR)]
-check$meanTEMP <- geese$meanTEMP_year[match(check$YEAR, geese$YEAR)]
+check$cumPREC <- geese$PREC_Y[match(check$YEAR, geese$YEAR)]
+check$meanTEMP <- geese$TEMP_Y[match(check$YEAR, geese$YEAR)]
 head(check)
 
 x11()
