@@ -819,133 +819,62 @@ geese.YEAR.2.results
 #### FULL MODELS ####
 # Models explaining maximal of variation of explained response with the time effect (YEAR, NestAge) and the habitat effect. Models including ALL MONITORED GOOSE NESTS IN COLONY since 1995
 
-full_goo <- geese[geese$SUPPL == "TEM",]
+# Models were run on VAIO computer --> see the VAIO script
+# Results are saved under "geeseFULL.rda" for the comparaiso of all models and under "geeseFULL_1.rda" for the best model
 
-# valeur de "nocc" varie selon le nombre d'occasion de capture, soit du premier au dernier jour du suivi, correspond au max de "LastChecked"
-nocc <- max(full_goo$LastChecked)
+load("geeseFULL.rda")
+geese.FULL.results$model.table
 
-run.geese.FULL = function()
-{
+#### WEATHER models ####
 
-full0 <- mark(full_goo, nocc = nocc, model = "Nest", model.parameters = list(S = list(formula = ~ 1)), delete = T)
-  
-full1 <- mark(full_goo, nocc = nocc, model = "Nest", model.parameters = list(S = list(formula = ~ YEAR + NestAge)), groups = "YEAR", delete = T)
-
-full3 <- mark(full_goo, nocc = nocc, model = "Nest", model.parameters = list(S = list(formula = ~ YEAR )), groups = "YEAR", delete = T)
-
-full4 <- mark(full_goo, nocc = nocc, model = "Nest", model.parameters = list(S = list(formula = ~ NestAge)), delete = T)
-
-full5 <- mark(full_goo, nocc = nocc, model = "Nest", model.parameters = list(S = list(formula = ~ YEAR + NestAge + HAB)), groups = c("YEAR", "HAB"), delete = T)
-
-full6 <- mark(full_goo, nocc = nocc, model = "Nest", model.parameters = list(S = list(formula = ~ YEAR + HAB)), groups = c("YEAR", "HAB"), delete = T)
-
-full7 <- mark(full_goo, nocc = nocc, model = "Nest", model.parameters = list(S = list(formula = ~ NestAge + HAB)), groups = "HAB", delete = T)
-
-full8 <- mark(full_goo, nocc = nocc, model = "Nest", model.parameters = list(S = list(formula = ~ HAB)), groups = "HAB", delete = T)
-
-# INTERACTION
-full2 <- mark(full_goo, nocc = nocc, model = "Nest", model.parameters = list(S = list(formula = ~ YEAR * NestAge)), groups = "YEAR", delete = T)
-
-full9 <- mark(full_goo, nocc = nocc, model = "Nest", model.parameters = list(S = list(formula = ~ YEAR*HAB)), groups = c("YEAR", "HAB"), delete = T)
-
-full10 <- mark(full_goo, nocc = nocc, model = "Nest", model.parameters = list(S = list(formula = ~ YEAR*HAB + NestAge)), groups = c("YEAR", "HAB"), delete = T)
-
-full11 <- mark(full_goo, nocc = nocc, model = "Nest", model.parameters = list(S = list(formula = ~ YEAR*NestAge + HAB)), groups = c("YEAR", "HAB"), delete = T)
-
-full12 <- mark(full_goo, nocc = nocc, model = "Nest", model.parameters = list(S = list(formula = ~ YEAR*NestAge + YEAR*HAB)), groups = c("YEAR", "HAB"), delete = T)
-
-return(collect.models() )
-}
-
-# run defined models
-geese.FULL.results <- run.geese.FULL()
-geese.FULL.results
-
-
-#Save models list and est model
-#save(geese.FULL.TIME.results, file = "geeseFULLTIME.rda")
-#save(time1, file = "geeseFULLTIME_1.rda")
-
-
-#### WEATHER/SUPPLEMENTATION models ####
+# *** Here, we use yearly values for climate variables ***
 
 # valeur de "nocc" varie selon le nombre d'occasion de capture, soit du premier au dernier jour du suivi, correspond au max de "LastChecked"
 nocc <- max(geese$LastChecked)
 
-run.geese.WEATHER.SUPPL=function()
+run.geese.WEATHER=function()
 {
-  m0 <- mark(geese, nocc = nocc, model = "Nest", model.parameters = list(S = list(formula = ~ 1)), delete = T)
+  # Null model
+  m1 <- mark(geese, nocc = nocc, model = "Nest", model.parameters = list(S = list(formula = ~ 1)), delete = T)
   
-  m1 <- mark(geese, nocc = nocc, model = "Nest", model.parameters = list(S = list(formula = ~ HAB)), groups = "HAB", delete = T)
-  
-  m2 <- mark(geese, nocc = nocc, model = "Nest", model.parameters = list(S = list(formula = ~ SUPPL)), groups = "SUPPL", delete = T)
+  # HAB + INITIATION + YEAR
+  m2 <- mark(geese, nocc = nocc, model = "Nest", model.parameters = list(S = list(formula = ~ HAB + INITIATION + YEAR)), groups = c("HAB", "YEAR"), delete = T)
 
-# TEMPERATURE  
-  temp1 <-  mark(geese, nocc = nocc, model = "Nest", model.parameters = list(S = list(formula = ~ meanTEMP)), delete = T)
+# Temperature  
+  m3 <-  mark(geese, nocc = nocc, model = "Nest", model.parameters = list(S = list(formula = ~ HAB + INITIATION + YEAR + TEMP_Y)), groups = c("HAB", "YEAR"), delete = T)
   
-  temp2 <-  mark(geese, nocc = nocc, model = "Nest", model.parameters = list(S = list(formula = ~ meanTEMP + HAB)), groups = "HAB", delete = T)
+  # Precipitation
+  m4 <-  mark(geese, nocc = nocc, model = "Nest", model.parameters = list(S = list(formula = ~ HAB + INITIATION + YEAR + PREC_Y)), groups = c("HAB", "YEAR"), delete = T)
   
-  temp3 <-  mark(geese, nocc = nocc, model = "Nest", model.parameters = list(S = list(formula = ~ meanTEMP + SUPPL)), groups = "SUPPL", delete = T)
+  # p(H2O)
+  m5 <-  mark(geese, nocc = nocc, model = "Nest", model.parameters = list(S = list(formula = ~ HAB + INITIATION + YEAR + PH2O_GG_Y)), groups = c("HAB", "YEAR"), delete = T)
   
-  temp4 <-  mark(geese, nocc = nocc, model = "Nest", model.parameters = list(S = list(formula = ~ meanTEMP + SUPPL + HAB)), groups = c("SUPPL", "HAB"), delete = T)
+  # Temperature + precipitation
+  m6 <-  mark(geese, nocc = nocc, model = "Nest", model.parameters = list(S = list(formula = ~ HAB + INITIATION + YEAR + TEMP_Y + PREC_Y)), groups = c("HAB", "YEAR"), delete = T)
   
-# CUMULATIVE PRECIPITATION  
-  prec1 <-  mark(geese, nocc = nocc, model = "Nest", model.parameters = list(S = list(formula = ~ cumPREC)), delete = T)
+  # Temperature + precipitation
+  m7 <-  mark(geese, nocc = nocc, model = "Nest", model.parameters = list(S = list(formula = ~ HAB + INITIATION + YEAR + TEMP_Y + PH2O_GG_Y)), groups = c("HAB", "YEAR"), delete = T)
   
-  prec2 <-  mark(geese, nocc = nocc, model = "Nest", model.parameters = list(S = list(formula = ~ cumPREC + HAB)), groups = "HAB", delete = T)
+  # Precipitation + p(H2O)
+  m8 <-  mark(geese, nocc = nocc, model = "Nest", model.parameters = list(S = list(formula = ~ HAB + INITIATION + YEAR + PREC_Y + PH2O_GG_Y)), groups = c("HAB", "YEAR"), delete = T)
   
-  prec3 <-  mark(geese, nocc = nocc, model = "Nest", model.parameters = list(S = list(formula = ~ cumPREC + SUPPL)), groups = "SUPPL", delete = T)
+  # Precipitation + p(H2O) + temperature
+  m9 <-  mark(geese, nocc = nocc, model = "Nest", model.parameters = list(S = list(formula = ~ HAB + INITIATION + YEAR + PREC_Y + PH2O_GG_Y + TEMP_Y)), groups = c("HAB", "YEAR"), delete = T)
   
-  prec4 <-  mark(geese, nocc = nocc, model = "Nest", model.parameters = list(S = list(formula = ~ cumPREC + SUPPL + HAB)), groups = c("SUPPL", "HAB"), delete = T)
+  # Precipitation x temperature
+  m10 <-  mark(geese, nocc = nocc, model = "Nest", model.parameters = list(S = list(formula = ~ HAB + INITIATION + YEAR + PREC_Y*TEMP_Y)), groups = c("HAB", "YEAR"), delete = T)
   
-# RAINFALL  
-  rain1 <-  mark(geese, nocc = nocc, model = "Nest", model.parameters = list(S = list(formula = ~ RAINFALL)), groups = "RAINFALL", delete = T)
-  
-  rain2 <-  mark(geese, nocc = nocc, model = "Nest", model.parameters = list(S = list(formula = ~ RAINFALL + HAB)), groups = c("RAINFALL", "HAB"), delete = T)
-  
-  rain3 <-  mark(geese, nocc = nocc, model = "Nest", model.parameters = list(S = list(formula = ~ RAINFALL + SUPPL)), groups = c("RAINFALL", "SUPPL"), delete = T)
-  
-  rain4 <-  mark(geese, nocc = nocc, model = "Nest", model.parameters = list(S = list(formula = ~ RAINFALL + SUPPL + HAB)), groups = c("RAINFALL", "SUPPL", "HAB"), delete = T)
-  
-# p(H2O)  
-  vap1 <-  mark(geese, nocc = nocc, model = "Nest", model.parameters = list(S = list(formula = ~ meanPh2o)), delete = T)
-  
-  vap2 <-  mark(geese, nocc = nocc, model = "Nest", model.parameters = list(S = list(formula = ~ meanPh2o + HAB)), groups = "HAB", delete = T)
-  
-  vap3 <-  mark(geese, nocc = nocc, model = "Nest", model.parameters = list(S = list(formula = ~ meanPh2o + SUPPL)), groups = "SUPPL", delete = T)
-  
-  vap4 <-  mark(geese, nocc = nocc, model = "Nest", model.parameters = list(S = list(formula = ~ meanPh2o + SUPPL + HAB)), groups = c("SUPPL", "HAB"), delete = T)
-  
-# WEATHER MIXTE VARIABLES
-  mix1 <-  mark(geese, nocc = nocc, model = "Nest", model.parameters = list(S = list(formula = ~ meanTEMP + meanPh2o + SUPPL + HAB)), groups = c("SUPPL", "HAB"), delete = T)
-  
-  mix2 <-  mark(geese, nocc = nocc, model = "Nest", model.parameters = list(S = list(formula = ~ meanTEMP + cumPREC + SUPPL + HAB)), groups = c("SUPPL", "HAB"), delete = T)
-  
-  mix3 <-  mark(geese, nocc = nocc, model = "Nest", model.parameters = list(S = list(formula = ~ meanTEMP + meanPh2o + SUPPL)), groups = "SUPPL", delete = T)
-  
-  mix4 <-  mark(geese, nocc = nocc, model = "Nest", model.parameters = list(S = list(formula = ~ meanTEMP + meanPh2o + HAB)), groups = "HAB", delete = T)
-  
-  mix5 <-  mark(geese, nocc = nocc, model = "Nest", model.parameters = list(S = list(formula = ~ meanTEMP + meanPh2o)), delete = T)
-  
-  mix6 <-  mark(geese, nocc = nocc, model = "Nest", model.parameters = list(S = list(formula = ~ meanTEMP + cumPREC + SUPPL)), groups = "SUPPL", delete = T)
-  
-  mix7 <-  mark(geese, nocc = nocc, model = "Nest", model.parameters = list(S = list(formula = ~ meanTEMP + cumPREC + HAB)), groups = "HAB", delete = T)
-  
-  mix8 <-  mark(geese, nocc = nocc, model = "Nest", model.parameters = list(S = list(formula = ~ meanTEMP + cumPREC)), delete = T)
-  
-  
-  mix9 <-  mark(geese, nocc = nocc, model = "Nest", model.parameters = list(S = list(formula = ~ meanTEMP*cumPREC + SUPPL + HAB)), groups = c("SUPPL", "HAB"), delete = T)
   
   return(collect.models())
 }
 
 
-geese.WEATHER.SUPPL.results <- run.geese.WEATHER.SUPPL()
-geese.WEATHER.SUPPL.results
+geese.WEATHER.results <- run.geese.WEATHER()
+geese.WEATHER.results
 
 #Save models list and est model
-#save(geese.WEATHER.SUPPL.results, file = "geeseWEASUPPL.rda")
-#save(mix2, file = "geeseWEASUPPL_1.rda")
+#save(geese.WEATHER.results, file = "geeseWEATHER.rda")
+#save(XXX, file = "geeseWEATHER_1.rda")
 
 
 
