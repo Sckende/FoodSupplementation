@@ -34,20 +34,22 @@ cum2$NEST_DURATION <- cum2$ECLO - cum2$INI
 # cumRAIN/day to compensate the different length of nesing period
 cum2$cumRAIN_DAY <- cum2$cumRAIN / cum2$NEST_DURATION
 
-#write.table(cum2, "PREC_cum2.txt", dec = ".")
+WEA <- read.table("GOOSE_PAPER_Annual_weather.txt", h = T)
+head(WEA)
+summary(WEA)
 
 
 # Plot
-#png("GOOSE_prec.tiff",
-#res=300,
-#width=20,
-#height=15,
-#pointsize=12,
-#unit="cm",
-#bg="transparent")
+png("C:/Users/HP_9470m/Dropbox/PHD. Claire/Chapitres de thèse/CHAPTER 1 - Geese nesting success & supplemented nests/PAPER/Figures/GOOSE_prec_temp.tiff",
+res=300,
+width=20,
+height=15,
+pointsize=12,
+unit="cm",
+bg="transparent")
 
-x11()
-par(mar=c(5,5,1,1)) # inner margin - default parameter is par("mar") <- 5.1 4.1 4.1 2.1
+#x11()
+par(mar=c(5,5,1,5)) # inner margin - default parameter is par("mar") <- 5.1 4.1 4.1 2.1
 my_vector <- cum2$cumRAIN
 names(my_vector) <- cum2$YEAR
 barplot(my_vector,
@@ -56,111 +58,53 @@ barplot(my_vector,
         # main = "Trend for specific dates for each goose nesting period",
         # ylab = "Cumulative precipitation (mm)",
         yaxt = "n",
-        ylim = c(0, 70))
+        ylim = c(0, 90))
 axis(side = 2,
      lwd = 1,
      las = 2)
 abline(h = mean(cum2$cumRAIN),
-       col = "darkolivegreen",
+       col = "olivedrab3",
        lwd = 3,
        lty = "solid")
 abline(h = mean(cum2$cumRAIN) - sd(cum2$cumRAIN),
-       col = "darkolivegreen",
+       col = "olivedrab3",
        lwd = 1.5,
        lty = "dotdash")
 abline(h = mean(cum2$cumRAIN) + sd(cum2$cumRAIN),
-       col = "darkolivegreen",
+       col = "olivedrab3",
        lwd = 1.5,
        lty = "dotdash")
-
-dev.off()
-
-#### Annual mean temperature and pH2O ####
-
-WEA <- read.table("GOOSE_PAPER_Annual_weather.txt", h = T)
-head(WEA)
-summary(WEA)
-
-png("C:/Users/HP_9470m/Dropbox/PHD. Claire/Chapitres de thèse/CHAPTER 1 - Geese nesting success & supplemented nests/PAPER/Figures/GOOSE_PAPER_meanTEMP_pH2O.tiff",
-    res=300,
-    width=20,
-    height=15,
-    pointsize=12,
-    unit="cm",
-    bg="transparent")
-
-#x11()
-#par(oma=c(0,0,0,3)) # outer margin
-par(mar=c(5,5,1,5)) # inner margin - default parameter is par("mar") <- 5.1 4.1 4.1 2.1
-
-plot(WEA$YEAR,
-     WEA$meanTEMP,
-     xlab = "Year",
-     ylab = "",
-     xaxp = c(1995, 2017, 12),
-     ylim = c(2, 8),
-     bty = "n",
-     yaxt = "n",
-     xaxt = "n",
-     cex = 1,
-     cex.lab = 1,
-     col = "darkblue",
-     pch = 19,
-     lwd = 2,
-     type = 'b'
-     )
-
-lines(WEA$YEAR,
-      rep(mean(WEA$meanTEMP), 23),
-      col = "darkblue",
-      type = "l",
-      lty = 4,
-      lwd = 2)
-
-axis(side = 2,
-     lwd = 1,
-     las = 2)
 
 par(new = T)
 
 plot(WEA$YEAR,
-     WEA$GG_Ph2o,
+     WEA$meanTEMP,
      xlab = "",
      ylab = "",
-     ylim = c(0.1, 0.13),
+     xaxp = c(1995, 2017, 12),
+     ylim = c(0, 8),
      bty = "n",
      yaxt = "n",
      xaxt = "n",
      cex = 1,
      cex.lab = 1,
-     col = "chocolate",
-     pch = 17,
-     type = 'b',
-     lwd = 2)
+     col = "darkgoldenrod2",
+     pch = 19,
+     lwd = 2,
+     type = 'b'
+)
 
 lines(WEA$YEAR,
-      rep(mean(WEA$GG_Ph2o), 23),
-      col = "chocolate",
+      rep(mean(WEA$meanTEMP), 23),
+      col = "darkgoldenrod2",
       type = "l",
       lty = 4,
       lwd = 2)
-
-axis(side = 1,
-     at = 1995:2017,
-     lwd = 1)
 
 axis(side = 4,
      lwd = 1,
      las = 2)
 
-# Add a legend
-legend("topleft", 
-       legend = c("Mean temperature", "pH2O"), 
-       col = c("darkblue", "chocolate"), 
-       pch = c(19,17), 
-       bty = "n", 
-       pt.cex = 1, 
-       cex = 1, 
-       text.col = "black", 
-       horiz = F )
+
 dev.off()
+
