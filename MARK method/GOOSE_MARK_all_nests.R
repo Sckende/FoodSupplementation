@@ -920,6 +920,7 @@ geese.EXTREM.results <- run.geese.EXTREM()
 geese.EXTREM.results
 
 #Save models list and est model
+write.table(m4$results$beta, "test.txt")
 save(geese.EXTREM.results, file = "geeseEXTREM.rda")
 save(m4, file = "geeseEXTREM_1.rda")
 
