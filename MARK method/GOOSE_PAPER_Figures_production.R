@@ -3,7 +3,7 @@
 setwd("C:/Users/HP_9470m/OneDrive - Université de Moncton/Doc doc doc/Ph.D. - ANALYSES/R analysis/Data")
 list.files()
 
-#### Yearly cumulative precipitation ####
+#### Annual cumulative precipitation ####
 # Trends between 1995 and 2017 -  Specific dates for each goose nidification period ***
 rain <- read.table("PREC_precipitation_Bylot_1995-2017.txt", sep = "\t", dec = ",", h = T)
 summary(rain)
@@ -75,7 +75,7 @@ abline(h = mean(cum2$cumRAIN) + sd(cum2$cumRAIN),
 
 dev.off()
 
-#### Yearly mean temperature and p(H2O)
+#### Annual mean temperature and pH2O ####
 
 WEA <- read.table("GOOSE_PAPER_Annual_weather.txt", h = T)
 head(WEA)
@@ -96,7 +96,7 @@ par(mar=c(5,5,1,5)) # inner margin - default parameter is par("mar") <- 5.1 4.1 
 plot(WEA$YEAR,
      WEA$meanTEMP,
      xlab = "Year",
-     #     ylab = "Mean temperature (°C)",
+     ylab = "",
      xaxp = c(1995, 2017, 12),
      ylim = c(2, 8),
      bty = "n",
@@ -155,7 +155,7 @@ axis(side = 4,
 
 # Add a legend
 legend("topleft", 
-       legend = c("Mean temperature", "p(H2O)"), 
+       legend = c("Mean temperature", "pH2O"), 
        col = c("darkblue", "chocolate"), 
        pch = c(19,17), 
        bty = "n", 
