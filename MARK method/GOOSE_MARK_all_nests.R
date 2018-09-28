@@ -122,7 +122,7 @@ gsg$HAB[gsg$HAB == "Wetland"] <- "WET"
 
 gsg$SUPPL[gsg$SUPPL == "FOO"] <- "F"
 gsg$SUPPL[gsg$SUPPL == "WAT"] <- "W"
-gsg <- gsg[gsg$SUPPL != "WF",]
+#gsg <- gsg[gsg$SUPPL != "WF",]
 gsg <- gsg[gsg$SUPPL != "PRED_BEF_SUPPL",]
 
 # Delete the NIDIF variable
@@ -547,6 +547,18 @@ for (i in unique(deg$Year)) {
 geese$TEMP_Y <- deg2$meanTEMP_year[match(geese$YEAR, deg2$YEAR)]
 geese$sdTEMP_Y <- deg2$sdTEMP_year[match(geese$YEAR, deg2$YEAR)]
 
+#### Type of year concerning temperature ####
+ann_temp <- mean(deg2$meanTEMP_year)
+ann_temp_sd <- sd(deg2$meanTEMP_year)
+
+
+deg2$TEMP_TYP[deg2$meanTEMP_year < ann_temp - ann_temp_sd] <- "COLD"
+deg2$TEMP_TYP[deg2$meanTEMP_year > ann_temp + ann_temp_sd] <- "WARM"
+deg2$TEMP_TYP[deg2$meanTEMP_year >= ann_temp - ann_temp_sd & deg2$meanTEMP_year <= ann_temp + ann_temp_sd] <- "INTER"
+
+deg2$TEMP_TYP <- as.factor(deg2$TEMP_TYP)
+
+geese$TYP_TEMP <- deg2$TEMP_TYP[match(geese$YEAR, deg2$YEAR)]
 #### Partial pressure of water per nest ####
 #######----Buck equation----#######
 # the simpliest one
@@ -670,8 +682,9 @@ mtext(side = 4,
 
 #### Data Analyses ####
   # Setting factors
+geese$TYP_TEMP <- relevel(geese$TYP_TEMP, "INTER")
 geese$YEAR <- as.factor(geese$YEAR)
-geese$RAINFALL <- relevel(geese$RAINFALL, "LOW")
+geese$RAINFALL <- relevel(geese$RAINFALL, "INTER")
 geese <- droplevels(geese)
 
 #write.csv(geese, "GOOSE_geese.txt") # For Rmarkdown document & analysis on VAIO
@@ -831,9 +844,9 @@ geese.YEAR.2.results
 load("geeseFULL.rda")
 geese.FULL.results$model.table
 
-#### WEATHER models ####
+#### WEATHER models - ANNUAL VALUES####
 
-# *** Here, we use yearly values for climate variables ***
+# *** Here, we use annual values for climate variables ***
 
 # valeur de "nocc" varie selon le nombre d'occasion de capture, soit du premier au dernier jour du suivi, correspond au max de "LastChecked"
 nocc <- max(geese$LastChecked)
@@ -848,6 +861,7 @@ run.geese.WEATHER=function()
 
 # Temperature  
   m3 <-  mark(geese, nocc = nocc, model = "Nest", model.parameters = list(S = list(formula = ~ HAB + INITIATION + YEAR + TEMP_Y)), groups = c("HAB", "YEAR"), delete = T)
+
   
   # Precipitation
   m4 <-  mark(geese, nocc = nocc, model = "Nest", model.parameters = list(S = list(formula = ~ HAB + INITIATION + YEAR + PREC_Y)), groups = c("HAB", "YEAR"), delete = T)
@@ -882,6 +896,32 @@ geese.WEATHER.results
 #save(geese.WEATHER.results, file = "geeseWEATHER.rda")
 #save(XXX, file = "geeseWEATHER_1.rda")
 
+#### WEATHER models - FACTORIAL VALUES ####
+
+nocc <- max(geese$LastChecked)
+
+run.geese.EXTREM=function()
+{
+  # Null model
+  m1 <- mark(geese, nocc = nocc, model = "Nest", model.parameters = list(S = list(formula = ~ 1)), delete = T)
+
+  m2 <-  mark(geese, nocc = nocc, model = "Nest", model.parameters = list(S = list(formula = ~ HAB + NestAge + TYP_TEMP)), groups = c("HAB", "TYP_TEMP"), delete = T)
+  
+  m3 <-  mark(geese, nocc = nocc, model = "Nest", model.parameters = list(S = list(formula = ~ HAB + NestAge + RAINFALL)), groups = c("HAB", "RAINFALL"), delete = T)
+  
+  m4 <-  mark(geese, nocc = nocc, model = "Nest", model.parameters = list(S = list(formula = ~ HAB + NestAge + RAINFALL*TYP_TEMP)), groups = c("HAB", "RAINFALL", "TYP_TEMP"), delete = T)
+  
+  m5 <-  mark(geese, nocc = nocc, model = "Nest", model.parameters = list(S = list(formula = ~ HAB + NestAge + RAINFALL + TYP_TEMP)), groups = c("HAB", "RAINFALL", "TYP_TEMP"), delete = T)
+  
+  return(collect.models())
+}
+
+geese.EXTREM.results <- run.geese.EXTREM()
+geese.EXTREM.results
+
+#Save models list and est model
+save(geese.EXTREM.results, file = "geeseEXTREM.rda")
+save(m4, file = "geeseEXTREM_1.rda")
 
 #################### Best model for full database ####################
 ############## only considering models without interaction ##########
