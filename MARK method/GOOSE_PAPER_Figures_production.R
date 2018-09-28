@@ -101,6 +101,20 @@ lines(WEA$YEAR,
       lty = 4,
       lwd = 2)
 
+lines(WEA$YEAR,
+      rep(mean(WEA$meanTEMP) + sd(WEA$meanTEMP), 23),
+      col = "darkgoldenrod2",
+      type = "l",
+      lty = 5,
+      lwd = 2)
+
+lines(WEA$YEAR,
+      rep(mean(WEA$meanTEMP) - sd(WEA$meanTEMP), 23),
+      col = "darkgoldenrod2",
+      type = "l",
+      lty = 5,
+      lwd = 2)
+
 axis(side = 4,
      lwd = 1,
      las = 2)
