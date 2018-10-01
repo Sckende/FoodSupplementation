@@ -64,6 +64,8 @@ run.WATER.1 = function()
   # SUPPL*HAB + YEAR
   wat10 <- mark(supW1, nocc = nocc, model = "Nest", model.parameters = list(S = list(formula = ~ SUPPL*HAB + YEAR)), groups = c("SUPPL", "HAB", "YEAR" ), delete = T)
   
+  # HAB + YEAR + NestAge
+  wat10 <- mark(supW1, nocc = nocc, model = "Nest", model.parameters = list(S = list(formula = ~ HAB + YEAR + NestAge)), groups = c("HAB", "YEAR" ), delete = T)
   
   return(collect.models() )
 }
@@ -77,7 +79,6 @@ WATER.1.results
 save(WATER.1.results, file = "waterGEESE_2015-2017.rda")
 save(wat8, file = "waterGEESE_2015-2017_1.rda")
 save(wat7, file = "waterGEESE_2015-2017_2.rda")
-save(wat9, file = "waterGEESE_2015-2017_3.rda")
 
 #### Second WATER models - 2005, 2015 to 2017 ####
 w05 <- read.table("GOOSE_Lecomte_supp_nests_2005.txt", h = T )
@@ -135,6 +136,9 @@ run.WATER.2 = function()
   
   # SUPPL*HAB + YEAR
   wat10 <- mark(supW2, nocc = nocc, model = "Nest", model.parameters = list(S = list(formula = ~ SUPPL*HAB + YEAR)), groups = c("SUPPL", "HAB", "YEAR" ), delete = T)
+  
+  # HAB + YEAR + NestAge
+  wat11 <- mark(supW2, nocc = nocc, model = "Nest", model.parameters = list(S = list(formula = ~ HAB + YEAR + NestAge)), groups = c("HAB", "YEAR" ), delete = T)
   
   
   return(collect.models() )
@@ -207,6 +211,8 @@ run.FOOD = function()
   # SUPPL*YEAR
   foo13 <- mark(supF, nocc = nocc, model = "Nest", model.parameters = list(S = list(formula = ~ SUPPL*YEAR)), groups = c("SUPPL", "YEAR"), delete = T)
   
+  # HAB + YEAR + NestAge
+  foo14 <- mark(supF, nocc = nocc, model = "Nest", model.parameters = list(S = list(formula = ~ HAB + YEAR + NestAge)), groups = c("HAB", "YEAR" ), delete = T)
   
   return(collect.models() )
 }
@@ -218,11 +224,12 @@ FOOD.results
 
 #Save models list and est model
 save(FOOD.results, file = "foodGEESE.rda")
-save(foo8, file = "foodGEESE_1.rda")
-save(foo7, file = "foodGEESE_2.rda")
-save(foo9, file = "foodGEESE_3.rda")
-save(foo12, file = "foodGEESE_4.rda")
-save(foo11, file = "foodGEESE_5.rda")
+save(foo14, file = "foodGEESE_1.rda")
+save(foo8, file = "foodGEESE_2.rda")
+save(foo7, file = "foodGEESE_3.rda")
+save(foo9, file = "foodGEESE_4.rda")
+
+
 
 
 #### WATER/FOOD models ####
@@ -272,6 +279,9 @@ run.WATFOO = function()
   # SUPPL*HAB
   watfoo9 <- mark(supWF, nocc = nocc, model = "Nest", model.parameters = list(S = list(formula = ~ SUPPL*HAB)), groups = c("SUPPL", "HAB"), delete = T)
   
+  # HAB + NestAge
+  watfoo10 <- mark(supWF, nocc = nocc, model = "Nest", model.parameters = list(S = list(formula = ~ HAB + NestAge)), groups = "HAB", delete = T)
+  
   return(collect.models() )
 }
 
@@ -282,6 +292,6 @@ WATFOO.results
 
 #Save models list and est model
 save(WATFOO.results, file = "watfooGEESE.rda")
-save(watfoo7, file = "watfooGEESE_1.rda")
-save(watfoo8, file = "watfooGEESE_2.rda")
-save(watfoo6, file = "watfooGEESE_3.rda")
+save(watfoo10, file = "watfooGEESE_1.rda")
+save(watfoo7, file = "watfooGEESE_2.rda")
+save(watfoo8, file = "watfooGEESE_3.rda")
