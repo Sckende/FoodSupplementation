@@ -84,7 +84,7 @@ w05 <- read.table("GOOSE_Lecomte_supp_nests_2005.txt", h = T )
 #Obtention de la variable AgeDay1 = correspond à l'âge du nid lors du premier jour du suivi de nids
 w05$AgeDay1 <- (w05$AgeFound - w05$FirstFound)
 
-supW1 <- sup[which(sup$YEAR == 2015 | sup$YEAR == 2016 | sup$YEAR == 2017),]
+supW1 <- sup[which(sup$YEAR == 2005 | sup$YEAR == 2015 | sup$YEAR == 2016 | sup$YEAR == 2017),]
 supW1 <- supW1[which(supW1$SUPPL == "W" | supW1$SUPPL == "TEM"),]
 supW1 <- droplevels(supW1)
 supW11 <- supW1[, c(1:4, 7:10, 14, 16)]
