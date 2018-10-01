@@ -896,7 +896,7 @@ geese.WEATHER.results
 #save(geese.WEATHER.results, file = "geeseWEATHER.rda")
 #save(XXX, file = "geeseWEATHER_1.rda")
 
-#### WEATHER models - FACTORIAL VALUES ####
+#### WEATHER models - FACTORIAL VALUES - 3 levels ####
 
 nocc <- max(geese$LastChecked)
 
