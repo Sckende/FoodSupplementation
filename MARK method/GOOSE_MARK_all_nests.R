@@ -909,7 +909,8 @@ run.geese.EXTREM=function()
   
   m3 <-  mark(geese, nocc = nocc, model = "Nest", model.parameters = list(S = list(formula = ~ HAB + NestAge + RAINFALL)), groups = c("HAB", "RAINFALL"), delete = T)
   
-  m4 <-  mark(geese, nocc = nocc, model = "Nest", model.parameters = list(S = list(formula = ~ HAB + NestAge + RAINFALL*TYP_TEMP)), groups = c("HAB", "RAINFALL", "TYP_TEMP"), delete = T)
+  #m4 <-  mark(geese, nocc = nocc, model = "Nest", model.parameters = list(S = list(formula = ~ HAB + NestAge + RAINFALL*TYP_TEMP)), groups = c("HAB", "RAINFALL", "TYP_TEMP"), delete = T)
+  # interaction is impossible because there is no repetition for several category
   
   m5 <-  mark(geese, nocc = nocc, model = "Nest", model.parameters = list(S = list(formula = ~ HAB + NestAge + RAINFALL + TYP_TEMP)), groups = c("HAB", "RAINFALL", "TYP_TEMP"), delete = T)
   
@@ -920,9 +921,8 @@ geese.EXTREM.results <- run.geese.EXTREM()
 geese.EXTREM.results
 
 #Save models list and est model
-write.table(m4$results$beta, "test.txt")
 save(geese.EXTREM.results, file = "geeseEXTREM.rda")
-save(m4, file = "geeseEXTREM_1.rda")
+save(m5, file = "geeseEXTREM_1.rda")
 
 #################### Best model for full database ####################
 ############## only considering models without interaction ##########
