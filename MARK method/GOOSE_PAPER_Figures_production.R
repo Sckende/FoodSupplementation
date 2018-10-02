@@ -48,8 +48,8 @@ pointsize=12,
 unit="cm",
 bg="transparent")
 
-#x11()
-par(mar=c(5,5,1,5)) # inner margin - default parameter is par("mar") <- 5.1 4.1 4.1 2.1
+x11()
+par(mfrow = c(2, 1), mar=c(5,5,1,5)) # inner margin - default parameter is par("mar") <- 5.1 4.1 4.1 2.1
 my_vector <- cum2$cumRAIN
 names(my_vector) <- cum2$YEAR
 barplot(my_vector,
@@ -58,7 +58,7 @@ barplot(my_vector,
         # main = "Trend for specific dates for each goose nesting period",
         # ylab = "Cumulative precipitation (mm)",
         yaxt = "n",
-        ylim = c(0, 90))
+        ylim = c(0, max(cum2$cumRAIN + 5)))
 axis(side = 2,
      lwd = 1,
      las = 2)
@@ -81,11 +81,12 @@ plot(WEA$YEAR,
      WEA$meanTEMP,
      xlab = "",
      ylab = "",
-     xaxp = c(1995, 2017, 12),
-     ylim = c(0, 8),
+     xaxp = c(1995, 2017, 22),
+     ylim = c(min(WEA$meanTEMP - 0.5), max(WEA$meanTEMP + 0.5)),
+     xlim = c(1995, 2017),
      bty = "n",
-     yaxt = "n",
-     xaxt = "n",
+     #yaxt = "n",
+    # xaxt = "n",
      cex = 1,
      cex.lab = 1,
      col = "darkgoldenrod2",
@@ -96,28 +97,28 @@ plot(WEA$YEAR,
 
 lines(WEA$YEAR,
       rep(mean(WEA$meanTEMP), 23),
-      col = "darkgoldenrod2",
+      col = "darkgoldenrod4",
       type = "l",
-      lty = 4,
-      lwd = 2)
+      lty = 1,
+      lwd = 2.5)
 
 lines(WEA$YEAR,
       rep(mean(WEA$meanTEMP) + sd(WEA$meanTEMP), 23),
-      col = "darkgoldenrod2",
+      col = "darkgoldenrod4",
       type = "l",
-      lty = 5,
-      lwd = 2)
+      lty = "dotdash",
+      lwd = 1.5)
 
 lines(WEA$YEAR,
       rep(mean(WEA$meanTEMP) - sd(WEA$meanTEMP), 23),
-      col = "darkgoldenrod2",
+      col = "darkgoldenrod4",
       type = "l",
-      lty = 5,
-      lwd = 2)
+      lty = "dotdash",
+      lwd = 1.5)
 
-axis(side = 4,
-     lwd = 1,
-     las = 2)
+#axis(side = 4,
+#     lwd = 1,
+ #    las = 2)
 
 
 dev.off()
