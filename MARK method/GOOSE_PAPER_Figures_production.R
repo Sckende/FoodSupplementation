@@ -43,7 +43,7 @@ summary(WEA)
 png("C:/Users/HP_9470m/Dropbox/PHD. Claire/Chapitres de thèse/CHAPTER 1 - Geese nesting success & supplemented nests/PAPER/Figures/GOOSE_prec_temp.tiff",
 res=300,
 width=20,
-height=30,
+height=25,
 pointsize=12,
 unit="cm",
 bg="transparent")
@@ -58,7 +58,7 @@ barplot(my_vector,
         col = cols,
         border = c("seagreen4", "olivedrab3", "darkgoldenrod3")[as.numeric(cum2$RAINFALL)],
         # main = "Trend for specific dates for each goose nesting period",
-        # ylab = "Cumulative precipitation (mm)",
+        ylab = "Cumulative precipitation (mm)",
         yaxt = "n",
         ylim = c(0, max(cum2$cumRAIN + 5)))
 axis(side = 2,
@@ -77,6 +77,7 @@ abline(h = mean(cum2$cumRAIN) + sd(cum2$cumRAIN),
        lwd = 1.5,
        lty = "dotdash")
 legend(-0.5, 70, legend = c("high", "intermediate", "low"), col = c("seagreen4", "olivedrab3", "darkgoldenrod3"), pch = 15, bty = "n")
+legend(26.5, 75, legend = "(a)", bty = "n")
 
 #par(new = T)
 #### Annual air temperature ####
@@ -89,7 +90,7 @@ pchs <- c(15:17)[as.numeric(WEA$type_temp)]
 plot(WEA$YEAR,
      WEA$meanTEMP,
      xlab = "",
-     ylab = "",
+     ylab = "Mean air temperature (°C)",
      xaxp = c(1995, 2017, 22),
      ylim = c(3, 8),
      xlim = c(1995, 2017),
@@ -131,6 +132,7 @@ axis(side = 2,
      las = 2)
 
 legend(1995, 8, legend = c("cold", "intermediate", "warm"), col = "darkgoldenrod3", pch = 15:17,bty = "n")
+legend(2016, 8.3, legend = "(b)", bty = "n")
 
 
 dev.off()
