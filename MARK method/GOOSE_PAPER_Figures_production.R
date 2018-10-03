@@ -64,7 +64,7 @@ axis(side = 2,
      las = 2)
 abline(h = mean(cum2$cumRAIN),
        col = "olivedrab4",
-       lwd = 3,
+       lwd = 2.5,
        lty = "solid")
 abline(h = mean(cum2$cumRAIN) - sd(cum2$cumRAIN),
        col = "olivedrab4",
@@ -75,17 +75,18 @@ abline(h = mean(cum2$cumRAIN) + sd(cum2$cumRAIN),
        lwd = 1.5,
        lty = "dotdash")
 
-par(new = T)
+#par(new = T)
 
 plot(WEA$YEAR,
      WEA$meanTEMP,
      xlab = "",
      ylab = "",
      xaxp = c(1995, 2017, 22),
-     ylim = c(min(WEA$meanTEMP - 0.5), max(WEA$meanTEMP + 0.5)),
+     ylim = c(3, 8),
      xlim = c(1995, 2017),
      bty = "n",
-     #yaxt = "n",
+     #yaxp = c(min(WEA$meanTEMP) - 0.5, max(WEA$meanTEMP) + 0.5, 6),
+     yaxt = "n",
     # xaxt = "n",
      cex = 1,
      cex.lab = 1,
@@ -116,6 +117,9 @@ lines(WEA$YEAR,
       lty = "dotdash",
       lwd = 1.5)
 
+axis(side = 2,
+     lwd = 1,
+     las = 2)
 #axis(side = 4,
 #     lwd = 1,
  #    las = 2)
