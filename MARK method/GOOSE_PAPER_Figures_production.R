@@ -43,18 +43,20 @@ summary(WEA)
 png("C:/Users/HP_9470m/Dropbox/PHD. Claire/Chapitres de thèse/CHAPTER 1 - Geese nesting success & supplemented nests/PAPER/Figures/GOOSE_prec_temp.tiff",
 res=300,
 width=20,
-height=15,
+height=30,
 pointsize=12,
 unit="cm",
 bg="transparent")
 
-x11()
+#x11()
 par(mfrow = c(2, 1), mar=c(5,5,1,5)) # inner margin - default parameter is par("mar") <- 5.1 4.1 4.1 2.1
 my_vector <- cum2$cumRAIN
 names(my_vector) <- cum2$YEAR
+cols <- c("seagreen4", "olivedrab3", "darkgoldenrod3")[as.numeric(cum2$RAINFALL)]
+
 barplot(my_vector,
-        col = "olivedrab3",
-        border = "olivedrab3",
+        col = cols,
+        border = c("seagreen4", "olivedrab3", "darkgoldenrod3")[as.numeric(cum2$RAINFALL)],
         # main = "Trend for specific dates for each goose nesting period",
         # ylab = "Cumulative precipitation (mm)",
         yaxt = "n",
@@ -74,9 +76,16 @@ abline(h = mean(cum2$cumRAIN) + sd(cum2$cumRAIN),
        col = "olivedrab4",
        lwd = 1.5,
        lty = "dotdash")
+legend(-0.5, 70, legend = c("high", "intermediate", "low"), col = c("seagreen4", "olivedrab3", "darkgoldenrod3"), pch = 15, bty = "n")
 
 #par(new = T)
+#### Annual air temperature ####
+WEA$type_temp[WEA$meanTEMP >= mean(WEA$meanTEMP) + sd(WEA$meanTEMP)] <- "WARM"
+WEA$type_temp[WEA$meanTEMP <= mean(WEA$meanTEMP) - sd(WEA$meanTEMP)] <- "COLD"
+WEA$type_temp[is.na(WEA$type_temp)] <- "INTER"
+WEA$type_temp <- as.factor(WEA$type_temp)
 
+pchs <- c(15:17)[as.numeric(WEA$type_temp)]
 plot(WEA$YEAR,
      WEA$meanTEMP,
      xlab = "",
@@ -88,10 +97,10 @@ plot(WEA$YEAR,
      #yaxp = c(min(WEA$meanTEMP) - 0.5, max(WEA$meanTEMP) + 0.5, 6),
      yaxt = "n",
     # xaxt = "n",
-     cex = 1,
+     cex = c(2, 1, 2)[as.numeric(WEA$type_temp)],
      cex.lab = 1,
-     col = "darkgoldenrod2",
-     pch = 19,
+     col = "darkgoldenrod3",
+     pch = pchs,
      lwd = 2,
      type = 'b'
 )
@@ -120,9 +129,8 @@ lines(WEA$YEAR,
 axis(side = 2,
      lwd = 1,
      las = 2)
-#axis(side = 4,
-#     lwd = 1,
- #    las = 2)
+
+legend(1995, 8, legend = c("cold", "intermediate", "warm"), col = "darkgoldenrod3", pch = 15:17,bty = "n")
 
 
 dev.off()
