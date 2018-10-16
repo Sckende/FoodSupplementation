@@ -897,7 +897,8 @@ geese.WEATHER.results
 #save(XXX, file = "geeseWEATHER_1.rda")
 
 #### WEATHER models - FACTORIAL VALUES - 3 levels ####
-
+geese <- read.table("GOOSE_geese_with_WF.txt", h = T, sep = ",")
+require(RMark)
 nocc <- max(geese$LastChecked)
 
 run.geese.EXTREM=function()
@@ -913,7 +914,9 @@ run.geese.EXTREM=function()
   # interaction is impossible because there is no repetition for several category
   
   m5 <-  mark(geese, nocc = nocc, model = "Nest", model.parameters = list(S = list(formula = ~ HAB + NestAge + RAINFALL + TYP_TEMP)), groups = c("HAB", "RAINFALL", "TYP_TEMP"), delete = T)
-  
+
+  m6 <-  mark(geese, nocc = nocc, model = "Nest", model.parameters = list(S = list(formula = ~ HAB + NestAge)), groups = c("HAB", "RAINFALL", "TYP_TEMP"), delete = T)
+    
   return(collect.models())
 }
 
