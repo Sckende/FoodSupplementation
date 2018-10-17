@@ -305,10 +305,9 @@ Est <- 1013.25
 deg$log_pH2O <- - 7.90298 * (Tst / (T0 - 1)) + 5.02808 * log(Tst / T0) - 1.3816 * 10^(-7) * (10^(11.344 * ((1 - T0)/Tst)) - 1) + 8.1328 * 10^(-3) * (10^(-3.49149 * (Tst / (T0-1))) - 1) + log(Est)
 
 deg$pH2O <- 10^(deg$log_pH2O) 
-#### WEIRDO RESULTS !!!!!!!!!!! #####
 
 #### AIR TEMPERATURE ####
-### BYLCAMP station data ####
+#### BYLCAMP station data ####
 temp <- read.table("TEMP_Tair moy 1989-2017 BYLCAMP.txt", h = T, sep = "\t", dec = ",")
 head(temp)
 summary(temp)
@@ -332,8 +331,6 @@ for (i in 1996:2016) {
   t <- rbind(t, TAB)
 }
 
-
-### To cope with temperature missing data of BYLCAMP station ####
 
 
 ########### Correlation between both spring and summer temperature ???
@@ -372,7 +369,7 @@ for (i in 1:29) {
 
 View(TABcor[TABcor$STARS != "NS" & TABcor$STARS != "-",])
 
-########## Use the Pond Inlet temperature data (Governement of Canada) 
+#### Pond Inlet temperature data (Governement of Canada) #### 
 rm(list = ls())
 setwd("C:/Users/HP_9470m/OneDrive - Université de Moncton/Doc doc doc/Ph.D. - ANALYSES/R analysis/Data")
 list.files()
@@ -463,3 +460,40 @@ cum2$cumRAIN_DAY <- cum2$cumRAIN / cum2$NEST_DURATION
 
 #write.table(cum2, "PREC_cum2.txt", dec = ".")
 
+#### Correlation between Pond and Canada temperature data ####
+# Pond temp data
+temp <- read.table("TEMP_Tair moy 1989-2017 BYLCAMP.txt", h = T, sep = "\t", dec = ",")
+temp$JJ <- strptime(paste(temp$DAY, temp$MONTH, temp$YEAR, sep = "-"), format = "%d-%m-%Y")
+temp$JJ <- temp$JJ$yday + 1
+head(temp)
+summary(temp)
+temp <- temp[temp$YEAR >= 1995 & temp$YEAR <= 2016,]
+
+# Canada government data
+deg <- read.table("TEMP_PondInlet_1995-2017.csv", h = T, dec =".", sep = ";")
+summary(deg)
+deg$JJ <- strptime(as.character(deg$Date), format = "%Y-%m-%d")
+deg$JJ <- deg$JJ$yday + 1
+head(deg)
+summary(deg)
+deg <- deg[deg$Year >= 1995 & deg$Year <= 2016,]
+
+# New common variable
+deg$YEAR_JJ <- paste(deg$Year, deg$JJ, sep = "-")
+temp$YEAR_JJ <- paste(temp$YEAR, temp$JJ, sep = "-")
+
+# Match data
+dim(temp)
+dim(deg)
+
+temp$T_canada <- deg$Mean_Temp[match(temp$YEAR_JJ, deg$YEAR_JJ)]
+summary(temp)
+hist(temp$TEMP)
+hist(temp$T_canada)
+
+# Spearman correlation test
+tt <- na.omit(temp)
+dim(tt)
+summary(tt)
+
+cor.test(tt$TEMP, tt$T_canada, method = "spearman")
