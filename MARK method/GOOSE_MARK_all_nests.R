@@ -843,6 +843,7 @@ geese.YEAR.2.results
 
 load("geeseFULL.rda")
 geese.FULL.results$model.table
+load("geeseFULL_1.rda")
 
 #### WEATHER models - ANNUAL VALUES####
 
@@ -898,6 +899,9 @@ geese.WEATHER.results
 
 #### WEATHER models - FACTORIAL VALUES - 3 levels ####
 geese <- read.table("GOOSE_geese_with_WF.txt", h = T, sep = ",")
+summary(geese)
+geese$RAINFALL <- relevel(geese$RAINFALL, "INTER")
+geese$TYP_TEMP <- relevel(geese$TYP_TEMP, "INTER")
 require(RMark)
 nocc <- max(geese$LastChecked)
 
