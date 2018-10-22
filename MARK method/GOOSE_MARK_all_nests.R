@@ -898,6 +898,9 @@ geese.WEATHER.results
 #save(XXX, file = "geeseWEATHER_1.rda")
 
 #### WEATHER models - FACTORIAL VALUES - 3 levels ####
+
+setwd("C:/Users/HP_9470m/OneDrive - Université de Moncton/Doc doc doc/Ph.D. - ANALYSES/R analysis/Data")
+rm(list = ls())
 geese <- read.table("GOOSE_geese_with_WF.txt", h = T, sep = ",")
 summary(geese)
 geese$RAINFALL <- relevel(geese$RAINFALL, "INTER")
@@ -931,6 +934,7 @@ geese.EXTREM.results
 save(geese.EXTREM.results, file = "geeseEXTREM.rda")
 save(m5, file = "geeseEXTREM_1.rda")
 
+
 #################### Best model for full database ####################
 ############## only considering models without interaction ##########
 
@@ -948,7 +952,7 @@ arrows(3, mYEAR_5$results$real$estimate[3], x1=3, y1=mYEAR_5$results$real$ucl[3]
 
 dev.off()
 
-#### Plot visualization - to end the CODE #### 
+#### Plot results for extreme years modele #### 
 # To obtain a plot
 M04 <- geese.results$M04
 fc <- find.covariates(M04,geese)
