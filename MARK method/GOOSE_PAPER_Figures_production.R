@@ -170,12 +170,19 @@ day <- rep(1:27, 10)
 TAB2 <- cbind(day, hab, prec, temp, TAB2)
 TAB2 <- TAB2[,1:8]
 summary(TAB2)
+utils::View(TAB2)
+
 
 x11()
 par(mfrow = c(2,2), bty = "n")
-# MESIC HABITAT & CUMULATIVE PRECIPITATION
+
+#######################################################################################
+# Graph parameters
+mini <- min(TAB2$estimate[TAB2$temp == "INTER"] - TAB2$se[TAB2$temp == "INTER"])
+maxi <- max(TAB2$estimate[TAB2$temp == "INTER"] + TAB2$se[TAB2$temp == "INTER"])
+# GRAPHE 1 - MESIC HABITAT & CUMULATIVE PRECIPITATION
 # INTERMEDIATE PREC
-plot(TAB2$estimate[TAB2$hab == "MES" & TAB2$prec == "INTER" & TAB2$temp == "INTER"], type = "b", col = "green", bg = "green", pch = 21, bty = "n", ylim = c(min(TAB2$estimate), max(TAB2$estimate)), ylab = "DSR", xlab = "Days")
+plot(TAB2$estimate[TAB2$hab == "MES" & TAB2$prec == "INTER" & TAB2$temp == "INTER"], type = "b", col = "green", bg = "green", pch = 21, bty = "n", ylim = c(mini,maxi), ylab = "DSR", xlab = "Days", main = "Mesic habitat & precipitation effect")
 lines(TAB2$estimate[TAB2$hab == "MES" & TAB2$prec == "INTER" & TAB2$temp == "INTER"] - TAB2$se[TAB2$hab == "MES" & TAB2$prec == "INTER" & TAB2$temp == "INTER"], col = "green", lty = 3)
 lines(TAB2$estimate[TAB2$hab == "MES" & TAB2$prec == "INTER" & TAB2$temp == "INTER"] + TAB2$se[TAB2$hab == "MES" & TAB2$prec == "INTER" & TAB2$temp == "INTER"], col = "green", lty = 3)
 # HIGH PREC
@@ -187,46 +194,47 @@ lines(TAB2$estimate[TAB2$hab == "MES" & TAB2$prec == "LOW" & TAB2$temp == "INTER
 lines(TAB2$estimate[TAB2$hab == "MES" & TAB2$prec == "LOW" & TAB2$temp == "INTER"] - TAB2$se[TAB2$hab == "MES" & TAB2$prec == "HIGH" & TAB2$temp == "INTER"], col = "greenyellow", lty = 3)
 lines(TAB2$estimate[TAB2$hab == "MES" & TAB2$prec == "LOW" & TAB2$temp == "INTER"] + TAB2$se[TAB2$hab == "MES" & TAB2$prec == "HIGH" & TAB2$temp == "INTER"], col = "greenyellow", lty = 3)
 
-##### HERE ******* #####
-# WETLAND HABITAT & CUMULATIVE PRECIPITATION
-# INTERMEDIATE PREC
-plot(m5$results$real[40:(40+d), "estimate"], type = "b", col = "green", bg = "green", pch = 21, bty = "n", ylab = "DSR", xlab = "Days", xlim = c(0,27))
-lines(m5$results$real[40:(40+d), "estimate"] - m5$results$real[1:(1+d), "se"], col = "green")
-lines(m5$results$real[40:(40+d), "estimate"] + m5$results$real[1:(1+d), "se"], col = "green")
+# GRAPHE 2 - WETLAND HABITAT & CUMULATIVE PRECIPITATION
+plot(TAB2$estimate[TAB2$hab == "WET" & TAB2$prec == "INTER" & TAB2$temp == "INTER"], type = "b", col = "green", bg = "green", pch = 21, bty = "n", ylim = c(mini,maxi), ylab = "DSR", xlab = "Days", main = "Wetland habitat & precipitation effect")
+lines(TAB2$estimate[TAB2$hab == "WET" & TAB2$prec == "INTER" & TAB2$temp == "INTER"] - TAB2$se[TAB2$hab == "WET" & TAB2$prec == "INTER" & TAB2$temp == "INTER"], col = "green", lty = 3)
+lines(TAB2$estimate[TAB2$hab == "WET" & TAB2$prec == "INTER" & TAB2$temp == "INTER"] + TAB2$se[TAB2$hab == "WET" & TAB2$prec == "INTER" & TAB2$temp == "INTER"], col = "green", lty = 3)
 # HIGH PREC
-lines(m5$results$real[118:(118+d), "estimate"], type = "b", col = "green4", bg = "green4", pch = 24, bty = "n")
-lines(m5$results$real[118:(118+d), "estimate"] - m5$results$real[1:(1+d), "se"], col = "green4")
-lines(m5$results$real[118:(118+d), "estimate"] + m5$results$real[1:(1+d), "se"], col = "green4")
+lines(TAB2$estimate[TAB2$hab == "WET" & TAB2$prec == "HIGH" & TAB2$temp == "INTER"], type = "b", col = "green4", bg = "green4", pch = 24, bty = "n")
+lines(TAB2$estimate[TAB2$hab == "WET" & TAB2$prec == "HIGH" & TAB2$temp == "INTER"] - TAB2$se[TAB2$hab == "WET" & TAB2$prec == "HIGH" & TAB2$temp == "INTER"], col = "green4", lty = 3)
+lines(TAB2$estimate[TAB2$hab == "WET" & TAB2$prec == "HIGH" & TAB2$temp == "INTER"] + TAB2$se[TAB2$hab == "WET" & TAB2$prec == "HIGH" & TAB2$temp == "INTER"], col = "green4", lty = 3)
 # LOW PREC
-lines(m5$results$real[196:(196+d), "estimate"], type = "b", col = "greenyellow", bg = "greenyellow", pch = 25, bty = "n")
-lines(m5$results$real[196:(196+d), "estimate"] - m5$results$real[1:(1+d), "se"], col = "greenyellow")
-lines(m5$results$real[196:(196+d), "estimate"] + m5$results$real[1:(1+d), "se"], col = "greenyellow")
+lines(TAB2$estimate[TAB2$hab == "WET" & TAB2$prec == "LOW" & TAB2$temp == "INTER"], type = "b", col = "greenyellow", bg = "greenyellow", pch = 25, bty = "n")
+lines(TAB2$estimate[TAB2$hab == "WET" & TAB2$prec == "LOW" & TAB2$temp == "INTER"] - TAB2$se[TAB2$hab == "WET" & TAB2$prec == "HIGH" & TAB2$temp == "INTER"], col = "greenyellow", lty = 3)
+lines(TAB2$estimate[TAB2$hab == "WET" & TAB2$prec == "LOW" & TAB2$temp == "INTER"] + TAB2$se[TAB2$hab == "WET" & TAB2$prec == "HIGH" & TAB2$temp == "INTER"], col = "greenyellow", lty = 3)
 
-# MESIC HABITAT & AIR TEMPERATURE
+###############################################################################################
+# Graph parameters
+mini <- min(TAB2$estimate[TAB2$prec == "INTER"] - TAB2$se[TAB2$prec == "INTER"])
+maxi <- max(TAB2$estimate[TAB2$prec == "INTER"] + TAB2$se[TAB2$prec == "INTER"])
+# GRAPHE 3 - MESIC HABITAT & AIR TEMPERATURE
 # INTERMEDIATE AIR TEMPERATURE
-plot(m5$results$real[1:(1+d), "estimate"], type = "b", col = "orangered", bg = "orangered", pch = 21, bty = "n", ylim = c(min(m5$results$real[235:(235+d), "estimate"] - m5$results$real[1:(1+d), "se"]), max(m5$results$real[1:(1+d), "estimate"] + m5$results$real[1:(1+d), "se"])), ylab = "DSR", xlab = "Days", xlim = c(0,27))
-lines(m5$results$real[1:(1+d), "estimate"] - m5$results$real[1:(1+d), "se"], col = "orangered")
-lines(m5$results$real[1:(1+d), "estimate"] + m5$results$real[1:(1+d), "se"], col = "orangered")
+plot(TAB2$estimate[TAB2$hab == "MES" & TAB2$prec == "INTER" & TAB2$temp == "INTER"], type = "b", col = "orangered", bg = "orangered", pch = 21, bty = "n", ylim = c(mini, maxi), ylab = "DSR", xlab = "Days", xlim = c(0,27), main = "Mesic habitat & temperature effect")
+lines(TAB2$estimate[TAB2$hab == "MES" & TAB2$prec == "INTER" & TAB2$temp == "INTER"] - TAB2$se[TAB2$hab == "MES" & TAB2$prec == "INTER" & TAB2$temp == "INTER"], col = "orangered")
+lines(TAB2$estimate[TAB2$hab == "MES" & TAB2$prec == "INTER" & TAB2$temp == "INTER"] + TAB2$se[TAB2$hab == "MES" & TAB2$prec == "INTER" & TAB2$temp == "INTER"], col = "orangered")
 # WARM AIR TEMPERATURE
-lines(m5$results$real[469:(469+d), "estimate"], type = "b", col = "red4", bg = "red4", pch = 24, bty = "n")
-lines(m5$results$real[469:(469+d), "estimate"] - m5$results$real[1:(1+d), "se"], col = "red4")
-lines(m5$results$real[469:(469+d), "estimate"] + m5$results$real[1:(1+d), "se"], col = "red4")
+lines(TAB2$estimate[TAB2$hab == "MES" & TAB2$prec == "INTER" & TAB2$temp == "WARM"], type = "b", col = "red4", bg = "red4", pch = 24, bty = "n")
+lines(TAB2$estimate[TAB2$hab == "MES" & TAB2$prec == "INTER" & TAB2$temp == "WARM"] - TAB2$se[TAB2$hab == "MES" & TAB2$prec == "INTER" & TAB2$temp == "WARM"], col = "red4")
+lines(TAB2$estimate[TAB2$hab == "MES" & TAB2$prec == "INTER" & TAB2$temp == "WARM"] + TAB2$se[TAB2$hab == "MES" & TAB2$prec == "INTER" & TAB2$temp == "WARM"], col = "red4")
 # COLD AIR TEMPERATURE
-lines(m5$results$real[235:(235+d), "estimate"], type = "b", col = "orange", bg = "orange", pch = 25, bty = "n")
-lines(m5$results$real[235:(235+d), "estimate"] - m5$results$real[1:(1+d), "se"], col = "orange")
-lines(m5$results$real[235:(235+d), "estimate"] + m5$results$real[1:(1+d), "se"], col = "orange")
+lines(TAB2$estimate[TAB2$hab == "MES" & TAB2$prec == "INTER" & TAB2$temp == "COLD"], type = "b", col = "orange", bg = "orange", pch = 25, bty = "n")
+lines(TAB2$estimate[TAB2$hab == "MES" & TAB2$prec == "INTER" & TAB2$temp == "COLD"] - TAB2$se[TAB2$hab == "MES" & TAB2$prec == "INTER" & TAB2$temp == "COLD"], col = "orange")
+lines(TAB2$estimate[TAB2$hab == "MES" & TAB2$prec == "INTER" & TAB2$temp == "COLD"] + TAB2$se[TAB2$hab == "MES" & TAB2$prec == "INTER" & TAB2$temp == "COLD"], col = "orange")
 
-# WETLAND HABITAT & AIR TEMPERATURE
+# GRAPHE 4 - WETLAND HABITAT & AIR TEMPERATURE
 # INTERMEDIATE AIR TEMPERATURE
-plot(m5$results$real[1:(1+d), "estimate"], type = "b", col = "orangered", bg = "orangered", pch = 21, bty = "n", ylim = c(min(m5$results$real[274:(274+d), "estimate"] - m5$results$real[1:(1+d), "se"]), max(m5$results$real[508:(508+d), "estimate"] + m5$results$real[1:(1+d), "se"])), ylab = "DSR", xlab = "Days", xlim = c(0,27))
-lines(m5$results$real[1:(1+d), "estimate"] - m5$results$real[1:(1+d), "se"], col = "orangered")
-lines(m5$results$real[1:(1+d), "estimate"] + m5$results$real[1:(1+d), "se"], col = "orangered")
+plot(TAB2$estimate[TAB2$hab == "WET" & TAB2$prec == "INTER" & TAB2$temp == "INTER"], type = "b", col = "orangered", bg = "orangered", pch = 21, bty = "n", ylim = c(mini, maxi), ylab = "DSR", xlab = "Days", xlim = c(0,27), main = "Wetland habitat & temperature effect")
+lines(TAB2$estimate[TAB2$hab == "WET" & TAB2$prec == "INTER" & TAB2$temp == "INTER"] - TAB2$se[TAB2$hab == "WET" & TAB2$prec == "INTER" & TAB2$temp == "INTER"], col = "orangered")
+lines(TAB2$estimate[TAB2$hab == "WET" & TAB2$prec == "INTER" & TAB2$temp == "INTER"] + TAB2$se[TAB2$hab == "WET" & TAB2$prec == "INTER" & TAB2$temp == "INTER"], col = "orangered")
 # WARM AIR TEMPERATURE
-lines(m5$results$real[508:(508+d), "estimate"], type = "b", col = "red4", bg = "red4", pch = 24, bty = "n")
-lines(m5$results$real[508:(508+d), "estimate"] - m5$results$real[1:(1+d), "se"], col = "red4")
-lines(m5$results$real[508:(508+d), "estimate"] + m5$results$real[1:(1+d), "se"], col = "red4")
+lines(TAB2$estimate[TAB2$hab == "WET" & TAB2$prec == "INTER" & TAB2$temp == "WARM"], type = "b", col = "red4", bg = "red4", pch = 24, bty = "n")
+lines(TAB2$estimate[TAB2$hab == "WET" & TAB2$prec == "INTER" & TAB2$temp == "WARM"] - TAB2$se[TAB2$hab == "WET" & TAB2$prec == "INTER" & TAB2$temp == "WARM"], col = "red4")
+lines(TAB2$estimate[TAB2$hab == "WET" & TAB2$prec == "INTER" & TAB2$temp == "WARM"] + TAB2$se[TAB2$hab == "WET" & TAB2$prec == "INTER" & TAB2$temp == "WARM"], col = "red4")
 # COLD AIR TEMPERATURE
-lines(m5$results$real[274:(274+d), "estimate"], type = "b", col = "orange", bg = "orange", pch = 25, bty = "n")
-lines(m5$results$real[274:(274+d), "estimate"] - m5$results$real[1:(1+d), "se"], col = "orange")
-lines(m5$results$real[274:(274+d), "estimate"] + m5$results$real[1:(1+d), "se"], col = "orange")
-
+lines(TAB2$estimate[TAB2$hab == "WET" & TAB2$prec == "INTER" & TAB2$temp == "COLD"], type = "b", col = "orange", bg = "orange", pch = 25, bty = "n")
+lines(TAB2$estimate[TAB2$hab == "WET" & TAB2$prec == "INTER" & TAB2$temp == "COLD"] - TAB2$se[TAB2$hab == "WET" & TAB2$prec == "INTER" & TAB2$temp == "COLD"], col = "orange")
+lines(TAB2$estimate[TAB2$hab == "WET" & TAB2$prec == "INTER" & TAB2$temp == "COLD"] + TAB2$se[TAB2$hab == "WET" & TAB2$prec == "INTER" & TAB2$temp == "COLD"], col = "orange")
