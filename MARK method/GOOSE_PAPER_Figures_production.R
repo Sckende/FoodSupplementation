@@ -286,3 +286,7 @@ axis(2, at = seq(0.935, 0.995, by = 0.01))
 text(x = 26, y = 0.995, labels = "(b)", pos = 3)
 
 dev.off()
+
+#### Histogram of NS depending on habitat and extreme years ####
+
+utils::View(TAB2)
