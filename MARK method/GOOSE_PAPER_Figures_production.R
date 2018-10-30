@@ -181,13 +181,13 @@ maxi <- max(TAB2$estimate[TAB2$temp == "INTER"] + TAB2$se[TAB2$temp == "INTER"])
 
 x11()
 
-png("C:/Users/HP_9470m/Dropbox/PHD. Claire/Chapitres de thèse/CHAPTER 1 - Geese nesting success & supplemented nests/PAPER/Figures/GOOSE_EXTREM_PREC.tiff",
-    res=300,
-    width=30,
-    height=20,
-    pointsize=12,
-    unit="cm",
-    bg="transparent")
+#png("C:/Users/HP_9470m/Dropbox/PHD. Claire/Chapitres de thèse/CHAPTER 1 - Geese nesting success & supplemented nests/PAPER/Figures/GOOSE_EXTREM_PREC.tiff",
+    #res=300,
+    #width=30,
+    #height=20,
+    #pointsize=12,
+    #unit="cm",
+    #bg="transparent")
 
 par(mfrow = c(1, 2),
     las = 1,# plot labels always horizontal
@@ -287,6 +287,89 @@ text(x = 26, y = 0.995, labels = "(b)", pos = 3)
 
 dev.off()
 
-#### Histogram of NS depending on habitat and extreme years ####
+#### Histogram of NS depending on habitat and supplementation ####
 
-utils::View(TAB2)
+
+setwd("C:/Users/HP_9470m/OneDrive - Université de Moncton/Doc doc doc/Ph.D. - ANALYSES/R analysis/Data")
+
+
+#### Water models ####
+# Concerning years : 2005, 2015, 2016 & 2017
+
+sup <- read.table("GOOSE_geese_with_WF.txt", sep = ",", h = T)
+head(sup)
+summary(sup)
+
+sup <- sup[,-1]
+supW1 <- sup[which(sup$YEAR == 2015 | sup$YEAR == 2016 | sup$YEAR == 2017),]
+supW1 <- supW1[which(supW1$SUPPL == "W" | supW1$SUPPL == "TEM"),]
+supW1 <- droplevels(supW1)
+summary(supW1)
+
+supW1$YEAR <- as.factor(supW1$YEAR)
+supW1$Fate <- as.factor(supW1$Fate)
+
+# Add 2005 data
+w05 <- read.table("GOOSE_Lecomte_supp_nests_2005.txt", h = T )
+#Obtention de la variable AgeDay1 = correspond à l'âge du nid lors du premier jour du suivi de nids
+w05$AgeDay1 <- (w05$AgeFound - w05$FirstFound)
+
+supW1 <- sup[which(sup$YEAR == 2005 | sup$YEAR == 2015 | sup$YEAR == 2016 | sup$YEAR == 2017),]
+supW1 <- supW1[which(supW1$SUPPL == "W" | supW1$SUPPL == "TEM"),]
+supW1 <- droplevels(supW1)
+supW11 <- supW1[, c(1:4, 7:10, 14, 16)]
+head(supW11)
+
+supW2 <- rbind(supW11, w05)
+
+supW2$YEAR <- as.factor(supW2$YEAR)
+supW2$Fate <- as.factor(supW2$Fate)
+summary(supW2)
+
+require(RMark)
+
+nocc <- max(supW2$LastChecked)
+
+
+wat9 <- mark(supW2, nocc = nocc, model = "Nest", model.parameters = list(S = list(formula = ~ SUPPL*HAB + YEAR + NestAge)), groups = c("SUPPL", "HAB", "YEAR" ), delete = T)
+
+wat9$results$beta
+utils::View(wat9$results$real)
+
+TAB <- as.data.frame(wat9$results$real)[,-c(5,6)]
+TAB$YEAR <- c(rep(2005, 152), rep(2015, 152), rep(2016, 152), rep(2017, 152))
+TAB$SUPPL <- c("TEM", "WAT")[rep(c(rep(1, 38), rep(2, 38)), times = 8)]
+TAB$HAB <- c("MES", "WET")[rep(c(rep(1, 76), rep(2, 76)), times = 4)] 
+
+lTAB <- split(TAB, list(TAB$YEAR, TAB$HAB, TAB$SUPPL))
+NS <- NULL
+
+for (i in 1:16){
+  lTAB[[i]] <- lTAB[[i]][1:27,] 
+  SR <- prod(lTAB[[i]]$estimate)
+  year <- unique(lTAB[[i]]$YEAR)
+  hab <- unique(lTAB[[i]]$HAB)
+  suppl <- unique(lTAB[[i]]$SUPPL)
+  
+  r<- c(year, hab, suppl, SR)
+  
+  NS <- rbind(NS, r)
+}
+
+NS <- as.data.frame(NS)
+names(NS) <- c("year", "hab", "suppl", "SR")
+NS$SR <- as.numeric(as.character(NS$SR))
+summary(NS)
+utils::View(NS)
+
+lNS <- split(NS, NS$year)
+lNS <- lapply(lNS, function(i){
+   i[order(i$hab),]
+} )
+x11()
+par(mfrow = c(2,2))
+
+lapply(lNS, function(i){
+  barplot(i$SR, main = unique(i$year))
+})
+
