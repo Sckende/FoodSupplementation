@@ -51,7 +51,7 @@ run.WATER.1 = function()
   wat6 <- mark(supW1, nocc = nocc, model = "Nest", model.parameters = list(S = list(formula = ~ NestAge)), delete = T)
   
   # Complete model without interaction
-  wat7 <- mark(supW1, nocc = nocc, model = "Nest", model.parameters = list(S = list(formula = ~ SUPPL + HAB + YEAR + NestAge + INITIATION)), groups = c("SUPPL", "HAB", "YEAR" ), delete = T)
+  #wat7 <- mark(supW1, nocc = nocc, model = "Nest", model.parameters = list(S = list(formula = ~ SUPPL + HAB + YEAR + NestAge + INITIATION)), groups = c("SUPPL", "HAB", "YEAR" ), delete = T)
   
   # **WARNING** message ! Seems to have too much factors for model wat7
   
@@ -67,6 +67,9 @@ run.WATER.1 = function()
   # HAB + YEAR + NestAge
   wat10 <- mark(supW1, nocc = nocc, model = "Nest", model.parameters = list(S = list(formula = ~ HAB + YEAR + NestAge)), groups = c("HAB", "YEAR" ), delete = T)
   
+  # SUPPL*HAB + YEAR
+  wat11 <- mark(supW1, nocc = nocc, model = "Nest", model.parameters = list(S = list(formula = ~ SUPPL*HAB + YEAR)), groups = c("SUPPL", "HAB"), delete = T)  
+  
   return(collect.models() )
 }
 
@@ -78,7 +81,7 @@ WATER.1.results
 #Save models list and est model
 save(WATER.1.results, file = "waterGEESE_2015-2017.rda")
 save(wat8, file = "waterGEESE_2015-2017_1.rda")
-save(wat7, file = "waterGEESE_2015-2017_2.rda")
+save(wat9, file = "waterGEESE_2015-2017_2.rda")
 
 #### Second WATER models - 2005, 2015 to 2017 ####
 w05 <- read.table("GOOSE_Lecomte_supp_nests_2005.txt", h = T )
