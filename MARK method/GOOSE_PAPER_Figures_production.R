@@ -373,3 +373,31 @@ lapply(lNS, function(i){
   barplot(i$SR, main = unique(i$year))
 })
 
+#### Plot of extreme weather model ####
+setwd("C:/Users/HP_9470m/OneDrive - Université de Moncton/Doc doc doc/Ph.D. - ANALYSES/R analysis/Data")
+list.files()
+load("geeseEXTREM_1.rda")
+summary(m5)
+m5$results$beta
+res <- as.data.frame(m5$results$beta)
+dim(res)
+summary(res)
+str(res)
+res$name <- c("intercept", "hab_WET", "NestAge", "rain_HIGH", "rain_LOW", "temp_COLD", "temp_WARM")
+res
+x11()
+plot(res$estimate, xaxt = "n", bty = "n")
+abline(h = 0, lty = 3)
+
+for (i in 2:7){
+  arrows(i, res$estimate[i], i, res$ucl[i], length = 0)
+  arrows(i, m5$results$beta$estimate[i], i, m5$results$beta$lcl[i], length = 0)
+}
+
+
+plot(m5$results$beta$estimate[4:7], ylim = c(min(m5$results$beta$lcl[4:7]) - 1, max(m5$results$beta$ucl[4:7]) + 1))
+
+
+
+abline(h = 0, lty = 3 )
+
