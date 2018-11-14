@@ -839,11 +839,11 @@ geese.YEAR.2.results
 # Models explaining maximal of variation of explained response with the time effect (YEAR, NestAge) and the habitat effect. Models including ALL MONITORED GOOSE NESTS IN COLONY since 1995
 
 # Models were run on VAIO computer --> see the VAIO script
-# Results are saved under "geeseFULL.rda" for the comparaiso of all models and under "geeseFULL_1.rda" for the best model
+# Results are saved under "geeseFULL.rda" for the comparaison of all models and under "geeseFULL_1.rda" for the best model
 
 load("geeseFULL.rda")
 geese.FULL.results$model.table
-load("geeseFULL_1.rda")
+load("geeseFULL_1.rda") # full15
 
 #### WEATHER models - ANNUAL VALUES####
 
