@@ -97,7 +97,7 @@ plot(WEA$YEAR,
      bty = "n",
      #yaxp = c(min(WEA$meanTEMP) - 0.5, max(WEA$meanTEMP) + 0.5, 6),
      yaxt = "n",
-    # xaxt = "n",
+     xaxt = "n",
      cex = c(2, 1, 2)[as.numeric(WEA$type_temp)],
      cex.lab = 1,
      col = "darkgoldenrod3",
@@ -137,6 +137,20 @@ legend(2016, 8.3, legend = "(b)", bty = "n")
 
 dev.off()
 
+# Superposition des deux graphiques
+png("C:/Users/HP_9470m/Dropbox/PHD. Claire/Chapitres de thèse/CHAPTER 1 - Geese nesting success & supplemented nests/PAPER/Figures/GOOSE_prec_temp_superposition.tiff",
+    res=300,
+    width=25,
+    height=20,
+    pointsize=12,
+    unit="cm",
+    bg="transparent")
+x11()
+cols2 <- c("red4", "orangered", "orange")[as.numeric(WEA$type_temp)]
+plot(WEA$YEAR, WEA$cumPREC, type = "h", col = cols, lwd = 20, xaxp = c(1995, 2017, 22), bty = "n")
+lines(WEA$YEAR, WEA$meanTEMP*10, xaxt = "n", yaxt = "n", cex = c(2, 1, 2)[as.numeric(WEA$type_temp)], pch = pchs, type = "b", lwd = 3, col =cols2, bty = "n")
+
+dev.off()
 #### Extreme climate years impacts on DSR ####
 
 setwd("C:/Users/HP_9470m/OneDrive - Université de Moncton/Doc doc doc/Ph.D. - ANALYSES/R analysis/Data")
@@ -385,6 +399,8 @@ summary(res)
 str(res)
 res$name <- c("intercept", "hab_WET", "NestAge", "rain_HIGH", "rain_LOW", "temp_COLD", "temp_WARM")
 res
+
+# Plot of modele estimates
 x11()
 plot(res$estimate, xaxt = "n", bty = "n")
 abline(h = 0, lty = 3)
@@ -394,10 +410,72 @@ for (i in 2:7){
   arrows(i, m5$results$beta$estimate[i], i, m5$results$beta$lcl[i], length = 0)
 }
 
+#### Plot of effects temperature and precipitation on DSR (quantitative variables) ####
+setwd("C:/Users/HP_9470m/OneDrive - Université de Moncton/Doc doc doc/Ph.D. - ANALYSES/R analysis/Data")
+list.files()
+geese <- read.table("GOOSE_geese_with_WF.txt", h = T, sep = ",")
+summary(geese)
 
-plot(m5$results$beta$estimate[4:7], ylim = c(min(m5$results$beta$lcl[4:7]) - 1, max(m5$results$beta$ucl[4:7]) + 1))
+# Exploration
+X11()
+par(mfrow = c(1, 2))
+plot(geese$cumPREC[geese$TYP_TEMP == "COLD"], geese$Fate[geese$TYP_TEMP == "COLD"], col = "blue")
+points(geese$cumPREC[geese$TYP_TEMP == "WARM"], geese$Fate[geese$TYP_TEMP == "WARM"], col = "red")
+points(geese$cumPREC[geese$TYP_TEMP == "INTER"], geese$Fate[geese$TYP_TEMP == "INTER"], col = "grey")
 
+# Exploration
+plot(geese$cumPREC[geese$RAINFALL == "LOW"], geese$Fate[geese$RAINFALL == "LOW"], col = "blue")
+points(geese$cumPREC[geese$RAINFALL == "HIGH"], geese$Fate[geese$RAINFALL == "HIGH"], col = "red")
+points(geese$cumPREC[geese$RAINFALL == "INTER"], geese$Fate[geese$RAINFALL == "INTER"], col = "grey")
 
+load("geesePAPER.rda") # geese.PAPER.results
+geese.PAPER.results$t9$results$beta # modele t9 is the best modele, including interaction between precipitation and temperature
+geese.PAPER.results$t9$results$real
 
-abline(h = 0, lty = 3 )
+# Obtain a slope for DSR vs. temp depending on 3 groups of cumulative precipitation (LOW, INTER, HIGH)
 
+geeseHIGH <- geese[geese$RAINFALL == "HIGH",]
+geeseINTER <- geese[geese$RAINFALL == "INTER",]
+geeseLOW <- geese[geese$RAINFALL == "LOW",]
+
+    # For HIGH precipitation seasons
+require(RMark)
+nocc <- max(geeseHIGH$LastChecked)
+
+mark(geeseHIGH, nocc = nocc, model = "Nest", model.parameters = list(S = list(formula = ~ NestAge + HAB + TEMP_Y)), groups = "HAB", delete = T) # TEMP_y estimate = 0.44 
+
+    # For INTERMEDIATE precipitation seasons
+require(RMark)
+nocc <- max(geeseINTER$LastChecked)
+
+mark(geeseINTER, nocc = nocc, model = "Nest", model.parameters = list(S = list(formula = ~ NestAge + HAB + TEMP_Y)), groups = "HAB", delete = T) # TEMP_y estimate = 0
+
+    # For LOW precipitation seasons
+require(RMark)
+nocc <- max(geeseLOW$LastChecked)
+
+mark(geeseLOW, nocc = nocc, model = "Nest", model.parameters = list(S = list(formula = ~ NestAge + HAB + TEMP_Y)), groups = "HAB", delete = T) # TEMP_y estimate = 0.79
+
+# Obtain a slope for DSR vs. temp depending on 3 groups of MEAN TEMPERATURE (COLD, INTER, WARM)
+
+geeseWARM <- geese[geese$TYP_TEMP == "WARM",]
+geeseINTER <- geese[geese$TYP_TEMP == "INTER",]
+geeseCOLD <- geese[geese$TYP_TEMP == "COLD",]
+
+# For WARM seasons
+require(RMark)
+nocc <- max(geeseWARM$LastChecked)
+
+mark(geeseWARM, nocc = nocc, model = "Nest", model.parameters = list(S = list(formula = ~ NestAge + HAB + quad_prec)), groups = "HAB", delete = T) # PREC_y estimate = -0.02
+geese$quad_prec <- (geese$PREC_Y^2)
+# For INTERMEDIATE temperature seasons
+require(RMark)
+nocc <- max(geeseINTER$LastChecked)
+
+mark(geeseINTER, nocc = nocc, model = "Nest", model.parameters = list(S = list(formula = ~ NestAge + HAB + PREC_Y)), groups = "HAB", delete = T) # PREC_y estimate = -0.007
+
+# For COLD seasons
+require(RMark)
+nocc <- max(geeseCOLD$LastChecked)
+
+mark(geeseCOLD, nocc = nocc, model = "Nest", model.parameters = list(S = list(formula = ~ NestAge + HAB + PREC_Y)), groups = "HAB", delete = T) # PREC_y estimate = 0
