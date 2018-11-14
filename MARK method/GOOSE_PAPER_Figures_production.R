@@ -52,32 +52,33 @@ bg="transparent")
 par(mfrow = c(2, 1), mar=c(5,5,1,5)) # inner margin - default parameter is par("mar") <- 5.1 4.1 4.1 2.1
 my_vector <- cum2$cumRAIN
 names(my_vector) <- cum2$YEAR
-cols <- c("seagreen4", "olivedrab3", "darkgoldenrod3")[as.numeric(cum2$RAINFALL)]
+cols <- c("springgreen4", "springgreen3", "olivedrab2")[as.numeric(cum2$RAINFALL)]
 
 barplot(my_vector,
         col = cols,
-        border = c("seagreen4", "olivedrab3", "darkgoldenrod3")[as.numeric(cum2$RAINFALL)],
+        border = cols,
         # main = "Trend for specific dates for each goose nesting period",
-        ylab = "Cumulative precipitation (mm)",
+        #ylab = "Cumulative precipitation (mm)",
         yaxt = "n",
         ylim = c(0, max(cum2$cumRAIN + 5)))
 axis(side = 2,
      lwd = 1,
-     las = 2)
+     las = 2,
+     cex.axis = 1.5)
 abline(h = mean(cum2$cumRAIN),
        col = "olivedrab4",
-       lwd = 2.5,
+       lwd = 3.5,
        lty = "solid")
 abline(h = mean(cum2$cumRAIN) - sd(cum2$cumRAIN),
        col = "olivedrab4",
-       lwd = 1.5,
+       lwd = 2.5,
        lty = "dotdash")
 abline(h = mean(cum2$cumRAIN) + sd(cum2$cumRAIN),
        col = "olivedrab4",
-       lwd = 1.5,
+       lwd = 2.5,
        lty = "dotdash")
-legend(-0.5, 70, legend = c("high", "intermediate", "low"), col = c("seagreen4", "olivedrab3", "darkgoldenrod3"), pch = 15, bty = "n")
-legend(26.5, 75, legend = "(a)", bty = "n")
+legend(-0.5, 70, legend = c("high", "intermediate", "low"), col =c("springgreen4", "springgreen3", "olivedrab2"), pch = 15, bty = "n", cex = 2)
+#legend(26.5, 75, legend = "(a)", bty = "n")
 
 #par(new = T)
 #### Annual air temperature ####
@@ -86,7 +87,8 @@ WEA$type_temp[WEA$meanTEMP <= mean(WEA$meanTEMP) - sd(WEA$meanTEMP)] <- "COLD"
 WEA$type_temp[is.na(WEA$type_temp)] <- "INTER"
 WEA$type_temp <- as.factor(WEA$type_temp)
 
-pchs <- c(15:17)[as.numeric(WEA$type_temp)]
+cols2 <- c("orange", "black", "red4")[as.numeric(WEA$type_temp)]
+pchs <- c(25, 19, 24)[as.numeric(WEA$type_temp)]
 plot(WEA$YEAR,
      WEA$meanTEMP,
      xlab = "",
@@ -97,12 +99,14 @@ plot(WEA$YEAR,
      bty = "n",
      #yaxp = c(min(WEA$meanTEMP) - 0.5, max(WEA$meanTEMP) + 0.5, 6),
      yaxt = "n",
-     xaxt = "n",
+     #xaxt = "n",
      cex = c(2, 1, 2)[as.numeric(WEA$type_temp)],
      cex.lab = 1,
+     #col = cols2,
      col = "darkgoldenrod3",
      pch = pchs,
-     lwd = 2,
+     bg = cols2,
+     lwd = 3,
      type = 'b'
 )
 
@@ -137,18 +141,140 @@ legend(2016, 8.3, legend = "(b)", bty = "n")
 
 dev.off()
 
-# Superposition des deux graphiques
-png("C:/Users/HP_9470m/Dropbox/PHD. Claire/Chapitres de thèse/CHAPTER 1 - Geese nesting success & supplemented nests/PAPER/Figures/GOOSE_prec_temp_superposition.tiff",
+#### Figures SQEBC ####
+# Cum prec plot
+png("C:/Users/HP_9470m/OneDrive - Université de Moncton/Doc doc doc/Ph.D. - ADMIN, COURSES & PRESENTATION/Colloques & congrès - Présentations orales & affiches/2018 SQEBC/2018_SQEBC_Presentation/Figures/GOOSE_prec.tiff",
     res=300,
     width=25,
     height=20,
     pointsize=12,
     unit="cm",
     bg="transparent")
-x11()
-cols2 <- c("red4", "orangered", "orange")[as.numeric(WEA$type_temp)]
-plot(WEA$YEAR, WEA$cumPREC, type = "h", col = cols, lwd = 20, xaxp = c(1995, 2017, 22), bty = "n")
-lines(WEA$YEAR, WEA$meanTEMP*10, xaxt = "n", yaxt = "n", cex = c(2, 1, 2)[as.numeric(WEA$type_temp)], pch = pchs, type = "b", lwd = 3, col =cols2, bty = "n")
+my_vector <- cum2$cumRAIN
+names(my_vector) <- cum2$YEAR
+cols <- c("springgreen4", "springgreen3", "olivedrab2")[as.numeric(cum2$RAINFALL)]
+
+barplot(my_vector,
+        col = cols,
+        border = cols,
+        # main = "Trend for specific dates for each goose nesting period",
+        #ylab = "Cumulative precipitation (mm)",
+        yaxt = "n",
+        ylim = c(0, max(cum2$cumRAIN + 5)))
+axis(side = 2,
+     lwd = 1,
+     las = 2,
+     cex.axis = 1.5)
+abline(h = mean(cum2$cumRAIN),
+       col = "olivedrab4",
+       lwd = 3.5,
+       lty = "solid")
+abline(h = mean(cum2$cumRAIN) - sd(cum2$cumRAIN),
+       col = "olivedrab4",
+       lwd = 2.5,
+       lty = "dotdash")
+abline(h = mean(cum2$cumRAIN) + sd(cum2$cumRAIN),
+       col = "olivedrab4",
+       lwd = 2.5,
+       lty = "dotdash")
+legend(-0.5, 70, legend = c("high", "intermediate", "low"), col =c("springgreen4", "springgreen3", "olivedrab2"), pch = 15, bty = "n", cex = 2)
+dev.off()
+# Mean temp plot
+
+WEA$type_temp[WEA$meanTEMP >= mean(WEA$meanTEMP) + sd(WEA$meanTEMP)] <- "WARM"
+WEA$type_temp[WEA$meanTEMP <= mean(WEA$meanTEMP) - sd(WEA$meanTEMP)] <- "COLD"
+WEA$type_temp[is.na(WEA$type_temp)] <- "INTER"
+WEA$type_temp <- as.factor(WEA$type_temp)
+
+png("C:/Users/HP_9470m/OneDrive - Université de Moncton/Doc doc doc/Ph.D. - ADMIN, COURSES & PRESENTATION/Colloques & congrès - Présentations orales & affiches/2018 SQEBC/2018_SQEBC_Presentation/Figures/GOOSE_temp.tiff",
+    res=300,
+    width=25,
+    height=20,
+    pointsize=12,
+    unit="cm",
+    bg="transparent")
+
+cols2 <- c("orange", "orangered", "red4")[as.numeric(WEA$type_temp)]
+pchs <- c(25, 21, 24)[as.numeric(WEA$type_temp)]
+plot(WEA$YEAR,
+     WEA$meanTEMP,
+     xlab = "",
+     ylab = "",
+     #ylab = "Mean air temperature (°C)",
+     xaxp = c(1995, 2017, 22),
+     ylim = c(3, 8),
+     xlim = c(1995, 2017),
+     bty = "n",
+     #yaxp = c(min(WEA$meanTEMP) - 0.5, max(WEA$meanTEMP) + 0.5, 6),
+     yaxt = "n",
+     #xaxt = "n",
+     cex = c(2, 1, 2)[as.numeric(WEA$type_temp)],
+     cex.axis = 1.5,
+     col = cols2,
+     pch = pchs,
+     bg = cols2,
+     lwd = 3,
+     type = 'b'
+)
+
+lines(WEA$YEAR,
+      rep(mean(WEA$meanTEMP), 23),
+      col = "darkgoldenrod4",
+      type = "l",
+      lty = 1,
+      lwd = 2.5)
+
+lines(WEA$YEAR,
+      rep(mean(WEA$meanTEMP) + sd(WEA$meanTEMP), 23),
+      col = "darkgoldenrod4",
+      type = "l",
+      lty = "dotdash",
+      lwd = 1.5)
+
+lines(WEA$YEAR,
+      rep(mean(WEA$meanTEMP) - sd(WEA$meanTEMP), 23),
+      col = "darkgoldenrod4",
+      type = "l",
+      lty = "dotdash",
+      lwd = 1.5)
+
+axis(side = 2,
+     lwd = 1,
+     las = 2,
+     cex.axis = 1.5)
+
+legend(1995, 8, legend = c("warm", "intermediate", "cold"), col = c("red4", "orangered", "orange"), pch =  c(24, 21, 25), bg = c("red4", "orange"), bty = "n", cex = 1.5)
+
+
+dev.off()
+
+#Superposition des deux graphiques -- Presentation for SQEBC #
+png("C:/Users/HP_9470m/OneDrive - Université de Moncton/Doc doc doc/Ph.D. - ADMIN, COURSES & PRESENTATION/Colloques & congrès - Présentations orales & affiches/2018 SQEBC/2018_SQEBC_Presentation/Figures/GOOSE_prec_temp_superposition.tiff",
+    res=300,
+    width=25,
+    height=20,
+    pointsize=12,
+    unit="cm",
+    bg="transparent")
+#x11()
+par(mar=c(5,5,1,5)) # inner margin - default parameter is par("mar") <- 5.1 4.1 4.1 2.1
+cols <- c("springgreen3", "black", "olivedrab2")[as.numeric(cum2$RAINFALL)]
+cols2 <- c("orange", "black", "red4")[as.numeric(WEA$type_temp)]
+pchs <- c(25, 21, 24)[as.numeric(WEA$type_temp)]
+r <- barplot(my_vector,
+             col = cols,
+             border = cols,
+             # main = "Trend for specific dates for each goose nesting period",
+             #ylab = "Cumulative precipitation (mm)",
+             yaxt = "n",
+             xaxt = "n",
+             ylim = c(0, max(cum2$cumRAIN + 10)),
+             cex.axis = 1.5)
+lines(r, WEA$meanTEMP*10, cex = c(2, 1, 2)[as.numeric(WEA$type_temp)], pch = pchs, col = cols2, bg = cols2, type = "b", lwd = 3, bty = "n")
+#points(r, WEA$meanTEMP*10, xaxt = "n", yaxt = "n", cex = c(2, 1, 2)[as.numeric(WEA$type_temp)], pch = pchs, bg = cols2, lwd = 3, col = cols2, bty = "n")
+axis(side = 1, at = r, labels = cum2$YEAR, lwd = 1, las = 1, padj = 0, cex.axis = 1.5)
+axis(side = 2, lwd = 1, las = 2, at = seq(0, 70, 10), labels = seq(0, 70, 10), padj = 0, cex.axis = 1.5)
+axis(side = 4, lwd = 1, las = 2, at = seq(35, 75, 10), labels = (seq(35, 75, 10)/10), padj = 0, cex.axis = 1.5)
 
 dev.off()
 #### Extreme climate years impacts on DSR ####
