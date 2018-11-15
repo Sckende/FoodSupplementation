@@ -684,3 +684,18 @@ legend("topleft",
 #text(barCenters,0.2, labels = paste("(", as.character(prop$n), ")", sep = ""))
 
 dev.off()
+
+# Solution 2
+utils::View(TAB)
+TAB$SUPPL <- as.factor(TAB$SUPPL)
+TAB$HAB <- as.factor(TAB$HAB)
+
+llTAB <- split(TAB, TAB$YEAR)
+
+par(mfrow = c(3, 1))
+for(i in 1:3){
+  llTAB[[i]] <- llTAB[[i]][1:27,]
+  
+  plot(llTAB[[i]]$estimate[llTAB[[i]]$SUPPL == "TEM"], col = "darkgoldenrod3", type ="b", ylim = c(0.9520, 0.9925))
+  plot(llTAB[[i]]$estimate[llTAB[[i]]$SUPPL == "FOO"], col = "darkgoldenrod4")
+}
