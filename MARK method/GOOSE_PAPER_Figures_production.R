@@ -427,91 +427,6 @@ text(x = 26, y = 0.995, labels = "(b)", pos = 3)
 
 dev.off()
 
-#### Histogram of NS depending on habitat and supplementation ####
-
-
-setwd("C:/Users/HP_9470m/OneDrive - Université de Moncton/Doc doc doc/Ph.D. - ANALYSES/R analysis/Data")
-
-
-#### Water models ####
-# Concerning years : 2005, 2015, 2016 & 2017
-
-sup <- read.table("GOOSE_geese_with_WF.txt", sep = ",", h = T)
-head(sup)
-summary(sup)
-
-sup <- sup[,-1]
-supW1 <- sup[which(sup$YEAR == 2015 | sup$YEAR == 2016 | sup$YEAR == 2017),]
-supW1 <- supW1[which(supW1$SUPPL == "W" | supW1$SUPPL == "TEM"),]
-supW1 <- droplevels(supW1)
-summary(supW1)
-
-supW1$YEAR <- as.factor(supW1$YEAR)
-supW1$Fate <- as.factor(supW1$Fate)
-
-# Add 2005 data
-w05 <- read.table("GOOSE_Lecomte_supp_nests_2005.txt", h = T )
-#Obtention de la variable AgeDay1 = correspond à l'âge du nid lors du premier jour du suivi de nids
-w05$AgeDay1 <- (w05$AgeFound - w05$FirstFound)
-
-supW1 <- sup[which(sup$YEAR == 2005 | sup$YEAR == 2015 | sup$YEAR == 2016 | sup$YEAR == 2017),]
-supW1 <- supW1[which(supW1$SUPPL == "W" | supW1$SUPPL == "TEM"),]
-supW1 <- droplevels(supW1)
-supW11 <- supW1[, c(1:4, 7:10, 14, 16)]
-head(supW11)
-
-supW2 <- rbind(supW11, w05)
-
-supW2$YEAR <- as.factor(supW2$YEAR)
-supW2$Fate <- as.factor(supW2$Fate)
-summary(supW2)
-
-require(RMark)
-
-nocc <- max(supW2$LastChecked)
-
-
-wat9 <- mark(supW2, nocc = nocc, model = "Nest", model.parameters = list(S = list(formula = ~ SUPPL*HAB + YEAR + NestAge)), groups = c("SUPPL", "HAB", "YEAR" ), delete = T)
-
-wat9$results$beta
-utils::View(wat9$results$real)
-
-TAB <- as.data.frame(wat9$results$real)[,-c(5,6)]
-TAB$YEAR <- c(rep(2005, 152), rep(2015, 152), rep(2016, 152), rep(2017, 152))
-TAB$SUPPL <- c("TEM", "WAT")[rep(c(rep(1, 38), rep(2, 38)), times = 8)]
-TAB$HAB <- c("MES", "WET")[rep(c(rep(1, 76), rep(2, 76)), times = 4)] 
-
-lTAB <- split(TAB, list(TAB$YEAR, TAB$HAB, TAB$SUPPL))
-NS <- NULL
-
-for (i in 1:16){
-  lTAB[[i]] <- lTAB[[i]][1:27,] 
-  SR <- prod(lTAB[[i]]$estimate)
-  year <- unique(lTAB[[i]]$YEAR)
-  hab <- unique(lTAB[[i]]$HAB)
-  suppl <- unique(lTAB[[i]]$SUPPL)
-  
-  r<- c(year, hab, suppl, SR)
-  
-  NS <- rbind(NS, r)
-}
-
-NS <- as.data.frame(NS)
-names(NS) <- c("year", "hab", "suppl", "SR")
-NS$SR <- as.numeric(as.character(NS$SR))
-summary(NS)
-utils::View(NS)
-
-lNS <- split(NS, NS$year)
-lNS <- lapply(lNS, function(i){
-   i[order(i$hab),]
-} )
-x11()
-par(mfrow = c(2,2))
-
-lapply(lNS, function(i){
-  barplot(i$SR, main = unique(i$year))
-})
 
 #### Plot of extreme weather model ####
 setwd("C:/Users/HP_9470m/OneDrive - Université de Moncton/Doc doc doc/Ph.D. - ANALYSES/R analysis/Data")
@@ -605,3 +520,167 @@ require(RMark)
 nocc <- max(geeseCOLD$LastChecked)
 
 mark(geeseCOLD, nocc = nocc, model = "Nest", model.parameters = list(S = list(formula = ~ NestAge + HAB + PREC_Y)), groups = "HAB", delete = T) # PREC_y estimate = 0
+
+
+#### Plot effect of supplementation ####
+
+#### WATER SUPPLEMENTATION 2005 - 2017 ####
+setwd("C:/Users/HP_9470m/OneDrive - Université de Moncton/Doc doc doc/Ph.D. - ANALYSES/R analysis/Data")
+list.files()
+load(file = "waterGEESE_2005-2017.rda") # water.2.results - Load the modeles comparison
+load(file = "waterGEESE_2005-2017_1.rda") # wat8 - Best model #1
+load(file = "waterGEESE_2005-2017_2.rda") # wat9 - Best model #2
+
+wat9$results$beta
+utils::View(wat9$results$real)
+
+TAB <- as.data.frame(wat9$results$real)[,-c(5,6)]
+TAB$YEAR <- c(rep(2005, 152), rep(2015, 152), rep(2016, 152), rep(2017, 152))
+TAB$SUPPL <- c("TEM", "WAT")[rep(c(rep(1, 38), rep(2, 38)), times = 8)]
+TAB$HAB <- c("MES", "WET")[rep(c(rep(1, 76), rep(2, 76)), times = 4)] 
+utils::View(TAB)
+
+lTAB <- split(TAB, list(TAB$YEAR, TAB$HAB, TAB$SUPPL))
+NS <- NULL
+
+for (i in 1:16){
+  lTAB[[i]] <- lTAB[[i]][1:27,] 
+  SR <- prod(lTAB[[i]]$estimate)
+  year <- unique(lTAB[[i]]$YEAR)
+  hab <- unique(lTAB[[i]]$HAB)
+  suppl <- unique(lTAB[[i]]$SUPPL)
+  se <- prod(lTAB[[i]]$se)
+  
+  r<- c(year, hab, suppl, SR, se)
+  
+  NS <- rbind(NS, r)
+}
+
+NS <- as.data.frame(NS)
+names(NS) <- c("year", "hab", "suppl", "SR", "se")
+NS$SR <- as.numeric(as.character(NS$SR))
+NS$se <- as.numeric(as.character(NS$se))
+summary(NS)
+
+# Solution 1
+NS <- NS[order(NS$year, NS$hab),]
+utils::View(NS)
+
+png("C:/Users/HP_9470m/OneDrive - Université de Moncton/Doc doc doc/Ph.D. - ADMIN, COURSES & PRESENTATION/Colloques & congrès - Présentations orales & affiches/2018 SQEBC/2018_SQEBC_Presentation/Figures/GOOSE_wat_suppl.tiff",
+    res=300,
+    width=25,
+    height=20,
+    pointsize=12,
+    unit="cm",
+    bg="transparent")
+cols <- c("aquamarine3", "aquamarine4")[as.numeric(NS$hab)]
+barCenters <- barplot(NS$SR,
+                      width = 0.5,
+                      col = cols,
+                      #xlab = "Year",
+                      #ylab = "Nesting success",
+                      ylim = c(0, 1),
+                      names.arg = c("", 2005, "", "", "",2015, "", "", "", 2016, "", "", "", 2017, "", ""),
+                      legend.text = TRUE,
+                      space = c(0.2, rep(c(0,0.05,0,0.4), 3), c(0,0.05,0)),
+                      las = 1,
+                      cex.axis = 1.5)
+legend("topleft",
+       inset = c(0, - 0.05),
+       legend = c("Mesic hab.", "Wetland"), 
+       fill = c("aquamarine3", "aquamarine4"),
+       bty = "n")
+
+#text(barCenters,0.2, labels = paste("(", as.character(prop$n), ")", sep = ""))
+
+dev.off()
+
+# Solution 2
+lNS <- split(NS, NS$year)
+lNS <- lapply(lNS, function(i){
+  i[order(i$hab),]
+} )
+
+x11()
+par(mfrow = c(2,2))
+lapply(lNS, function(i){
+  cols <- c("aquamarine3", "aquamarine4")[as.numeric(i$hab)]
+  r <- barplot(i$SR, main = unique(i$year), names.arg = i$suppl ,col = cols)
+  legend("topleft", legend = c("MESIC HAB.", "WETLAND"), col = cols)
+})
+
+barplot(NS$SR)
+
+
+#### FOOD SUPPLEMENTATION 2005 - 2017 ####
+setwd("C:/Users/HP_9470m/OneDrive - Université de Moncton/Doc doc doc/Ph.D. - ANALYSES/R analysis/Data")
+list.files()
+load(file = "foodGEESE.rda") # foodGEESE - Load the modeles comparison
+load(file = "foodGEESE_1.rda") # foo14 - Best model #1 on 5 modeles
+load(file = "foodGEESE_2.rda") # foo8 - Best model #2 on 5 modeles with supplementation effects
+
+foo8$results$beta
+utils::View(foo8$results$real)
+
+TAB <- as.data.frame(foo8$results$real)[,-c(5,6)]
+TAB$YEAR <- c(rep(2015, 152), rep(2016, 152), rep(2017, 152))
+TAB$SUPPL <- c("TEM", "FOO")[rep(c(rep(1, 38), rep(2, 38)), times = 6)]
+TAB$HAB <- c("MES", "WET")[rep(c(rep(1, 76), rep(2, 76)), times = 3)] 
+utils::View(TAB)
+
+# NS total
+lTAB <- split(TAB, list(TAB$YEAR, TAB$HAB, TAB$SUPPL))
+NS <- NULL
+
+for (i in 1:12){
+  lTAB[[i]] <- lTAB[[i]][1:27,] 
+  SR <- prod(lTAB[[i]]$estimate)
+  year <- unique(lTAB[[i]]$YEAR)
+  hab <- unique(lTAB[[i]]$HAB)
+  suppl <- unique(lTAB[[i]]$SUPPL)
+  se <- prod(lTAB[[i]]$se)
+  
+  r<- c(year, hab, suppl, SR, se)
+  
+  NS <- rbind(NS, r)
+}
+
+NS <- as.data.frame(NS)
+names(NS) <- c("year", "hab", "suppl", "SR", "se")
+NS$SR <- as.numeric(as.character(NS$SR))
+NS$se <- as.numeric(as.character(NS$se))
+summary(NS)
+
+utils::View(NS)
+# Solution 1
+NS <- NS[order(NS$year, NS$hab, - as.numeric(NS$suppl)),]
+utils::View(NS)
+
+png("C:/Users/HP_9470m/OneDrive - Université de Moncton/Doc doc doc/Ph.D. - ADMIN, COURSES & PRESENTATION/Colloques & congrès - Présentations orales & affiches/2018 SQEBC/2018_SQEBC_Presentation/Figures/GOOSE_foo_suppl.tiff",
+    res=300,
+    width=25,
+    height=20,
+    pointsize=12,
+    unit="cm",
+    bg="transparent")
+cols <- c("darkgoldenrod2", "darkgoldenrod3")[as.numeric(NS$hab)]
+barCenters <- barplot(NS$SR,
+                      #width = 0.5,
+                      col = cols,
+                      #xlab = "Year",
+                      #ylab = "Nesting success",
+                      ylim = c(0, 1),
+                      names.arg = c("",2015, "", "", "", 2016, "", "", "", 2017, "", ""),
+                      legend.text = TRUE,
+                      space = c(0.2, rep(c(0,0.05,0,0.4), 2), c(0,0.05,0)),
+                      las = 1,
+                      cex.axis = 1.5)
+legend("topleft",
+       inset = c(0, - 0.05),
+       legend = c("Mesic hab.", "Wetland"), 
+       fill = c("darkgoldenrod2", "darkgoldenrod3"),
+       bty = "n")
+
+#text(barCenters,0.2, labels = paste("(", as.character(prop$n), ")", sep = ""))
+
+dev.off()
