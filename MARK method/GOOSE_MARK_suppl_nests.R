@@ -68,7 +68,7 @@ run.WATER.1 = function()
   wat10 <- mark(supW1, nocc = nocc, model = "Nest", model.parameters = list(S = list(formula = ~ HAB + YEAR + NestAge)), groups = c("HAB", "YEAR" ), delete = T)
   
   # SUPPL*HAB + YEAR
-  wat11 <- mark(supW1, nocc = nocc, model = "Nest", model.parameters = list(S = list(formula = ~ SUPPL*HAB + YEAR)), groups = c("SUPPL", "HAB"), delete = T)  
+  wat11 <- mark(supW1, nocc = nocc, model = "Nest", model.parameters = list(S = list(formula = ~ SUPPL*HAB + YEAR)), groups = c("SUPPL", "HAB", "YEAR"), delete = T)  
   
   return(collect.models() )
 }
