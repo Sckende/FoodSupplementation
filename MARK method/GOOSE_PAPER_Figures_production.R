@@ -243,7 +243,7 @@ axis(side = 2,
      las = 2,
      cex.axis = 1.5)
 
-legend(1995, 8, legend = c("warm", "intermediate", "cold"), col = c("red4", "orangered", "orange"), pch =  c(24, 21, 25), bg = c("red4", "orange"), bty = "n", cex = 1.5)
+legend(1995, 8, legend = c("warm", "intermediate", "cold"), col = c("red4", "orangered", "orange"), pch =  c(24, 21, 25), bg = c("red4", "orange"), bty = "n", cex = 2)
 
 
 dev.off()
@@ -573,6 +573,8 @@ png("C:/Users/HP_9470m/OneDrive - Université de Moncton/Doc doc doc/Ph.D. - ADM
     pointsize=12,
     unit="cm",
     bg="transparent")
+#x11()
+par(mar=c(5,6,4,5)) # inner margin - default parameter is par("mar") <- 5.1 4.1 4.1 2.1
 cols <- c("aquamarine3", "aquamarine4")[as.numeric(NS$hab)]
 barCenters <- barplot(NS$SR,
                       width = 0.5,
@@ -580,16 +582,17 @@ barCenters <- barplot(NS$SR,
                       #xlab = "Year",
                       #ylab = "Nesting success",
                       ylim = c(0, 1),
-                      names.arg = c("", 2005, "", "", "",2015, "", "", "", 2016, "", "", "", 2017, "", ""),
+                      names.arg = rep(c("T", "WAT"), 8),
                       legend.text = TRUE,
                       space = c(0.2, rep(c(0,0.05,0,0.4), 3), c(0,0.05,0)),
                       las = 1,
                       cex.axis = 1.5)
 legend("topleft",
-       inset = c(0, - 0.05),
+      #inset = c(0, - 0.05),
        legend = c("Mesic hab.", "Wetland"), 
        fill = c("aquamarine3", "aquamarine4"),
-       bty = "n")
+       bty = "n",
+      cex = 1.45)
 
 #text(barCenters,0.2, labels = paste("(", as.character(prop$n), ")", sep = ""))
 
@@ -652,6 +655,7 @@ NS$se <- as.numeric(as.character(NS$se))
 summary(NS)
 
 utils::View(NS)
+
 # Solution 1
 NS <- NS[order(NS$year, NS$hab, - as.numeric(NS$suppl)),]
 utils::View(NS)
@@ -689,13 +693,129 @@ dev.off()
 utils::View(TAB)
 TAB$SUPPL <- as.factor(TAB$SUPPL)
 TAB$HAB <- as.factor(TAB$HAB)
+TAB$X <- rep(1:27)
+summary(TAB)
 
 llTAB <- split(TAB, TAB$YEAR)
+# 2015 
+summary(llTAB[[1]])
+  # y lim
+mini <- min(llTAB[[1]]$lcl)
+maxi <- max(llTAB[[1]]$ucl)
 
-par(mfrow = c(3, 1))
-for(i in 1:3){
-  llTAB[[i]] <- llTAB[[i]][1:27,]
-  
-  plot(llTAB[[i]]$estimate[llTAB[[i]]$SUPPL == "TEM"], col = "darkgoldenrod3", type ="b", ylim = c(0.9520, 0.9925))
-  plot(llTAB[[i]]$estimate[llTAB[[i]]$SUPPL == "FOO"], col = "darkgoldenrod4")
-}
+  # Plot 1 - Food in mesic
+plot(llTAB[[1]]$estimate[llTAB[[1]]$SUPPL == "TEM" & llTAB[[1]]$HAB == "MES"], ylim = c(mini, maxi), type = "l", bty = "n", col = "black", main = "2015 - Mesic habitat")
+lines(llTAB[[1]]$ucl[llTAB[[1]]$SUPPL == "TEM" & llTAB[[1]]$HAB == "MES"], col = "black", lty = 3, lwd = 1.5)
+lines(llTAB[[1]]$lcl[llTAB[[1]]$SUPPL == "TEM" & llTAB[[1]]$HAB == "MES"],  col = "black", lty = 3, lwd = 1.5)
+
+
+lines(llTAB[[1]]$estimate[llTAB[[1]]$SUPPL == "FOO" & llTAB[[1]]$HAB == "MES"], type = "l", bty = "n", col = "darkgoldenrod3")
+lines(llTAB[[1]]$ucl[llTAB[[1]]$SUPPL == "FOO" & llTAB[[1]]$HAB == "MES"], col = "darkgoldenrod3", lty = 3, lwd = 1.5)
+lines(llTAB[[1]]$lcl[llTAB[[1]]$SUPPL == "FOO" & llTAB[[1]]$HAB == "MES"], col = "darkgoldenrod3", lty = 3, lwd = 1.5)
+
+  # Plot 2 - Food in wetland
+plot(llTAB[[1]]$estimate[llTAB[[1]]$SUPPL == "TEM" & llTAB[[1]]$HAB == "WET"], ylim = c(mini, maxi), type = "l", bty = "n", col = "black", main = "2015 - Wetland")
+lines(llTAB[[1]]$ucl[llTAB[[1]]$SUPPL == "TEM" & llTAB[[1]]$HAB == "WET"], col = "black", lty = 3, lwd = 1.5)
+lines(llTAB[[1]]$lcl[llTAB[[1]]$SUPPL == "TEM" & llTAB[[1]]$HAB == "WET"], col = "black", lty = 3, lwd = 1.5)
+
+
+lines(llTAB[[1]]$estimate[llTAB[[1]]$SUPPL == "FOO" & llTAB[[1]]$HAB == "WET"], type = "l", bty = "n", col = "darkgoldenrod3")
+lines(llTAB[[1]]$ucl[llTAB[[1]]$SUPPL == "FOO" & llTAB[[1]]$HAB == "WET"],  col = "darkgoldenrod3", lty = 3, lwd = 1.5)
+lines(llTAB[[1]]$lcl[llTAB[[1]]$SUPPL == "FOO" & llTAB[[1]]$HAB == "WET"], col = "darkgoldenrod3", lty = 3, lwd = 1.5)
+
+# 2016 
+summary(llTAB[[2]])
+# y lim
+mini <- min(llTAB[[2]]$lcl)
+maxi <- max(llTAB[[2]]$ucl)
+
+# Plot 1 - Food in mesic
+plot(llTAB[[2]]$estimate[llTAB[[2]]$SUPPL == "TEM" & llTAB[[2]]$HAB == "MES"], ylim = c(mini, maxi), type = "l", bty = "n", col = "black", main = "2016 - Mesic habitat")
+lines(llTAB[[2]]$ucl[llTAB[[2]]$SUPPL == "TEM" & llTAB[[2]]$HAB == "MES"], col = "black", lty = 3, lwd = 1.5)
+lines(llTAB[[2]]$lcl[llTAB[[2]]$SUPPL == "TEM" & llTAB[[2]]$HAB == "MES"],  col = "black", lty = 3, lwd = 1.5)
+
+
+lines(llTAB[[2]]$estimate[llTAB[[2]]$SUPPL == "FOO" & llTAB[[2]]$HAB == "MES"], type = "l", bty = "n", col = "darkgoldenrod3")
+lines(llTAB[[2]]$ucl[llTAB[[2]]$SUPPL == "FOO" & llTAB[[2]]$HAB == "MES"], col = "darkgoldenrod3", lty = 3, lwd = 1.5)
+lines(llTAB[[2]]$lcl[llTAB[[2]]$SUPPL == "FOO" & llTAB[[2]]$HAB == "MES"], col = "darkgoldenrod3", lty = 3, lwd = 1.5)
+
+# Plot 2 - Food in wetland
+plot(llTAB[[2]]$estimate[llTAB[[2]]$SUPPL == "TEM" & llTAB[[2]]$HAB == "WET"], ylim = c(mini, maxi), type = "l", bty = "n", col = "black", main = "2016 - Wetland")
+lines(llTAB[[2]]$ucl[llTAB[[2]]$SUPPL == "TEM" & llTAB[[2]]$HAB == "WET"], col = "black", lty = 3, lwd = 1.5)
+lines(llTAB[[2]]$lcl[llTAB[[2]]$SUPPL == "TEM" & llTAB[[2]]$HAB == "WET"], col = "black", lty = 3, lwd = 1.5)
+
+
+lines(llTAB[[2]]$estimate[llTAB[[2]]$SUPPL == "FOO" & llTAB[[2]]$HAB == "WET"], type = "l", bty = "n", col = "darkgoldenrod3")
+lines(llTAB[[2]]$ucl[llTAB[[2]]$SUPPL == "FOO" & llTAB[[2]]$HAB == "WET"],  col = "darkgoldenrod3", lty = 3, lwd = 1.5)
+lines(llTAB[[2]]$lcl[llTAB[[2]]$SUPPL == "FOO" & llTAB[[2]]$HAB == "WET"], col = "darkgoldenrod3", lty = 3, lwd = 1.5)
+
+# 2017 
+summary(llTAB[[3]])
+  # y lim
+mini <- min(llTAB[[3]]$lcl)
+maxi <- max(llTAB[[3]]$ucl)
+
+  # Plot 1 - Food in mesic
+plot(llTAB[[3]]$estimate[llTAB[[3]]$SUPPL == "TEM" & llTAB[[3]]$HAB == "MES"], ylim = c(mini, maxi), type = "l", bty = "n", col = "black", main = "2017 - Mesic habitat")
+lines(llTAB[[3]]$ucl[llTAB[[3]]$SUPPL == "TEM" & llTAB[[3]]$HAB == "MES"], col = "black", lty = 3, lwd = 1.5)
+lines(llTAB[[3]]$lcl[llTAB[[3]]$SUPPL == "TEM" & llTAB[[3]]$HAB == "MES"],  col = "black", lty = 3, lwd = 1.5)
+
+
+lines(llTAB[[3]]$estimate[llTAB[[3]]$SUPPL == "FOO" & llTAB[[3]]$HAB == "MES"], type = "l", bty = "n", col = "darkgoldenrod3")
+lines(llTAB[[3]]$ucl[llTAB[[3]]$SUPPL == "FOO" & llTAB[[3]]$HAB == "MES"], col = "darkgoldenrod3", lty = 3, lwd = 1.5)
+lines(llTAB[[3]]$lcl[llTAB[[3]]$SUPPL == "FOO" & llTAB[[3]]$HAB == "MES"], col = "darkgoldenrod3", lty = 3, lwd = 1.5)
+
+# Plot 2 - Food in wetland
+plot(llTAB[[3]]$estimate[llTAB[[3]]$SUPPL == "TEM" & llTAB[[3]]$HAB == "WET"], ylim = c(mini, maxi), type = "l", bty = "n", col = "black", main = "2017 - Wetland")
+lines(llTAB[[3]]$ucl[llTAB[[3]]$SUPPL == "TEM" & llTAB[[3]]$HAB == "WET"], col = "black", lty = 3, lwd = 1.5)
+lines(llTAB[[3]]$lcl[llTAB[[3]]$SUPPL == "TEM" & llTAB[[3]]$HAB == "WET"], col = "black", lty = 3, lwd = 1.5)
+
+
+lines(llTAB[[3]]$estimate[llTAB[[3]]$SUPPL == "FOO" & llTAB[[3]]$HAB == "WET"], type = "l", bty = "n", col = "darkgoldenrod3")
+lines(llTAB[[3]]$ucl[llTAB[[3]]$SUPPL == "FOO" & llTAB[[3]]$HAB == "WET"],  col = "darkgoldenrod3", lty = 3, lwd = 1.5)
+lines(llTAB[[3]]$lcl[llTAB[[3]]$SUPPL == "FOO" & llTAB[[3]]$HAB == "WET"], col = "darkgoldenrod3", lty = 3, lwd = 1.5)
+
+#### FOOD SUPPLEMENTATION 2017 ####
+load(file = "foodGEESE.2017.rda") # FOOD.results.2017
+load(file = "foodGEESE.2017_1.rda") #foo7
+
+foo7$results$beta
+utils::View(foo7$results$real)
+
+TAB <- as.data.frame(foo7$results$real)[,-c(5,6)]
+TAB$YEAR <- rep(2017, 148)
+TAB$SUPPL <- c("TEM", "FOO")[rep(c(rep(1, 37), rep(2, 37)), times = 2)]
+TAB$HAB <- rep(c(rep("MES", 74), rep("WET", 74)))
+TAB$SUPPL <- factor(TAB$SUPPL)
+TAB$HAB <- factor(TAB$HAB)
+utils::View(TAB)
+
+lTAB <- split(TAB, list(TAB$HAB))
+
+
+# y lim
+mini <- min(TAB$lcl)
+maxi <- max(TAB$ucl)
+
+# Plot 1 - No habitat effect !
+png("C:/Users/HP_9470m/OneDrive - Université de Moncton/Doc doc doc/Ph.D. - ADMIN, COURSES & PRESENTATION/Colloques & congrès - Présentations orales & affiches/2018 SQEBC/2018_SQEBC_Presentation/Figures/GOOSE_foo_suppl_2017.tiff",
+    res=300,
+    width=25,
+    height=20,
+    pointsize=12,
+    unit="cm",
+    bg="transparent")
+
+plot(lTAB[[2]]$estimate[lTAB[[2]]$SUPPL == "TEM" ][1:27], ylim = c(mini, maxi), type = "b", pch = 16, bty = "n", col = "black", las = 1, main = "2017 - Wetland", cex = 1, cex.axis = 1.5, lwd = 2, xlab = "", ylab = "")
+lines(lTAB[[2]]$ucl[lTAB[[2]]$SUPPL == "TEM"][1:27], col = "black", lty = 3, lwd = 2)
+lines(lTAB[[2]]$lcl[lTAB[[2]]$SUPPL == "TEM"][1:27],  col = "black", lty = 3, lwd = 2)
+
+
+lines(lTAB[[2]]$estimate[lTAB[[2]]$SUPPL == "FOO"][1:27], type = "b", pch = 16, bty = "n", col = "darkgoldenrod3", lwd = 2)
+lines(lTAB[[2]]$ucl[lTAB[[2]]$SUPPL == "FOO"][1:27], col = "darkgoldenrod3", lty = 3, lwd = 2)
+lines(lTAB[[2]]$lcl[lTAB[[2]]$SUPPL == "FOO"][1:27], col = "darkgoldenrod3", lty = 3, lwd = 2)
+
+legend(20, 0.92, legend = c("control", "food"), col = c("black", "darkgoldenrod3"), pch = c(16, 16), bty = "n", cex = 2)
+
+dev.off()
+
