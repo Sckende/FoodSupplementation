@@ -232,8 +232,57 @@ save(foo8, file = "foodGEESE_2.rda")
 save(foo7, file = "foodGEESE_3.rda")
 save(foo9, file = "foodGEESE_4.rda")
 
+#### Food models for 2017 ####
+supF.2017 <- supF[supF$YEAR == 2017, ]
+supF.2017 <- droplevels(supF.2017)
+require(RMark)
 
+nocc <- max(supF.2017$LastChecked)
 
+run.FOOD.2017 = function()
+{
+  # Null model
+  foo1 <- mark(supF.2017, nocc = nocc, model = "Nest", model.parameters = list(S = list(formula = ~ 1)), delete = T)
+  
+  # SUPPL
+  foo3 <- mark(supF.2017, nocc = nocc, model = "Nest", model.parameters = list(S = list(formula = ~ SUPPL)), groups = "SUPPL", delete = T)
+  
+  # HAB
+  foo4 <- mark(supF.2017, nocc = nocc, model = "Nest", model.parameters = list(S = list(formula = ~ HAB)), groups = "HAB", delete = T)
+  
+  # INITIATION
+  foo5 <- mark(supF.2017, nocc = nocc, model = "Nest", model.parameters = list(S = list(formula = ~ INITIATION)), delete = T)
+  
+  # NestAge
+  foo6 <- mark(supF.2017, nocc = nocc, model = "Nest", model.parameters = list(S = list(formula = ~ NestAge)), delete = T)
+  
+  # SUPPL + HAB + NestAge + INITIATION
+  foo7 <- mark(supF.2017, nocc = nocc, model = "Nest", model.parameters = list(S = list(formula = ~ SUPPL + HAB + NestAge + INITIATION)), groups = c("SUPPL", "HAB"), delete = T)
+  
+  # SUPPL + HAB + NestAge
+  foo8 <- mark(supF.2017, nocc = nocc, model = "Nest", model.parameters = list(S = list(formula = ~ SUPPL + HAB + NestAge)), groups = c("SUPPL", "HAB"), delete = T)
+  
+  # SUPPL*HAB + NestAge
+  foo9 <- mark(supF.2017, nocc = nocc, model = "Nest", model.parameters = list(S = list(formula = ~ SUPPL*HAB + NestAge)), groups = c("SUPPL", "HAB"), delete = T)
+  
+  # SUPPL*HAB
+  foo10 <- mark(supF.2017, nocc = nocc, model = "Nest", model.parameters = list(S = list(formula = ~ SUPPL*HAB)), groups = c("SUPPL", "HAB"), delete = T)
+  
+  # SUPPL*HAB
+  foo11 <- mark(supF.2017, nocc = nocc, model = "Nest", model.parameters = list(S = list(formula = ~ SUPPL*HAB)), groups = c("SUPPL", "HAB"), delete = T)
+  
+  # HAB + NestAge
+  foo14 <- mark(supF.2017, nocc = nocc, model = "Nest", model.parameters = list(S = list(formula = ~ HAB + NestAge)), groups = "HAB", delete = T)
+  
+  return(collect.models() )
+}
+
+# run defined models
+FOOD.results.2017 <- run.FOOD.2017()
+FOOD.results.2017
+
+save(FOOD.results.2017, file = "foodGEESE.2017.rda")
+save(foo7, file = "foodGEESE.2017_1.rda")
 
 #### WATER/FOOD models ####
 # Only concerning 2015
