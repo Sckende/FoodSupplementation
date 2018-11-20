@@ -243,7 +243,7 @@ axis(side = 2,
      las = 2,
      cex.axis = 1.5)
 
-legend(1995, 8, legend = c("warm", "intermediate", "cold"), col = c("red4", "orangered", "orange"), pch =  c(24, 21, 25), bg = c("red4", "orange"), bty = "n", cex = 2)
+legend(1995, 8, legend = c("warm", "intermediate", "cold"), col = c("red4", "orangered", "orange"), pch =  c(24, 21, 25), pt.bg = c("red4", "orangered", "orange"), bty = "n", cex = 2)
 
 
 dev.off()
@@ -373,13 +373,13 @@ dev.off()
 mini <- min(TAB2$estimate[TAB2$prec == "INTER"] - TAB2$se[TAB2$prec == "INTER"])
 maxi <- max(TAB2$estimate[TAB2$prec == "INTER"] + TAB2$se[TAB2$prec == "INTER"])
 
-png("C:/Users/HP_9470m/Dropbox/PHD. Claire/Chapitres de thèse/CHAPTER 1 - Geese nesting success & supplemented nests/PAPER/Figures/GOOSE_EXTREM_TEMP.tiff",
-    res=300,
-    width=30,
-    height=20,
-    pointsize=12,
-    unit="cm",
-    bg="transparent")
+#png("C:/Users/HP_9470m/Dropbox/PHD. Claire/Chapitres de thèse/CHAPTER 1 - Geese nesting success & supplemented nests/PAPER/Figures/GOOSE_EXTREM_TEMP.tiff",
+ #   res=300,
+  #  width=30,
+   # height=20,
+    #pointsize=12,
+    #unit="cm",
+    #bg="transparent")
 
 par(mfrow = c(1, 2),
     las = 1,# plot labels always horizontal
@@ -425,8 +425,49 @@ axis(1, at = seq(0, 28, by = 2))
 axis(2, at = seq(0.935, 0.995, by = 0.01))
 text(x = 26, y = 0.995, labels = "(b)", pos = 3)
 
-dev.off()
+#dev.off()
 
+#### Superposition simplified plot of precipitation and temperature by habitat####
+
+# Plot 1
+mini <- min(TAB2$estimate)
+maxi <- max(TAB2$estimate)
+
+png("C:/Users/HP_9470m/OneDrive - Université de Moncton/Doc doc doc/Ph.D. - ADMIN, COURSES & PRESENTATION/Colloques & congrès - Présentations orales & affiches/2018 SQEBC/2018_SQEBC_Presentation/Figures/GOOSE_DSR_prec_temp_superposition.tiff",
+    res=300,
+    width=30,
+    height=20,
+    pointsize=12,
+    unit="cm",
+    bg="transparent")
+par(mfrow = c(1, 2))
+# MESIC - Intermediaire - prec
+plot(TAB2$estimate[TAB2$hab == "MES" & TAB2$prec == "INTER" & TAB2$temp == "INTER"], type = "l", col = "springgreen4", bty = "n", ylim = c(mini, maxi), xaxt = "n", ylab = "DSR", xlab = "Days", main = "Mesic habitat", las =1, lwd = 3, cex.lab = 1.5)
+# MESIC - high = low - prec
+lines(TAB2$estimate[TAB2$hab == "MES" & TAB2$prec == "HIGH" & TAB2$temp == "INTER"], type = "l", col = "springgreen3",bty = "n", lwd = 3)
+# MESIC - Intermediate = warm - temperature
+lines(TAB2$estimate[TAB2$hab == "MES" & TAB2$prec == "INTER" & TAB2$temp == "WARM"], type = "l", col = "red4", bty = "n", lwd = 3)
+# MESIC - Cold - temperature
+lines(TAB2$estimate[TAB2$hab == "MES" & TAB2$prec == "INTER" & TAB2$temp == "COLD"], type = "l", col = "orange", bty = "n", lwd = 3)
+
+legend(x = 14, y = 0.95,  col = c("springgreen4", "springgreen3", "red4", "orange"), pch = 16, legend = c("inter. prec.", "high/low prec.", "inter./warm temp.", "cold temp."), bty = "n", cex = 1.5)
+axis(1, at = seq(0, 28, by = 2))
+
+# Plot 2
+
+# WETLAND - Intermediaire - prec
+plot(TAB2$estimate[TAB2$hab == "WET" & TAB2$prec == "INTER" & TAB2$temp == "INTER"], type = "l", col = "springgreen4", bty = "n", ylim = c(mini, maxi), xaxt = "n", ylab = "DSR", xlab = "Days", main = "Wetland habitat", las =1, lwd = 3, cex.lab = 1.5)
+# WETLAND - high = low - prec
+lines(TAB2$estimate[TAB2$hab == "WET" & TAB2$prec == "HIGH" & TAB2$temp == "INTER"], type = "l", col = "springgreen3",bty = "n", lwd = 3)
+# WETLAND - Intermediate = warm - temperature
+lines(TAB2$estimate[TAB2$hab == "WET" & TAB2$prec == "INTER" & TAB2$temp == "WARM"], type = "l", col = "red4", bty = "n", lwd = 3)
+# WETLAND - Cold - temperature
+lines(TAB2$estimate[TAB2$hab == "WET" & TAB2$prec == "INTER" & TAB2$temp == "COLD"], type = "l", col = "orange", bty = "n", lwd = 3)
+
+legend(x = 14, y = 0.95, col = c("springgreen4", "springgreen3", "red4", "orange"), pch = 16, legend = c("inter. prec.", "high/low prec.", "inter./warm temp.", "cold temp."), bty = "n", cex = 1.5)
+axis(1, at = seq(0, 28, by = 2))
+
+dev.off()
 
 #### Plot of extreme weather model ####
 setwd("C:/Users/HP_9470m/OneDrive - Université de Moncton/Doc doc doc/Ph.D. - ANALYSES/R analysis/Data")
