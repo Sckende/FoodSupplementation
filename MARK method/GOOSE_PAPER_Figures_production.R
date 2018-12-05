@@ -541,21 +541,21 @@ par(mfrow = c(2, 2),
     mar = c(1, 4, 1, 1))
 # GRAPHE 1 - MESIC HABITAT & CUMULATIVE PRECIPITATION
 # INTERMEDIATE PREC
-plot(TAB2$estimate[TAB2$hab == "MES" & TAB2$prec == "INTER" & TAB2$temp == "INTER"], type = "b", col = "springgreen4", bg = "springgreen4", pch = 21, bty = "n", yaxt = "n", ylim = c(0.965, 0.995), xaxt = "n", ylab = "DSR")
-lines(TAB2$estimate[TAB2$hab == "MES" & TAB2$prec == "INTER" & TAB2$temp == "INTER"] - TAB2$se[TAB2$hab == "MES" & TAB2$prec == "INTER" & TAB2$temp == "INTER"], col = "springgreen4", lty = 3, lwd = 1.5)
-lines(TAB2$estimate[TAB2$hab == "MES" & TAB2$prec == "INTER" & TAB2$temp == "INTER"] + TAB2$se[TAB2$hab == "MES" & TAB2$prec == "INTER" & TAB2$temp == "INTER"], col = "springgreen4", lty = 3, lwd = 1.5)
+plot(TAB2$estimate[TAB2$hab == "MES" & TAB2$prec == "INTER" & TAB2$temp == "INTER"], type = "b", col = "springgreen4", bg = "springgreen4", pch = 21, bty = "n", yaxt = "n", ylim = c(0.965, 0.995), xaxt = "n", ylab = "", xlab = "", cex = 1, cex.axis = 1.5, lwd = 2)
+lines(TAB2$estimate[TAB2$hab == "MES" & TAB2$prec == "INTER" & TAB2$temp == "INTER"] - TAB2$se[TAB2$hab == "MES" & TAB2$prec == "INTER" & TAB2$temp == "INTER"], col = "springgreen4", lty = 3, lwd = 2)
+lines(TAB2$estimate[TAB2$hab == "MES" & TAB2$prec == "INTER" & TAB2$temp == "INTER"] + TAB2$se[TAB2$hab == "MES" & TAB2$prec == "INTER" & TAB2$temp == "INTER"], col = "springgreen4", lty = 3, lwd = 2)
 # HIGH PREC
-lines(TAB2$estimate[TAB2$hab == "MES" & TAB2$prec == "HIGH" & TAB2$temp == "INTER"], type = "b", col = "springgreen3", bg = "springgreen3", pch = 24, bty = "n")
-lines(TAB2$estimate[TAB2$hab == "MES" & TAB2$prec == "HIGH" & TAB2$temp == "INTER"] - TAB2$se[TAB2$hab == "MES" & TAB2$prec == "HIGH" & TAB2$temp == "INTER"], col = "springgreen3", lty = 3, lwd = 1.5)
-lines(TAB2$estimate[TAB2$hab == "MES" & TAB2$prec == "HIGH" & TAB2$temp == "INTER"] + TAB2$se[TAB2$hab == "MES" & TAB2$prec == "HIGH" & TAB2$temp == "INTER"], col = "springgreen3", lty = 3, lwd = 1.5)
+lines(TAB2$estimate[TAB2$hab == "MES" & TAB2$prec == "HIGH" & TAB2$temp == "INTER"], type = "b", col = "springgreen3", bg = "springgreen3", pch = 24, bty = "n", lwd = 2)
+lines(TAB2$estimate[TAB2$hab == "MES" & TAB2$prec == "HIGH" & TAB2$temp == "INTER"] - TAB2$se[TAB2$hab == "MES" & TAB2$prec == "HIGH" & TAB2$temp == "INTER"], col = "springgreen3", lty = 3, lwd = 2)
+lines(TAB2$estimate[TAB2$hab == "MES" & TAB2$prec == "HIGH" & TAB2$temp == "INTER"] + TAB2$se[TAB2$hab == "MES" & TAB2$prec == "HIGH" & TAB2$temp == "INTER"], col = "springgreen3", lty = 3, lwd = 2)
 # LOW PREC
-lines(TAB2$estimate[TAB2$hab == "MES" & TAB2$prec == "LOW" & TAB2$temp == "INTER"], type = "b", col = "olivedrab2", bg = "olivedrab2", pch = 25, bty = "n")
-lines(TAB2$estimate[TAB2$hab == "MES" & TAB2$prec == "LOW" & TAB2$temp == "INTER"] - TAB2$se[TAB2$hab == "MES" & TAB2$prec == "HIGH" & TAB2$temp == "INTER"], col = "olivedrab2", lty = 3, lwd = 1.5)
-lines(TAB2$estimate[TAB2$hab == "MES" & TAB2$prec == "LOW" & TAB2$temp == "INTER"] + TAB2$se[TAB2$hab == "MES" & TAB2$prec == "HIGH" & TAB2$temp == "INTER"], col = "olivedrab2", lty = 3, lwd = 1.5)
+lines(TAB2$estimate[TAB2$hab == "MES" & TAB2$prec == "LOW" & TAB2$temp == "INTER"], type = "b", col = "olivedrab2", bg = "olivedrab2", pch = 25, bty = "n", lwd = 2)
+lines(TAB2$estimate[TAB2$hab == "MES" & TAB2$prec == "LOW" & TAB2$temp == "INTER"] - TAB2$se[TAB2$hab == "MES" & TAB2$prec == "HIGH" & TAB2$temp == "INTER"], col = "olivedrab2", lty = 3, lwd = 2)
+lines(TAB2$estimate[TAB2$hab == "MES" & TAB2$prec == "LOW" & TAB2$temp == "INTER"] + TAB2$se[TAB2$hab == "MES" & TAB2$prec == "HIGH" & TAB2$temp == "INTER"], col = "olivedrab2", lty = 3, lwd = 2)
 
 
 #axis(1, at = seq(0, 28, by = 2))
-axis(2, at = seq(0.965, 0.995, by = 0.01))
+axis(2, at = seq(0.965, 0.995, by = 0.01), cex = 2, lwd = 2)
 text(x = 26, y = 0.993, labels = "(a)", pos = 3)
 
 # GRAPHE 2 - WETLAND HABITAT & CUMULATIVE PRECIPITATION
