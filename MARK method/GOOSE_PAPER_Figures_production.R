@@ -738,7 +738,7 @@ summary(NS)
 NS <- NS[order(NS$year, NS$hab),]
 utils::View(NS)
 
-png("C:/Users/HP_9470m/OneDrive - Université de Moncton/Doc doc doc/Ph.D. - ADMIN, COURSES & PRESENTATION/Colloques & congrès - Présentations orales & affiches/2018 SQEBC/2018_SQEBC_Presentation/Figures/GOOSE_wat_suppl.tiff",
+png("C:/Users/HP_9470m/Dropbox/PHD. Claire/Chapitres de thèse/CHAPTER 1 - Geese nesting success & supplemented nests/PAPER/Figures/GOOSE_wat_suppl.tiff",
     res=300,
     width=25,
     height=20,
@@ -754,17 +754,20 @@ barCenters <- barplot(NS$SR,
                       #xlab = "Year",
                       #ylab = "Nesting success",
                       ylim = c(0, 1),
-                      names.arg = rep(c("T", "WAT"), 8),
+                      names.arg = rep(c("C", "WAT"), 8),
                       legend.text = TRUE,
                       space = c(0.2, rep(c(0,0.05,0,0.4), 3), c(0,0.05,0)),
                       las = 1,
-                      cex.axis = 1.5)
-legend("topleft",
-      #inset = c(0, - 0.05),
-       legend = c("Mesic hab.", "Wetland"), 
+                      cex.axis = 1.5,
+                      cex = 1)
+legend(#"topleft",
+        x = 0,
+        y = 0.95,
+       legend = c("Mesic", "Wetland"), 
        fill = c("aquamarine3", "aquamarine4"),
        bty = "n",
-      cex = 1.45)
+       cex = 1.2)
+text(c(1, 3.5, 5.5, 8), rep(0.98, 4), c(2005, 2015:2017), cex = 1.5)
 
 #text(barCenters,0.2, labels = paste("(", as.character(prop$n), ")", sep = ""))
 
@@ -970,24 +973,24 @@ mini <- min(TAB$lcl)
 maxi <- max(TAB$ucl)
 
 # Plot 1 - No habitat effect !
-png("C:/Users/HP_9470m/OneDrive - Université de Moncton/Doc doc doc/Ph.D. - ADMIN, COURSES & PRESENTATION/Colloques & congrès - Présentations orales & affiches/2018 SQEBC/2018_SQEBC_Presentation/Figures/GOOSE_foo_suppl_2017.tiff",
+png("C:/Users/HP_9470m/Dropbox/PHD. Claire/Chapitres de thèse/CHAPTER 1 - Geese nesting success & supplemented nests/PAPER/Figures/GOOSE_foo_suppl_2017.tiff",
     res=300,
     width=25,
     height=20,
     pointsize=12,
     unit="cm",
     bg="transparent")
-
-plot(lTAB[[2]]$estimate[lTAB[[2]]$SUPPL == "TEM" ][1:27], ylim = c(mini, maxi), type = "b", pch = 16, bty = "n", col = "black", las = 1, main = "2017 - Wetland", cex = 1, cex.axis = 1.5, lwd = 2, xlab = "", ylab = "")
+#x11()
+plot(lTAB[[2]]$estimate[lTAB[[2]]$SUPPL == "TEM" ][1:27], ylim = c(mini, maxi), type = "b", pch = 16, bty = "n", col = "black", las = 1, cex = 1, cex.axis = 1.5, lwd = 2, xlab = "", ylab = "")
 lines(lTAB[[2]]$ucl[lTAB[[2]]$SUPPL == "TEM"][1:27], col = "black", lty = 3, lwd = 2)
 lines(lTAB[[2]]$lcl[lTAB[[2]]$SUPPL == "TEM"][1:27],  col = "black", lty = 3, lwd = 2)
 
 
-lines(lTAB[[2]]$estimate[lTAB[[2]]$SUPPL == "FOO"][1:27], type = "b", pch = 16, bty = "n", col = "darkgoldenrod3", lwd = 2)
+lines(lTAB[[2]]$estimate[lTAB[[2]]$SUPPL == "FOO"][1:27], type = "b", pch = 17, bty = "n", col = "darkgoldenrod3", lwd = 2)
 lines(lTAB[[2]]$ucl[lTAB[[2]]$SUPPL == "FOO"][1:27], col = "darkgoldenrod3", lty = 3, lwd = 2)
 lines(lTAB[[2]]$lcl[lTAB[[2]]$SUPPL == "FOO"][1:27], col = "darkgoldenrod3", lty = 3, lwd = 2)
 
-legend(20, 0.92, legend = c("control", "food"), col = c("black", "darkgoldenrod3"), pch = c(16, 16), bty = "n", cex = 2)
+legend(20, 0.92, legend = c("control", "food"), col = c("black", "darkgoldenrod3"), pch = c(16, 17), bty = "n", cex = 2)
 
 dev.off()
 
