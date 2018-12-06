@@ -241,10 +241,7 @@ FOOD.results
 
 #Save models list and est model
 save(FOOD.results, file = "foodGEESE.rda")
-save(foo14, file = "foodGEESE_1.rda")
-save(foo8, file = "foodGEESE_2.rda")
-save(foo7, file = "foodGEESE_3.rda")
-save(foo9, file = "foodGEESE_4.rda")
+save(foo15, file = "foodGEESE_1.rda")
 
 #### Food models for 2017 ####
 supF.2017 <- supF[supF$YEAR == 2017, ]
