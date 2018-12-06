@@ -143,6 +143,17 @@ run.WATER.2 = function()
   # HAB + YEAR + NestAge
   wat11 <- mark(supW2, nocc = nocc, model = "Nest", model.parameters = list(S = list(formula = ~ HAB + YEAR + NestAge)), groups = c("HAB", "YEAR" ), delete = T)
   
+  # SUPPL * YEAR + NestAge + HAB
+  wat12 <- mark(supW2, nocc = nocc, model = "Nest", model.parameters = list(S = list(formula = ~ HAB + SUPPL*YEAR + NestAge)), groups = c("HAB", "YEAR", "SUPPL" ), delete = T)
+#### *** WARNINGS***
+  
+  # SUPPL*HAB + SUPPL*YEAR + NestAge
+  wat13 <- mark(supW2, nocc = nocc, model = "Nest", model.parameters = list(S = list(formula = ~ SUPPL*HAB + SUPPL*YEAR + NestAge)), groups = c("HAB", "YEAR", "SUPPL" ), delete = T)
+  #### *** WARNINGS***
+  
+  # SUPPL*YEAR
+  wat14 <- mark(supW2, nocc = nocc, model = "Nest", model.parameters = list(S = list(formula = ~ YEAR)), groups = "YEAR", delete = T)
+  #### *** WARNINGS***
   
   return(collect.models() )
 }
@@ -216,6 +227,9 @@ run.FOOD = function()
   
   # HAB + YEAR + NestAge
   foo14 <- mark(supF, nocc = nocc, model = "Nest", model.parameters = list(S = list(formula = ~ HAB + YEAR + NestAge)), groups = c("HAB", "YEAR" ), delete = T)
+  
+  # HAB + SUPPL*YEAR + NestAge
+  foo15 <- mark(supF, nocc = nocc, model = "Nest", model.parameters = list(S = list(formula = ~ HAB + SUPPL*YEAR + NestAge)), groups = c("HAB", "YEAR", "SUPPL" ), delete = T)
   
   return(collect.models() )
 }
