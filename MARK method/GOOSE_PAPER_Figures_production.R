@@ -249,7 +249,7 @@ legend(1995, 8, legend = c("warm", "intermediate", "cold"), col = c("red4", "ora
 dev.off()
 
 #Superposition des deux graphiques -- Presentation for SQEBC #
-png("C:/Users/HP_9470m/OneDrive - Université de Moncton/Doc doc doc/Ph.D. - ADMIN, COURSES & PRESENTATION/Colloques & congrès - Présentations orales & affiches/2018 SQEBC/2018_SQEBC_Presentation/Figures/GOOSE_prec_temp_superposition.tiff",
+png("C:/Users/HP_9470m/Dropbox/PHD. Claire/Chapitres de thèse/CHAPTER 1 - Geese nesting success & supplemented nests/PAPER/Figures/GOOSE_prec_temp_superposition_2.tiff",
     res=300,
     width=25,
     height=20,
@@ -268,14 +268,49 @@ r <- barplot(my_vector,
              #ylab = "Cumulative precipitation (mm)",
              yaxt = "n",
              xaxt = "n",
-             ylim = c(0, max(cum2$cumRAIN + 10)),
+             ylim = c(0, max(cum2$cumRAIN + 30)),
              cex.axis = 1.5)
-lines(r, WEA$meanTEMP*10, cex = c(2, 1, 2)[as.numeric(WEA$type_temp)], pch = pchs, col = cols2, bg = cols2, type = "b", lwd = 3, bty = "n")
+lines(r,
+      rep(mean(cum2$cumRAIN), 23),
+       col = "olivedrab4",
+       lwd = 2.5,
+       lty = "solid")
+lines(r,
+      rep(mean(cum2$cumRAIN) - sd(cum2$cumRAIN), 23),
+       col = "olivedrab4",
+       lwd = 1.5,
+       lty = "dotdash")
+lines(r,
+      rep(mean(cum2$cumRAIN) + sd(cum2$cumRAIN), 23),
+       col = "olivedrab4",
+       lwd = 1.5,
+       lty = "dotdash")
+
+
+lines(r, WEA$meanTEMP*12, cex = c(2, 1, 2)[as.numeric(WEA$type_temp)], pch = pchs, col = cols2, bg = cols2, type = "b", lwd = 3, bty = "n")
+
+lines(r,
+      rep(mean(WEA$meanTEMP*12), 23),
+      col = "darkgoldenrod4",
+      type = "l",
+      lty = 1,
+      lwd = 2.5)
+lines(r,
+      rep(mean(WEA$meanTEMP*12) + sd(WEA$meanTEMP*12), 23),
+      col = "darkgoldenrod4",
+      type = "l",
+      lty = "dotdash",
+      lwd = 1.5)
+lines(r,
+      rep(mean(WEA$meanTEMP*12) - sd(WEA$meanTEMP*12), 23),
+      col = "darkgoldenrod4",
+      type = "l",
+      lty = "dotdash",
+      lwd = 1.5)
 #points(r, WEA$meanTEMP*10, xaxt = "n", yaxt = "n", cex = c(2, 1, 2)[as.numeric(WEA$type_temp)], pch = pchs, bg = cols2, lwd = 3, col = cols2, bty = "n")
 axis(side = 1, at = r, labels = cum2$YEAR, lwd = 1, las = 1, padj = 0, cex.axis = 1.5)
 axis(side = 2, lwd = 1, las = 2, at = seq(0, 70, 10), labels = seq(0, 70, 10), padj = 0, cex.axis = 1.5)
-axis(side = 4, lwd = 1, las = 2, at = seq(35, 75, 10), labels = (seq(35, 75, 10)/10), padj = 0, cex.axis = 1.5)
-
+axis(side = 4, lwd = 1, las = 2, at = seq(35, 95, 10), labels = round(seq(35, 95, 10)/12, digits = 1), padj = 0, cex.axis = 1.5)
 dev.off()
 #### Extreme climate years impacts on DSR ####
 
