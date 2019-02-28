@@ -201,6 +201,41 @@ abline(h = mean(cum2$cumRAIN) + sd(cum2$cumRAIN),
 
 #dev.off()
 
+#### Cumulative precipitation per day for 2002 and 2015 - 2017 between mean initiation and hatching date
+total <- list()
+for (i in c(2005, 2015:2017)) {
+  ini <- nidi$moy_ponte[nidi$year == i]
+  hatch <- nidi$moy_eclos[nidi$year == i]
+  cumprec <- cumsum(rain$RAIN[rain$YEAR == i & rain$JJ >= ini & rain$JJ <= hatch])
+  
+  total[i] <- cumprec
+}
+
+# Tentative de creation de fonction
+cumul_prec <- function(year) {
+  ini <- nidi$moy_ponte[nidi$year == year]
+  hatch <- nidi$moy_eclos[nidi$year == year]
+  cumprec <- cumsum(rain$RAIN[rain$YEAR == year & rain$JJ >= ini & rain$JJ <= hatch])
+  return(cumprec)
+}
+
+yahoo <- lapply(c(2005,2015:2017), cumul_prec)
+
+# With anonymous function
+lapply(c(2005, 2015:2017), function(x) {ini <- nidi$moy_ponte[nidi$year == x]
+  hatch <- nidi$moy_eclos[nidi$year == x]
+  cumprec <- cumsum(rain$RAIN[rain$YEAR == x & rain$JJ >= ini & rain$JJ <= hatch])
+  return(cumprec)})
+
+
+# Plot 
+col <- c("blue", "chartreuse4", "chocolate2", "brown4")
+for (i in 1:4) {
+  par(new = TRUE)
+  barplot(yahoo[[i]], xlim = c(0, 30), ylim = c(0, 45), col = col[i](alpha = 0.5))
+}
+
+
 #### cum3 - Annual cumulation prec between the earliest initiation and latest hatching ####
 
 ni <- read.table("GOOSE_MARK_Complete_data.txt", h = T, sep = ",")
