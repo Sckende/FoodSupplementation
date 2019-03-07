@@ -50,6 +50,8 @@ plot(sup$YEAR, sup$PREC_Y, type = "l", ylab = "PREC_Y", bty = "n", xlab = "Year"
 # Minimum ariables that I have to keep are for MARK analysis: ID / FirstFound / LAstPresent / LastChecked / FAte / AgeFound / AgeDay1
 # Variables that I want to add for checking potential effects: YEAR / HAB / SUPPL / PREC_Y / TEMP_Y
 sup <- sup[, c(1:4, 7:10, 14, 16, 21, 25:27)]
+
+
 supW <- rbind(sup, w05)
 summary(supW)
 
