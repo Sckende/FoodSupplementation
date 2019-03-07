@@ -519,8 +519,8 @@ for (i in 1:23){
   
 }
 
-#### Mean temperature per year ####
-# Computation of new variables - mean temperature per year
+#### Mean temperature and cumulative temperature per year ####
+# Computation of new variables - mean temperature and cumulative temperature per year
 deg <- read.csv("TEMP_PondInlet_1995-2017.csv", h = T, sep = ";")
 deg$JJ <- strptime(as.character(deg$Date), format = "%Y-%m-%d")
 deg$JJ <- deg$JJ$yday + 1 #comme dates continues pas besoin de traiter 
@@ -539,13 +539,16 @@ for (i in unique(deg$Year)) {
   meanTEMP_year <- mean(deg$Mean_Temp[deg$Year == i & deg$JJ >= INI & deg$JJ <= ECLO], na.rm = TRUE)
   sdTEMP_year <- sd(deg$Mean_Temp[deg$Year == i & deg$JJ >= INI & deg$JJ <= ECLO], na.rm = TRUE)
   
-  TAB <- data.frame(YEAR, INI, ECLO, temp1, temp2, meanTEMP_year, sdTEMP_year)
+  cumTEMP_year <- sum(deg$Mean_Temp[deg$Year == i & deg$JJ >= INI & deg$JJ <= ECLO], na.rm = TRUE)
+  
+  TAB <- data.frame(YEAR, INI, ECLO, temp1, temp2, meanTEMP_year, sdTEMP_year, cumTEMP_year)
   
   deg2 <- rbind(deg2, TAB)
 }
 
 geese$TEMP_Y <- deg2$meanTEMP_year[match(geese$YEAR, deg2$YEAR)]
 geese$sdTEMP_Y <- deg2$sdTEMP_year[match(geese$YEAR, deg2$YEAR)]
+geese$cumTEMP_Y <- deg2$cumTEMP_year[match(geese$YEAR, deg2$YEAR)]
 
 #### Type of year concerning temperature ####
 ann_temp <- mean(deg2$meanTEMP_year)
@@ -688,7 +691,7 @@ geese$RAINFALL <- relevel(geese$RAINFALL, "INTER")
 geese <- droplevels(geese)
 
 #write.csv(geese, "GOOSE_geese.txt") # For Rmarkdown document & analysis on VAIO
-#write.csv(geese, "GOOSE_geese_with_WF.txt") # Same than before PLUS WF supplemented nests - For analysis in GOOSE_MARK_suppl_nests.R
+write.csv(geese, "GOOSE_geese_with_WF.txt") # Same than before PLUS WF supplemented nests - For analysis in GOOSE_MARK_suppl_nests.R
 
 #### True nesting success per habitat / treatment / year ####
 geese_SUPPL <- geese[geese$YEAR == "2015" | geese$YEAR == "2016" | geese$YEAR == "2017",]
