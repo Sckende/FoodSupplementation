@@ -115,13 +115,46 @@ f1 <- glm(food$Fate[food$YEAR == "2017"] ~ food$SUPPL[food$YEAR == "2017"],
 summary(f1)
 
 ###########################################################################
-f2 <- glm(Fate ~ HAB + SUPPL + YEAR,
+f2 <- glm(Fate ~ HAB + SUPPL + YEAR + TEMP_Y + PREC_Y,
           family = binomial(link = logexp(food$EXPO)),
           data = food)
 summary(f2)
 
-# Model for 2017 #############################################################
+
 f2017 <- glm(food$Fate[food$YEAR == "2017"] ~ food$SUPPL[food$YEAR == "2017"] + food$HAB[food$YEAR == "2017"],
              family = binomial(link = logexp(food$EXPO[food$YEAR == "2017"])))
+run.food <- list(f2, f2017)
+AIC.table(run.food)
 
-summary(f2017)
+
+# Function for AIC comparaison between (only) glm models 
+AIC.table <- function(liste){
+  if(!is.list(liste))
+     stop("Argument has to be a list")
+  table <- NULL
+for(i in 1:length(liste)){
+  
+  # if(class(liste[[i]]) %in% c("glm", "lm"))
+  #   stop("At least one model is not a glm")
+  
+  name <- liste[[i]]$formula
+  dev <- liste[[i]]$deviance
+  aic <- liste[[i]]$aic
+  
+  table <- rbind(table, c(name, dev, aic))
+  
+}
+ # table <- as.data.frame(table)
+
+  table <- as.data.frame(table)
+  table$V2 <- as.numeric(table$V2)
+  table$V3 <- as.numeric(table$V3)
+  
+for(j in 1:dim(table)[1]){
+  table$V4[j] <- table$V3[j] - min(table$V3)
+}
+  table <- table[order(table$V4),]
+ 
+  names(table) <- c("Model", "Deviance", "AIC", "dAIC")
+  print(table)
+}
