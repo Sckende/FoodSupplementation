@@ -95,3 +95,33 @@ mfit9 <- glm(Fate ~ SUPPL + HAB + YEAR,
              family = binomial(link = logexp(water$EXPO)),
              data = water)
 anova(mfit9, mfit8)
+
+######################################################################
+################### FOOD SUPPL MODELS #################################
+##########################################################################
+
+# Specific database building ##############################################
+
+food <- tot[tot$YEAR == 2015 | tot$YEAR == 2016 | tot$YEAR == 2017,]
+food <- food[food$SUPPL == "F" | food$SUPPL == "TEM",]
+food <- droplevels(food)
+food$YEAR <- as.factor(food$YEAR)
+food$SUPPL <- relevel(food$SUPPL, "TEM")
+summary(food)
+
+# Models fitting ###########################################################
+f1 <- glm(food$Fate[food$YEAR == "2017"] ~ food$SUPPL[food$YEAR == "2017"],
+           family = binomial(link = logexp(food$EXPO[food$YEAR == "2017"])))
+summary(f1)
+
+###########################################################################
+f2 <- glm(Fate ~ HAB + SUPPL + YEAR,
+          family = binomial(link = logexp(food$EXPO)),
+          data = food)
+summary(f2)
+
+# Model for 2017 #############################################################
+f2017 <- glm(food$Fate[food$YEAR == "2017"] ~ food$SUPPL[food$YEAR == "2017"] + food$HAB[food$YEAR == "2017"],
+             family = binomial(link = logexp(food$EXPO[food$YEAR == "2017"])))
+
+summary(f2017)
