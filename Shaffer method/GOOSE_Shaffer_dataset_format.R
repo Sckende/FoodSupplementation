@@ -70,38 +70,5 @@ dim(tot[tot$EXPO == 0.5,])
 
 summary(tot)
 
-#### Analysis ####
+write.csv(tot, "GOOSE_Data_Shaffer.csv")
 
-# Function link
-logexp <- function(exposure = 1) {
-  linkfun <- function(mu) qlogis(mu^(1/exposure))
-  ## FIXME: is there some trick we can play here to allow
-  ## evaluation in the context of the 'data' argument?
-  linkinv <- function(eta) plogis(eta)^exposure
-  logit_mu_eta <- function(eta) {
-    ifelse(abs(eta)>30,.Machine$double.eps,
-           exp(eta)/(1+exp(eta))^2)
-    ## OR .Call(stats:::C_logit_mu_eta, eta, PACKAGE = "stats")
-  }
-  mu.eta <- function(eta) {
-    exposure * plogis(eta)^(exposure-1) *
-      logit_mu_eta(eta)
-  }
-  valideta <- function(eta) TRUE
-  link <- paste("logexp(", deparse(substitute(exposure)), ")",
-                sep="")
-  structure(list(linkfun = linkfun, linkinv = linkinv,
-                 mu.eta = mu.eta, valideta = valideta,
-                 name = link),
-            class = "link-glm")
-}
-# Now fit models... ####################################################### Fit a model of DSR as a function of tree height
-mfit1 <- glm(Fate ~ HAB, family=binomial(link=logexp(tot$EXPO)), data = tot)
-summary(mfit1)
-
-####################################################### Fit a model of DSR as a quadratic function of nest age
-mfit2 <- glm(Fate ~ HAB + SUPPL,
-             family=binomial(link=logexp(tot$EXPO)), data = tot)
-summary(mfit2)
-
-####################################################
