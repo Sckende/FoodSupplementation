@@ -55,6 +55,11 @@ mfit2 <- glm(Fate ~ HAB + SUPPL,
              family=binomial(link=logexp(water$EXPO)),
              data = water)
 summary(mfit2)
+#######################################################
+mfit2.1 <- glm(Fate ~ HAB + SUPPL + lmg,
+             family=binomial(link=logexp(water$EXPO)),
+             data = water)
+summary(mfit2.1)
 
 ####################################################
 water$YEAR <- as.factor(water$YEAR)
@@ -63,34 +68,43 @@ mfit3 <- glm(Fate ~ HAB + SUPPL + YEAR,
              data = water)
 summary(mfit3)
 #####################################################
+mfit3.1 <- glm(Fate ~ HAB + SUPPL + YEAR + lmg,
+             family=binomial(link=logexp(water$EXPO)),
+             data = water)
+summary(mfit3.1)
+#####################################################
 mfit4 <- glm(Fate ~ TEMP_Y + PREC_Y + SUPPL + HAB,
              family = binomial(link = logexp(water$EXPO)),
              data = water)
 summary(mfit4)
 #####################################################
-
+mfit4.1 <- glm(Fate ~ TEMP_Y + PREC_Y + SUPPL + HAB + lmg,
+             family = binomial(link = logexp(water$EXPO)),
+             data = water)
+summary(mfit4.1)
+#####################################################
 require(lme4)
 mfit5 <- glmer(Fate ~ SUPPL + HAB + TEMP_Y + PREC_Y + (1|YEAR),
              family = binomial(link = logexp(water$EXPO)),
              data = water,
              nAGQ = 0)
 summary(mfit5)
-
+#####################################################
 mfit6 <- glm(Fate ~ SUPPL + HAB + TEMP_Y + PREC_Y,
                family = binomial(link = logexp(water$EXPO)),
                data = water)
 anova(mfit5, mfit6) # Not sure I need to integrate random effect with YEAR *****
-
+#####################################################
 mfit7 <- glmer(Fate ~ SUPPL + HAB + (1|YEAR),
                family = binomial(link = logexp(water$EXPO)),
                data = water,
                nAGQ = 1)
 summary(mfit7)
-
+#####################################################
 mfit8 <- glm(Fate ~ SUPPL + HAB + TEMP_Y + PREC_Y,
              family = binomial(link = logexp(water$EXPO)),
              data = water)
-
+#####################################################
 mfit9 <- glm(Fate ~ SUPPL + HAB + YEAR,
              family = binomial(link = logexp(water$EXPO)),
              data = water)
@@ -119,10 +133,51 @@ f2 <- glm(Fate ~ HAB + SUPPL + YEAR + TEMP_Y + PREC_Y,
           family = binomial(link = logexp(food$EXPO)),
           data = food)
 summary(f2)
+###########################################################################
+f2.1 <- glm(Fate ~ HAB + SUPPL + lmg + TEMP_Y + PREC_Y,
+          family = binomial(link = logexp(food$EXPO)),
+          data = food)
+summary(f2.1)
+###########################################################################
+f3 <- glm(Fate ~ HAB + SUPPL + lmg,
+          family = binomial(link = logexp(food$EXPO)),
+          data = food)
+summary(f3)
+###########################################################################
+f4 <- glm(Fate ~ HAB + SUPPL,
+          family = binomial(link = logexp(food$EXPO)),
+          data = food)
+summary(f4)
+###########################################################################
+f5 <- glm(Fate ~ HAB + SUPPL + TEMP_Y * PREC_Y + lmg,
+            family = binomial(link = logexp(food$EXPO)),
+            data = food)
+summary(f5)
 
+###########################################################################
+#################### food - 2017 ##########################################
+###########################################################################
+f2017 <- glm(Fate ~ SUPPL + HAB,
+             family = binomial(link = logexp(food$EXPO[food$YEAR == "2017"])),
+             data = food[food$YEAR == "2017",])
+summary(f2017)
+###########################################################################
+f2017.0 <- glm(Fate ~ 1,
+             family = binomial(link = logexp(food$EXPO[food$YEAR == "2017"])),
+             data = food[food$YEAR == "2017",])
+summary(f2017.0)
+###########################################################################
+f2017.1 <- glm(Fate ~ HAB,
+             family = binomial(link = logexp(food$EXPO[food$YEAR == "2017"])),
+             data = food[food$YEAR == "2017",])
+summary(f2017.1)
+###########################################################################
+f2017.2 <- glm(Fate ~ SUPPL,
+               family = binomial(link = logexp(food$EXPO[food$YEAR == "2017"])),
+               data = food[food$YEAR == "2017",])
+summary(f2017.2)
+###########################################################################
 
-f2017 <- glm(food$Fate[food$YEAR == "2017"] ~ food$SUPPL[food$YEAR == "2017"] + food$HAB[food$YEAR == "2017"],
-             family = binomial(link = logexp(food$EXPO[food$YEAR == "2017"])))
 run.food <- list(f2, f2017)
 AIC.table(run.food)
 
