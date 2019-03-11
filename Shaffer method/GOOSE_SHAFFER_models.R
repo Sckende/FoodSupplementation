@@ -31,6 +31,39 @@ logexp <- function(exposure = 1) {
                  name = link),
             class = "link-glm")
 }
+
+# Function for AIC comparaison between (only) glm models 
+AIC.rank <- function(liste){
+  if(!is.list(liste))
+    stop("Argument has to be a list")
+  table <- NULL
+  for(i in 1:length(liste)){
+    
+    # if(class(liste[[i]]) %in% c("glm", "lm"))
+    #   stop("At least one model is not a glm")
+    
+    name <- liste[[i]]$formula
+    dev <- liste[[i]]$deviance
+    aic <- liste[[i]]$aic
+    
+    table <- rbind(table, c(name, dev, aic))
+    
+  }
+  # table <- as.data.frame(table)
+  
+  table <- as.data.frame(table)
+  table$V2 <- as.numeric(table$V2)
+  table$V3 <- as.numeric(table$V3)
+  
+  for(j in 1:dim(table)[1]){
+    table$V4[j] <- table$V3[j] - min(table$V3)
+  }
+  table <- table[order(table$V4),]
+  
+  names(table) <- c("Model", "Deviance", "AIC", "dAIC")
+  print(table)
+}
+
 ######################################################################
 ################### WATER SUPPL MODELS #################################
 ##########################################################################
@@ -40,75 +73,108 @@ logexp <- function(exposure = 1) {
 water <- tot[tot$YEAR == 2005 | tot$YEAR == 2015 | tot$YEAR == 2016 | tot$YEAR == 2017,]
 water <- water[water$SUPPL == "W" | water$SUPPL == "TEM",]
 water <- droplevels(water)
+water$YEAR <- as.factor(water$YEAR)
 summary(water)
 
 # Models fitting ###########################################################
-
+mfit0 <- glm(Fate ~ 1,
+             family=binomial(link=logexp(water$EXPO)),
+             data = water)
+summary(mfit0)
+#######################################################
 mfit1 <- glm(Fate ~ HAB,
              family=binomial(link=logexp(water$EXPO)),
              data = water)
 summary(mfit1)
 plot(mfit1)
-
 #######################################################
-mfit2 <- glm(Fate ~ HAB + SUPPL,
+mfit2 <- glm(Fate ~ SUPPL + HAB,
              family=binomial(link=logexp(water$EXPO)),
              data = water)
 summary(mfit2)
 #######################################################
-mfit2.1 <- glm(Fate ~ HAB + SUPPL + lmg,
+mfit2.1 <- glm(Fate ~ SUPPL + HAB + lmg,
              family=binomial(link=logexp(water$EXPO)),
              data = water)
 summary(mfit2.1)
 
 ####################################################
-water$YEAR <- as.factor(water$YEAR)
-mfit3 <- glm(Fate ~ HAB + SUPPL + YEAR,
+mfit3 <- glm(Fate ~ SUPPL + HAB + YEAR,
              family=binomial(link=logexp(water$EXPO)),
              data = water)
 summary(mfit3)
 #####################################################
-mfit3.1 <- glm(Fate ~ HAB + SUPPL + YEAR + lmg,
+mfit3.1 <- glm(Fate ~ SUPPL + HAB + YEAR + lmg,
              family=binomial(link=logexp(water$EXPO)),
              data = water)
 summary(mfit3.1)
 #####################################################
-mfit4 <- glm(Fate ~ TEMP_Y + PREC_Y + SUPPL + HAB,
-             family = binomial(link = logexp(water$EXPO)),
-             data = water)
-summary(mfit4)
-#####################################################
-mfit4.1 <- glm(Fate ~ TEMP_Y + PREC_Y + SUPPL + HAB + lmg,
+mfit4.1 <- glm(Fate ~ SUPPL + HAB + lmg + TEMP_Y + PREC_Y,
              family = binomial(link = logexp(water$EXPO)),
              data = water)
 summary(mfit4.1)
 #####################################################
-require(lme4)
-mfit5 <- glmer(Fate ~ SUPPL + HAB + TEMP_Y + PREC_Y + (1|YEAR),
-             family = binomial(link = logexp(water$EXPO)),
-             data = water,
-             nAGQ = 0)
-summary(mfit5)
+mfit4.2 <- glm(Fate ~ SUPPL + HAB + lmg + PREC_Y,
+               family = binomial(link = logexp(water$EXPO)),
+               data = water)
+summary(mfit4.2)
+#####################################################
+mfit4.3 <- glm(Fate ~ SUPPL + HAB + lmg + TEMP_Y,
+               family = binomial(link = logexp(water$EXPO)),
+               data = water)
+summary(mfit4.3)
 #####################################################
 mfit6 <- glm(Fate ~ SUPPL + HAB + TEMP_Y + PREC_Y,
                family = binomial(link = logexp(water$EXPO)),
                data = water)
-anova(mfit5, mfit6) # Not sure I need to integrate random effect with YEAR *****
+summary(mfit6)
 #####################################################
-mfit7 <- glmer(Fate ~ SUPPL + HAB + (1|YEAR),
+mfit8 <- glm(Fate ~ SUPPL + HAB + YEAR,
+             family = binomial(link = logexp(water$EXPO)),
+             data = water)
+summary(mfit8)
+#####################################################
+mfit9 <- glm(Fate ~ SUPPL*TEMP_Y + SUPPL*PREC_Y + HAB + lmg,
+             family = binomial(link = logexp(water$EXPO)),
+             data = water)
+summary(mfit9)
+#####################################################
+mfit10 <- glm(Fate ~ HAB + lmg + TEMP_Y + PREC_Y,
                family = binomial(link = logexp(water$EXPO)),
-               data = water,
-               nAGQ = 1)
-summary(mfit7)
+               data = water)
+summary(mfit10)
 #####################################################
-mfit8 <- glm(Fate ~ SUPPL + HAB + TEMP_Y + PREC_Y,
-             family = binomial(link = logexp(water$EXPO)),
-             data = water)
+mfit11 <- glm(Fate ~ HAB + lmg,
+              family = binomial(link = logexp(water$EXPO)),
+              data = water)
+summary(mfit11)
 #####################################################
-mfit9 <- glm(Fate ~ SUPPL + HAB + YEAR,
-             family = binomial(link = logexp(water$EXPO)),
-             data = water)
-anova(mfit9, mfit8)
+
+# mfit7 <- glmer(Fate ~ SUPPL + HAB + (1|YEAR),
+#                family = binomial(link = logexp(water$EXPO)),
+#                data = water,
+#                nAGQ = 1)
+# summary(mfit7)
+#####################################################
+# require(lme4)
+# mfit5 <- glmer(Fate ~ SUPPL + HAB + TEMP_Y + PREC_Y + (1|YEAR),
+#              family = binomial(link = logexp(water$EXPO)),
+#              data = water,
+#              nAGQ = 0)
+# summary(mfit5)
+#####################################################
+
+##############################################################
+##################### AIC models #############################
+##############################################################
+
+l <- list(mfit0, mfit1, mfit2.1, mfit3, mfit3.1, mfit4.1, mfit4.2, mfit4.3, mfit6, mfit8, mfit9, mfit10, mfit11)
+
+AIC.rank(liste = l)
+
+###### Models comparaison to test hypothesis ####################
+l1 <- list(mfit0, mfit10, mfit11, mfit4.1)
+AIC.rank(l1)
 
 ######################################################################
 ################### FOOD SUPPL MODELS #################################
@@ -182,34 +248,3 @@ run.food <- list(f2, f2017)
 AIC.table(run.food)
 
 
-# Function for AIC comparaison between (only) glm models 
-AIC.table <- function(liste){
-  if(!is.list(liste))
-     stop("Argument has to be a list")
-  table <- NULL
-for(i in 1:length(liste)){
-  
-  # if(class(liste[[i]]) %in% c("glm", "lm"))
-  #   stop("At least one model is not a glm")
-  
-  name <- liste[[i]]$formula
-  dev <- liste[[i]]$deviance
-  aic <- liste[[i]]$aic
-  
-  table <- rbind(table, c(name, dev, aic))
-  
-}
- # table <- as.data.frame(table)
-
-  table <- as.data.frame(table)
-  table$V2 <- as.numeric(table$V2)
-  table$V3 <- as.numeric(table$V3)
-  
-for(j in 1:dim(table)[1]){
-  table$V4[j] <- table$V3[j] - min(table$V3)
-}
-  table <- table[order(table$V4),]
- 
-  names(table) <- c("Model", "Deviance", "AIC", "dAIC")
-  print(table)
-}
