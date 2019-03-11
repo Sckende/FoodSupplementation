@@ -70,5 +70,13 @@ dim(tot[tot$EXPO == 0.5,])
 
 summary(tot)
 
-write.csv(tot, "GOOSE_Data_Shaffer.csv")
+# Add index of lemming abundance
+lmg <- read.table("LEM_1993-2017.txt", h = T, dec = ",")
+head(lmg)
+tot$lmg <- lmg$LMG_C1_CORR[match(tot$YEAR, lmg$YEAR)]
+summary(tot)
+
+
+
+#write.csv(tot, "GOOSE_Data_Shaffer.csv")
 
