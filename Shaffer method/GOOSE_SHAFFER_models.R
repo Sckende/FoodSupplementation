@@ -139,6 +139,16 @@ mfit9 <- glm(Fate ~ SUPPL*TEMP_Y + SUPPL*PREC_Y + HAB + lmg,
              data = water)
 summary(mfit9)
 #####################################################
+mfit9.1 <- glm(Fate ~ SUPPL*TEMP_Y + HAB + lmg,
+             family = binomial(link = logexp(water$EXPO)),
+             data = water)
+summary(mfit9.1)
+#####################################################
+mfit9.2 <- glm(Fate ~ SUPPL*PREC_Y + HAB + lmg,
+             family = binomial(link = logexp(water$EXPO)),
+             data = water)
+summary(mfit9.2)
+#####################################################
 mfit10 <- glm(Fate ~ HAB + lmg + TEMP_Y + PREC_Y,
                family = binomial(link = logexp(water$EXPO)),
                data = water)
@@ -260,10 +270,15 @@ foo1 <- glm(Fate ~ 1,
             data = food)
 summary(foo1)
 ###########################################################################
-foo2 <- glm(Fate ~ SUPPL + HAB + lmg + TEMP_Y + PREC_Y,
-          family = binomial(link = logexp(food$EXPO)),
-          data = food)
-summary(foo2)
+# foo2 <- glm(Fate ~ SUPPL + HAB + lmg + TEMP_Y + PREC_Y,
+#           family = binomial(link = logexp(food$EXPO)),
+#           data = food)
+# summary(foo2)
+# Impossible to use in the same time: lmg, TEMP_y, and PREC_y 
+# Cause impossible estimate for 
+# Soluce 1 : replace TEMP_Y AND PREC_Y by YEAR (factor)
+# Soluce 2 : Use an individual value per nest for the climatic variables
+#           Possible to use a fake duration for failed nests
 ###########################################################################
 foo2.1 <- glm(Fate ~ HAB + SUPPL + lmg + TEMP_Y,
           family = binomial(link = logexp(food$EXPO)),
@@ -294,12 +309,33 @@ foo6 <- glm(Fate ~ SUPPL*TEMP_Y + SUPPL*PREC_Y + HAB + lmg,
             family = binomial(link = logexp(food$EXPO)),
             data = food)
 summary(foo6)
+###########################################################################
+foo7 <- glm(Fate ~ SUPPL*HAB + lmg + TEMP_Y + PREC_Y,
+            family = binomial(link = logexp(food$EXPO)),
+            data = food)
+summary(foo7)
+###########################################################################
+foo8 <- glm(Fate ~ SUPPL*HAB + lmg + TEMP_Y,
+            family = binomial(link = logexp(food$EXPO)),
+            data = food)
+summary(foo8)
+###########################################################################
+foo9 <- glm(Fate ~ SUPPL*HAB + lmg + PREC_Y,
+            family = binomial(link = logexp(food$EXPO)),
+            data = food)
+summary(foo9)
+###########################################################################
+# foo10 <- glm(Fate ~ SUPPL + HAB + lmg + YEAR,
+#             family = binomial(link = logexp(food$EXPO)),
+#             data = food)
+# summary(foo10)
+# Impossible to use in the same time: lmg and YEAR
 
 ##############################################################
 ##################### AIC models #############################
 ##############################################################
 
-l <- list(foo1, foo2, foo2.1, foo2.2, foo3, foo4, foo5, foo6)
+l <- list(foo1, foo2, foo2.1, foo2.2, foo3, foo4, foo5, foo6, foo7, foo8, foo9)
 AIC.rank(liste = l)
 
 ###### Models comparaison to test hypothesis ####################
@@ -331,8 +367,10 @@ f2017.2 <- glm(Fate ~ SUPPL,
                data = food[food$YEAR == "2017",])
 summary(f2017.2)
 ###########################################################################
+##############################################################
+##################### AIC models #############################
+##############################################################
 
-run.food <- list(f2, f2017)
-AIC.table(run.food)
-
+l <- list(f2017,f2017.0, f2017.1, f2017.2)
+AIC.rank(liste = l)
 
