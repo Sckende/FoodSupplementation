@@ -45,22 +45,23 @@ AIC.rank <- function(liste){
     name <- liste[[i]]$formula
     dev <- liste[[i]]$deviance
     aic <- liste[[i]]$aic
+    Modnam <- paste("mod", i, sep = " ")
     
-    table <- rbind(table, c(name, dev, aic))
+    table <- rbind(table, c(Modnam, name, dev, aic))
     
   }
   # table <- as.data.frame(table)
   
   table <- as.data.frame(table)
-  table$V2 <- as.numeric(table$V2)
   table$V3 <- as.numeric(table$V3)
+  table$V4 <- as.numeric(table$V4)
   
   for(j in 1:dim(table)[1]){
-    table$V4[j] <- table$V3[j] - min(table$V3)
+    table$V5[j] <- table$V4[j] - min(table$V4)
   }
-  table <- table[order(table$V4),]
+  table <- table[order(table$V5),]
   
-  names(table) <- c("Model", "Deviance", "AIC", "dAIC")
+  names(table) <- c("Model", "Formula", "Deviance", "AIC", "dAIC")
   print(table)
 }
 
@@ -98,16 +99,16 @@ mfit2.1 <- glm(Fate ~ SUPPL + HAB + lmg,
              data = water)
 summary(mfit2.1)
 
-####################################################
-mfit3 <- glm(Fate ~ SUPPL + HAB + YEAR,
-             family=binomial(link=logexp(water$EXPO)),
-             data = water)
-summary(mfit3)
+# ####################################################
+# mfit3 <- glm(Fate ~ SUPPL + HAB + YEAR,
+#              family=binomial(link=logexp(water$EXPO)),
+#              data = water)
+# summary(mfit3)
 #####################################################
-mfit3.1 <- glm(Fate ~ SUPPL + HAB + YEAR + lmg,
-             family=binomial(link=logexp(water$EXPO)),
-             data = water)
-summary(mfit3.1)
+# mfit3.1 <- glm(Fate ~ SUPPL + HAB + YEAR + lmg,
+#              family=binomial(link=logexp(water$EXPO)),
+#              data = water)
+# summary(mfit3.1)
 #####################################################
 mfit4.1 <- glm(Fate ~ SUPPL + HAB + lmg + TEMP_Y + PREC_Y,
              family = binomial(link = logexp(water$EXPO)),
@@ -129,10 +130,10 @@ mfit6 <- glm(Fate ~ SUPPL + HAB + TEMP_Y + PREC_Y,
                data = water)
 summary(mfit6)
 #####################################################
-mfit8 <- glm(Fate ~ SUPPL + HAB + YEAR,
-             family = binomial(link = logexp(water$EXPO)),
-             data = water)
-summary(mfit8)
+# mfit8 <- glm(Fate ~ SUPPL + HAB + YEAR,
+#              family = binomial(link = logexp(water$EXPO)),
+#              data = water)
+# summary(mfit8)
 #####################################################
 mfit9 <- glm(Fate ~ SUPPL*TEMP_Y + SUPPL*PREC_Y + HAB + lmg,
              family = binomial(link = logexp(water$EXPO)),
@@ -178,13 +179,91 @@ summary(mfit11)
 ##################### AIC models #############################
 ##############################################################
 
-l <- list(mfit0, mfit1, mfit2.1, mfit3, mfit3.1, mfit4.1, mfit4.2, mfit4.3, mfit6, mfit8, mfit9, mfit10, mfit11)
+# No models with the YEAR variable - Replaced by models with TEMP, PREC, and lmg variables ***
+l <- list(mfit0, mfit1, mfit2.1, mfit4.1, mfit4.2, mfit4.3, mfit6, mfit9, mfit9.1, mfit9.2, mfit10, mfit11)
 
-AIC.rank(liste = l)
+rr <- AIC.rank(liste = l)
 
-###### Models comparaison to test hypothesis ####################
-l1 <- list(mfit0, mfit10, mfit11, mfit4.1)
-AIC.rank(l1)
+require(AICcmodavg)
+gg <- aictab(l)
+gg <- as.data.frame(gg)
+
+
+final.AICtable <- cbind(name = as.character(rr$Model), formula = as.character(rr$Formula), gg[, -1])
+final.AICtable
+
+
+###### Predictions of the best model ############################
+require(visreg)
+visreg(mfit4.1)
+
+#### Plot for supplementation effect ########
+summary(mfit4.1)
+mfit4.1$formula
+water$fitted.values <- mfit4.1$fitted.values
+
+
+f1 <- as.data.frame(tapply(water$fitted.values, water$SUPPL, mean))
+f2 <- as.data.frame(tapply(water$fitted.values, water$SUPPL, sd))
+f <- cbind(f1, f2)
+names(f) <- c("mean", "sd")
+f$SUPPL <- as.factor(c("TEM", "W"))
+
+#install.packages("gplots")
+require(gplots)
+barCenters <- barplot2(height = f$mean,
+                       names.arg = f$SUPPL,
+                       ylim = c(0, 1),
+                       xlab = "Treatment",
+                       border = "NA",
+                       plot.grid = TRUE,
+                       ylab = "Nesting success probability",
+                       col = c("chartreuse4", "cyan4"))
+arrows(barCenters,
+       f$mean - f$sd,
+       barCenters,
+       f$mean + f$sd,
+       angle=90,
+       code=3,
+       lwd = 2)
+#### Plot for habitat effect ########
+mfit4.1$formula
+water$fitted.values <- mfit4.1$fitted.values
+
+
+f1 <- as.data.frame(tapply(water$fitted.values, water$HAB, mean))
+f2 <- as.data.frame(tapply(water$fitted.values, water$HAB, sd))
+f <- cbind(f1, f2)
+names(f) <- c("mean", "sd")
+f$HAB <- as.factor(c("MES", "WET"))
+
+#install.packages("gplots")
+require(gplots)
+barCenters <- barplot2(height = f$mean,
+                       names.arg = f$HAB,
+                       ylim = c(0, 1),
+                       xlab = "Habitat",
+                       border = "NA",
+                       plot.grid = TRUE,
+                       ylab = "Nesting success probability",
+                       col = c("darkgoldenrod3", "darkgreen"))
+arrows(barCenters,
+       f$mean - f$sd,
+       barCenters,
+       f$mean + f$sd,
+       angle=90,
+       code=3,
+       lwd = 2)
+#### Plot for temperature effect ########
+plot(water$TEMP_Y, water$Fate)
+
+# min_TEMP = 0.4957
+# max_TEMP = 5.944
+
+v <- seq(0.49, 6, by = 0.01)
+newdata <- data.frame(TEMP_Y = v, SUPPL = 0.90, HAB = 0.15, lmg = mean(water$lmg), PREC_Y = mean(water$PREC_Y)) # wetland = 15% of the studied area
+
+Pwater <- predict(mfit4.1, newdata = newdata, type = "response", se.fit = TRUE)
 
 ######################################################################
 ################### FOOD SUPPL MODELS #################################
@@ -231,35 +310,27 @@ logexp <- function(exposure = 1) {
 }
 
 # Function for AIC comparaison between (only) glm models 
-AIC.rank <- function(liste){
-  if(!is.list(liste))
-    stop("Argument has to be a list")
-  table <- NULL
-  for(i in 1:length(liste)){
-    
-    # if(class(liste[[i]]) %in% c("glm", "lm"))
-    #   stop("At least one model is not a glm")
-    
-    name <- liste[[i]]$formula
-    dev <- liste[[i]]$deviance
-    aic <- liste[[i]]$aic
-    
-    table <- rbind(table, c(name, dev, aic))
-    
+logexp <- function(exposure = 1) {
+  linkfun <- function(mu) qlogis(mu^(1/exposure))
+  ## FIXME: is there some trick we can play here to allow
+  ## evaluation in the context of the 'data' argument?
+  linkinv <- function(eta) plogis(eta)^exposure
+  logit_mu_eta <- function(eta) {
+    ifelse(abs(eta)>30,.Machine$double.eps,
+           exp(eta)/(1+exp(eta))^2)
+    ## OR .Call(stats:::C_logit_mu_eta, eta, PACKAGE = "stats")
   }
-  # table <- as.data.frame(table)
-  
-  table <- as.data.frame(table)
-  table$V2 <- as.numeric(table$V2)
-  table$V3 <- as.numeric(table$V3)
-  
-  for(j in 1:dim(table)[1]){
-    table$V4[j] <- table$V3[j] - min(table$V3)
+  mu.eta <- function(eta) {
+    exposure * plogis(eta)^(exposure-1) *
+      logit_mu_eta(eta)
   }
-  table <- table[order(table$V4),]
-  
-  names(table) <- c("Model", "Deviance", "AIC", "dAIC")
-  print(table)
+  valideta <- function(eta) TRUE
+  link <- paste("logexp(", deparse(substitute(exposure)), ")",
+                sep="")
+  structure(list(linkfun = linkfun, linkinv = linkinv,
+                 mu.eta = mu.eta, valideta = valideta,
+                 name = link),
+            class = "link-glm")
 }
 
 ###############################################################################
@@ -310,6 +381,16 @@ foo6 <- glm(Fate ~ SUPPL*TEMP_Y + SUPPL*PREC_Y + HAB + lmg,
             data = food)
 summary(foo6)
 ###########################################################################
+foo6.1 <- glm(Fate ~ SUPPL*TEMP_Y + SUPPL*PREC_Y + HAB,
+            family = binomial(link = logexp(food$EXPO)),
+            data = food)
+summary(foo6.1)
+###########################################################################
+foo6.2 <- glm(Fate ~ SUPPL*TEMP_Y + HAB + lmg,
+            family = binomial(link = logexp(food$EXPO)),
+            data = food)
+summary(foo6.2)
+###########################################################################
 foo7 <- glm(Fate ~ SUPPL*HAB + lmg + TEMP_Y + PREC_Y,
             family = binomial(link = logexp(food$EXPO)),
             data = food)
@@ -335,15 +416,99 @@ summary(foo9)
 ##################### AIC models #############################
 ##############################################################
 
-l <- list(foo1, foo2, foo2.1, foo2.2, foo3, foo4, foo5, foo6, foo7, foo8, foo9)
-AIC.rank(liste = l)
+l <- list(foo1, foo2.1, foo2.2, foo3, foo4, foo5, foo6, foo6.1, foo6.2, foo7, foo8, foo9)
 
-###### Models comparaison to test hypothesis ####################
-l1 <- list(foo1, foo6, foo3, foo2)
-AIC.rank(l1)
+rr <- AIC.rank(liste = l)
 
+require(AICcmodavg)
+gg <- aictab(l)
+gg <- as.data.frame(gg)
+
+
+final.AICtable <- cbind(name = as.character(rr$Model), formula = as.character(rr$Formula), gg[, -1])
+final.AICtable
 ####*** WARNINGS !!! Check models one by one !!! *** ######################
 
+
+require(visreg)
+visreg(foo6.2)
+################ Best model : foo6.2 ############
+#### Plot for interaction SUPPL*TEMP_Y ########
+summary(food)
+# min(TEMp_Y) = 4.354
+# max(TEMP_Y) = 5.944
+
+newdata_temp_min <- food
+newdata_temp_min$TEMP_Y <- 4.354 
+Pmin <- predict(foo6.2, newdata = newdata_temp_min, type = "response")
+Pmin
+
+food$pred_min_temp <- Pmin
+tapply(food$pred_min_temp, food$SUPPL, mean)
+
+newdata_temp_max <- food
+newdata_temp_max$TEMP_Y <- 5.944 
+Pmax <- predict(foo6.2, newdata = newdata_temp_max, type = "response")
+Pmax
+
+food$pred_max_temp <- Pmax
+plot(tapply(food$pred_max_temp, food$SUPPL, mean))
+
+suppl1 <- as.data.frame(tapply(food$pred_max_temp, food$SUPPL, mean))
+names(suppl1) <- "NS"
+suppl1$treat <- c("TEM", "F")
+suppl1$TEMP_Y <- "max"
+
+suppl2 <- as.data.frame(tapply(food$pred_min_temp, food$SUPPL, mean))
+names(suppl2) <- "NS"
+suppl2$treat <- c("TEM", "F")
+suppl2$TEMP_Y <- "min"
+suppl2
+
+suppl <- rbind(suppl1, suppl2)
+summary(suppl)
+# Interaction SUPPL*TEMP_Y plot #
+plot(tapply(food$pred_min_temp, food$SUPPL, mean), ylim = c(0.55, 0.999), bty = "n", xlab = "Treatment", ylab = "Nesting success probability", type = "b", col = "darkblue", lwd = 2, xaxt = "n")
+axis(1, at = c(1, 2), labels = c("TEM", "FOOD"))
+par(new = T)
+plot(tapply(food$pred_max_temp, food$SUPPL, mean), xlim = c(1, 2), ylim = c(0.55, 0.999), bty = "n", xlab = "", xaxt = "n", ylab = "", type = "b", col = "darkorange", lwd = 2)
+
+legend(x = 1.8,
+       y = 1,
+       legend = c("low temp.", "high temp."),
+       fill = c("darkblue", "darkorange"),
+       border = c("darkblue", "darkorange"),
+       bty = "n")
+
+#### Plot for habitat effect ########
+
+foo6.2$formula
+food$fitted.values <- foo6.2$fitted.values
+
+
+f1 <- as.data.frame(tapply(food$fitted.values, food$HAB, mean))
+f2 <- as.data.frame(tapply(food$fitted.values, food$HAB, sd))
+f <- cbind(f1, f2)
+names(f) <- c("mean", "sd")
+f$HAB <- as.factor(c("MES", "WET"))
+
+install.packages("gplots")
+require(gplots)
+barCenters <- barplot2(height = f$mean,
+                      names.arg = f$HAB,
+                      ylim = c(0, 1),
+                      xlab = "Habitat",
+                      border = "NA",
+                      plot.grid = TRUE,
+                      ylab = "Nesting success probability",
+                      col = c("darkgoldenrod3", "darkgreen"))
+arrows(barCenters,
+       f$mean - f$sd,
+       barCenters,
+       f$mean + f$sd,
+       angle=90,
+       code=3,
+       lwd = 2)
 ###########################################################################
 #################### food - 2017 ##########################################
 ###########################################################################
