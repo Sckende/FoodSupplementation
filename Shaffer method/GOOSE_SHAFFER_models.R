@@ -254,6 +254,7 @@ arrows(barCenters,
        angle=90,
        code=3,
        lwd = 2)
+text(barCenters, 0.2, labels = c("(946)", "(139)"))
 #### Plot for temperature effect ########
 plot(water$TEMP_Y, water$Fate)
 
@@ -310,28 +311,38 @@ logexp <- function(exposure = 1) {
 }
 
 # Function for AIC comparaison between (only) glm models 
-logexp <- function(exposure = 1) {
-  linkfun <- function(mu) qlogis(mu^(1/exposure))
-  ## FIXME: is there some trick we can play here to allow
-  ## evaluation in the context of the 'data' argument?
-  linkinv <- function(eta) plogis(eta)^exposure
-  logit_mu_eta <- function(eta) {
-    ifelse(abs(eta)>30,.Machine$double.eps,
-           exp(eta)/(1+exp(eta))^2)
-    ## OR .Call(stats:::C_logit_mu_eta, eta, PACKAGE = "stats")
+AIC.rank <- function(liste){
+  if(!is.list(liste))
+    stop("Argument has to be a list")
+  table <- NULL
+  for(i in 1:length(liste)){
+    
+    # if(class(liste[[i]]) %in% c("glm", "lm"))
+    #   stop("At least one model is not a glm")
+    
+    name <- liste[[i]]$formula
+    dev <- liste[[i]]$deviance
+    aic <- liste[[i]]$aic
+    Modnam <- paste("mod", i, sep = " ")
+    
+    table <- rbind(table, c(Modnam, name, dev, aic))
+    
   }
-  mu.eta <- function(eta) {
-    exposure * plogis(eta)^(exposure-1) *
-      logit_mu_eta(eta)
+  # table <- as.data.frame(table)
+  
+  table <- as.data.frame(table)
+  table$V3 <- as.numeric(table$V3)
+  table$V4 <- as.numeric(table$V4)
+  
+  for(j in 1:dim(table)[1]){
+    table$V5[j] <- table$V4[j] - min(table$V4)
   }
-  valideta <- function(eta) TRUE
-  link <- paste("logexp(", deparse(substitute(exposure)), ")",
-                sep="")
-  structure(list(linkfun = linkfun, linkinv = linkinv,
-                 mu.eta = mu.eta, valideta = valideta,
-                 name = link),
-            class = "link-glm")
+  table <- table[order(table$V5),]
+  
+  names(table) <- c("Model", "Formula", "Deviance", "AIC", "dAIC")
+  print(table)
 }
+
 
 ###############################################################################
 ########################### Models fitting ####################################
@@ -438,47 +449,76 @@ summary(food)
 # min(TEMp_Y) = 4.354
 # max(TEMP_Y) = 5.944
 
-newdata_temp_min <- food
-newdata_temp_min$TEMP_Y <- 4.354 
-Pmin <- predict(foo6.2, newdata = newdata_temp_min, type = "response")
-Pmin
+# min value of temperature
+Tmin_TEM <- data.frame(SUPPL = "TEM", TEMP_Y = min(food$TEMP_Y), HAB = "WET", lmg = mean(food$lmg))
+sn_Tmin_TEM <- mean(predict(foo6.2, newdata = Tmin_TEM, type = "response")); sn_Tmin_TEM
+sn_Tmin_TEMsd <- sd(predict(foo6.2, newdata = Tmin_TEM, type = "response")); sn_Tmin_TEMsd
 
-food$pred_min_temp <- Pmin
-tapply(food$pred_min_temp, food$SUPPL, mean)
+Tmin_F <- data.frame(SUPPL = "F", TEMP_Y = min(food$TEMP_Y), HAB = "WET", lmg = mean(food$lmg))
+sn_Tmin_F <- mean(predict(foo6.2, newdata = Tmin_F, type = "response")); sn_Tmin_F
+sn_Tmin_Fsd <- sd(predict(foo6.2, newdata = Tmin_F, type = "response")); sn_Tmin_Fsd
 
-newdata_temp_max <- food
-newdata_temp_max$TEMP_Y <- 5.944 
-Pmax <- predict(foo6.2, newdata = newdata_temp_max, type = "response")
-Pmax
+# max value of temperature
+Tmax_TEM <- data.frame(SUPPL = "TEM", TEMP_Y = max(food$TEMP_Y), HAB = "WET", lmg = mean(food$lmg))
+sn_Tmax_TEM <- mean(predict(foo6.2, newdata = Tmax_TEM, type = "response")); sn_Tmax_TEM
+sn_Tmax_TEMsd <- sd(predict(foo6.2, newdata = Tmax_TEM, type = "response")); sn_Tmax_TEMsd
 
-food$pred_max_temp <- Pmax
-plot(tapply(food$pred_max_temp, food$SUPPL, mean))
+Tmax_F <- data.frame(SUPPL = "F", TEMP_Y = max(food$TEMP_Y), HAB = "WET", lmg = mean(food$lmg))
+sn_Tmax_F <- mean(predict(foo6.2, newdata = Tmax_F, type = "response")); sn_Tmax_F
+sn_Tmax_Fsd <- sd(predict(foo6.2, newdata = Tmax_F, type = "response")); sn_Tmax_Fsd
 
-suppl1 <- as.data.frame(tapply(food$pred_max_temp, food$SUPPL, mean))
-names(suppl1) <- "NS"
-suppl1$treat <- c("TEM", "F")
-suppl1$TEMP_Y <- "max"
+# Dataframe with prediction values
+pred <- data.frame(TEMP = c(rep("LOW", 2), rep("HIGH", 2)), TREAT = rep(c("TEM", "F"), 2), mSN = c(sn_Tmin_TEM, sn_Tmin_F, sn_Tmax_TEM, sn_Tmax_F), sdSN = c(sn_Tmin_TEMsd, sn_Tmin_Fsd, sn_Tmax_TEMsd, sn_Tmax_Fsd))
 
-suppl2 <- as.data.frame(tapply(food$pred_min_temp, food$SUPPL, mean))
-names(suppl2) <- "NS"
-suppl2$treat <- c("TEM", "F")
-suppl2$TEMP_Y <- "min"
-suppl2
-
-suppl <- rbind(suppl1, suppl2)
-summary(suppl)
 # Interaction SUPPL*TEMP_Y plot #
-plot(tapply(food$pred_min_temp, food$SUPPL, mean), ylim = c(0.55, 0.999), bty = "n", xlab = "Treatment", ylab = "Nesting success probability", type = "b", col = "darkblue", lwd = 2, xaxt = "n")
-axis(1, at = c(1, 2), labels = c("TEM", "FOOD"))
-par(new = T)
-plot(tapply(food$pred_max_temp, food$SUPPL, mean), xlim = c(1, 2), ylim = c(0.55, 0.999), bty = "n", xlab = "", xaxt = "n", ylab = "", type = "b", col = "darkorange", lwd = 2)
+plot(pred$mSN[pred$TEMP == "LOW"],
+     ylim = c(0.38, 1),
+     ylab = "Nesting success probability",
+     xlab = "Treatment",
+     xaxt = "n",
+     type = "b",
+     bty = "n",
+     col = "darkblue",
+     lwd = 2)
+par(new = TRUE)
+plot(pred$mSN[pred$TEMP == "HIGH"],
+     ylim = c(0.38, 1),
+     ylab = "",
+     xlab = "",
+     xaxt = "n",
+     type = "b",
+     bty = "n",
+     col = "darkorange",
+     lwd = 2)
+predL <- pred[pred$TEMP == "LOW",]
+arrows(x0 = c(1, 2),
+       y0 = predL$mSN - predL$sdSN,
+       x1 = c(1, 2),
+       y1 = predL$mSN + predL$sdSN,
+       angle=90,
+       code=3,
+       lwd = 2,
+       col = "darkblue")
+predH <- pred[pred$TEMP == "HIGH",]
+arrows(x0 = c(1, 2),
+       y0 = predH$mSN - predH$sdSN,
+       x1 = c(1, 2),
+       y1 = predH$mSN + predH$sdSN,
+       angle=90,
+       code=3,
+       lwd = 2,
+       col = "darkorange")
 
+
+axis(1, at = c(1, 2), labels = c("TEM", "FOOD"))
 legend(x = 1.8,
-       y = 1,
+       y = 0.6,
        legend = c("low temp.", "high temp."),
        fill = c("darkblue", "darkorange"),
        border = c("darkblue", "darkorange"),
        bty = "n")
+
+
 
 #### Plot for habitat effect ########
 
