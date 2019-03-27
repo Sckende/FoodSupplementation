@@ -1,6 +1,7 @@
 ######## *** Thinking point ***** ############
 # For the case of the variable "NestAge" ==> There is no utility to use it in models which want to characterize an inter-annual effect. But if I want to analyse nesting success to intra-seasonal scale (or inter-indivual scale?), "NestAge" is essential (cf 2017 model !)
 # See Brown et al. 2013, Shaffer 2004, and the paper ms of Royer-Boutin
+# Read Grant and al 2005 --> special paper about time effect ont nesting success estimators
 
 #### Analysis ####
 setwd("C:/Users/HP_9470m/OneDrive - Université de Moncton/Doc doc doc/Ph.D. - ANALYSES/R analysis/Data")
