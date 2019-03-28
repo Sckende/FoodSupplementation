@@ -20,8 +20,70 @@ short.data <- data.frame()
 for(i in j){
   data.1 <- goo[goo$No_ter == i,][-1,]
   data.1$EXPO <- diff(goo[goo$No_ter == i,]$Date)
+  data.1$AGE <- goo$Date[goo$No_ter == i][1] - unique(data.1$Init)
   
   long.data <- rbind(long.data, data.1)
+  
+  if(any(as.character(goo$Status[goo$No_ter == i]) == "0")){
+    expo.1 <- sum(data.1$EXPO[-length(data.1$EXPO)])
+    expo.2 <- data.1$EXPO[length(data.1$EXPO)]
+    
+    line.1 <- cbind(goo[goo$No_ter == i,][1,], EXPO = expo.1, AGE = unique(data.1$AGE))
+    line.2 <- cbind(goo[goo$No_ter == i,][dim(goo[goo$No_ter == i,])[1],], EXPO = expo.2, AGE = unique(data.1$AGE))
+    
+    short.data <- rbind(short.data, line.1, line.2)
+  }else{
+    expo.3 <- sum(data.1$EXPO)
+    
+    line.3 <- cbind(goo[goo$No_ter == i,][1,], EXPO = expo.3, AGE = unique(data.1$AGE))
+    
+    short.data <- rbind(short.data, line.3)
+  }
 }
 
 utils::View(long.data)
+utils::View(short.data)
+
+# Delete double check in the same of nests (i.e., EXPO = 0)
+long.data <- long.data[!long.data$EXPO == 0,]
+
+# Function link
+logexp <- function(exposure = 1) {
+  linkfun <- function(mu) qlogis(mu^(1/exposure))
+  ## FIXME: is there some trick we can play here to allow
+  ## evaluation in the context of the 'data' argument?
+  linkinv <- function(eta) plogis(eta)^exposure
+  logit_mu_eta <- function(eta) {
+    ifelse(abs(eta)>30,.Machine$double.eps,
+           exp(eta)/(1+exp(eta))^2)
+    ## OR .Call(stats:::C_logit_mu_eta, eta, PACKAGE = "stats")
+  }
+  mu.eta <- function(eta) {
+    exposure * plogis(eta)^(exposure-1) *
+      logit_mu_eta(eta)
+  }
+  valideta <- function(eta) TRUE
+  link <- paste("logexp(", deparse(substitute(exposure)), ")",
+                sep="")
+  structure(list(linkfun = linkfun, linkinv = linkinv,
+                 mu.eta = mu.eta, valideta = valideta,
+                 name = link),
+            class = "link-glm")
+}
+
+#### Models comparison ####
+data <- list(short.data = short.data, long.data = long.data)
+
+for(i in c(1, 2)){
+  mod <- glm(Status ~ 1,
+             family=binomial(link=logexp(data[[i]]$EXPO)),
+             data = data[[i]])
+  print(names(data)[i])
+  print(summary(mod))
+}
+mod <- glm(Status ~ 1,
+             family=binomial(link=logexp(i$EXPO)),
+             data = i)
+print(paste("Model based on ", i, " database", sep = ""))
+summary(mod)
+
