@@ -41,6 +41,33 @@ for(i in j){
   }
 }
 
+#### Add temperature values in long dataframe ####
+tp <- read.csv("TEMP_PondInlet_1995-2017.csv", sep = ";", h = T, dec = ".")
+tp <- tp[tp$Year == 2017,]
+head(tp)
+summary(tp)
+
+tp$date_jj <- strptime(tp$Date, format = "%Y-%m-%d")
+tp$date_jj <- tp$date_jj$yday +1
+
+for(i in 1:length(long.data$No)){
+  j.1 <- long.data$Date[i] - long.data$EXPO[i]
+  j.2 <- long.data$Date[i]
+  
+  
+  long.data$temp[i] <- mean(tp$Mean_Temp[tp$date_jj <= j.2 & tp$date_jj >= j.1]) # mean temperature for each interval
+}
+
+for(i in unique(long.data$No_ter)){
+  j.3 <- unique(long.data$Init[long.data$No_ter == i])
+  j.4 <- long.data$Date[long.data$No_ter == i][length(long.data$Date[long.data$No_ter == i])]
+    
+    
+    long.data$temp_nid[long.data$No_ter == i] <- mean(tp$Mean_Temp[tp$date_jj >= j.3 & tp$date_jj <= j.4]) # Here is mean temperature between the initiation date and last date of visit
+}
+#### *** WARNING ! Here is coarse computation of mean temp *** ####
+
+#### Viewing data ####
 utils::View(long.data)
 utils::View(short.data)
 
@@ -81,9 +108,29 @@ for(i in c(1, 2)){
   print(names(data)[i])
   print(summary(mod))
 }
-mod <- glm(Status ~ 1,
-             family=binomial(link=logexp(i$EXPO)),
-             data = i)
-print(paste("Model based on ", i, " database", sep = ""))
+
+#--------------------------#
+mod <- glm(Status ~ AGE + temp,
+             family=binomial(link=logexp(long.data$EXPO)),
+             data = long.data)
+
+summary(mod)
+#--------------------------#
+mod.1 <- glm(Status ~ AGE + temp_nid,
+           family=binomial(link=logexp(long.data$EXPO)),
+           data = long.data)
+
+summary(mod.1)
+# ----------------------#
+require(lme4)
+mod <- glmer(Status ~ AGE + temp + (1|No_ter),
+           family=binomial(link=logexp(long.data$EXPO)),
+           data = long.data)
 summary(mod)
 
+# ----------------------#
+require(lme4)
+mod.11 <- glmer(Status ~ AGE + temp_nid + (1|No_ter),
+             family=binomial(link=logexp(long.data$EXPO)),
+             data = long.data)
+summary(mod.11)
