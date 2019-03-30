@@ -135,3 +135,6 @@ summary(mod.w)
 #              family=binomial(link=logexp(longD$EXPO)),
 #              data = longD)
 # summary(mod.11)
+
+#### Confirmation that I have to use the long version of the dataset, with one row per visit, irrespective of the status of the nest. The number of exposition days and the age of the nest have to change for each visit.
+### Better to keep one value of temperature and precipitation per the lifespan of each nest rather than one value per intervals cause I think this setting answers to a different question (short term impact - few day - od the local climate on the survival of the nest)
