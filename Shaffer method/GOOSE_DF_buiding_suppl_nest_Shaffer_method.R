@@ -135,11 +135,15 @@ sup.2 <- sup
 
 for(i in sup$ID){
   if(sup$VISIT_NUMBER[sup$ID == i] >= 2){
-    matr <- matrix(rep(c(t(sup[sup$ID == i,])), as.numeric(sup$VISIT_NUMBER[sup$ID == i]) - 1), byrow = T, ncol = dim(sup)[2])
+    matr <- matrix(rep(c(t(sup[sup$ID == i,])), as.numeric(sup$VISIT_NUMBER[sup$ID == i])), byrow = T, ncol = dim(sup)[2])
     matr <- as.data.frame(matr)
     names(matr) <- names(sup)
     
     sup.2 <- rbind(sup.2, as.data.frame(matr))
+  }else{
+    matr <- sup[sup$ID == i,]
+    
+    sup.2 <- rbind(sup.2, matr)
   }
   
 }
@@ -153,6 +157,12 @@ sup.2$CLUTCH <- as.numeric(as.character(sup.2$CLUTCH))
 sup.2$YEAR <- as.numeric(sup.2$YEAR)
 summary(sup.2)
 
-
+# Ordering data per ID
+sup.2 <- sup.2[order(sup.2$ID),]
+# Subset to find information about visit date
+dd <- sup.2[,c(1, 2, 3, 4, 5, 8, 16)]
+write.table(dd, "GOOSE_suppl_nests_TO_COMPLETE.csv")
 #### **** Warning - Special care for nests with only one visit ! **** ####
 #### **** Division of the variable sup.2$HATCH **** ####
+### **** Warning for the computation of the last exposition interval for each nest **** ####
+#### Delete Control nest in wetland Peksek cause repetition with colony nests ####
