@@ -4,7 +4,7 @@ rm(list = ls())
 list.files()
 
 # File with supplemented nests
-sup <- read.csv("GOOSE_MARK_all_SUPPL_nests_all_years.txt", sep = "\t", h = T)[,-c(3, 4, 6:8, 15:18)]
+sup <- read.csv("GOOSE_SHAFFER_all_SUPPL_nests_all_years.txt", sep = "\t", h = T)[,-c(3, 4, 6:8, 15:18)]
 names(sup)
 summary(sup)
 
@@ -160,9 +160,19 @@ summary(sup.2)
 # Ordering data per ID
 sup.2 <- sup.2[order(sup.2$ID),]
 # Subset to find information about visit date
-dd <- sup.2[,c(1, 2, 3, 4, 5, 8, 16)]
-write.table(dd, "GOOSE_suppl_nests_TO_COMPLETE.csv")
+#dd <- sup.2[,c(1, 2, 3, 4, 5, 8, 16)]
+#write.table(dd, "GOOSE_suppl_nests_TO_COMPLETE.csv")
+
+# Delete Control nest in wetland Peksek cause repetition with colony nests
+sup.2 <- sup.2[!(sup.2$SUPPL == "TEM" & sup.2$HAB == "WET"),]
+
+# VISIT_DATE matching with new completed file
+date <- read.csv("GOOSE_suppl_nests_visit_date_COMPLETED.csv", h = T, sep = ";")
+head(date)
+
+sup.2$VISIT_DATE <- date$VISIT_DATE[match(sup.2$ID, date$ID)]
+
 #### **** Warning - Special care for nests with only one visit ! **** ####
 #### **** Division of the variable sup.2$HATCH **** ####
 ### **** Warning for the computation of the last exposition interval for each nest **** ####
-#### Delete Control nest in wetland Peksek cause repetition with colony nests ####
+
