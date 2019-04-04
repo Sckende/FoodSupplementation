@@ -4,7 +4,7 @@ rm(list = ls())
 list.files()
 
 # File with supplemented nests
-sup <- read.csv("GOOSE_SHAFFER_all_SUPPL_nests_all_years.txt", sep = "\t", h = T)[,-c(3, 4, 6:8, 15:18)]
+sup <- read.csv("GOOSE_SHAFFER_all_SUPPL_nests_all_years.txt", sep = "\t", h = T)[,-c(6:8, 15:18)]
 names(sup)
 summary(sup)
 
@@ -47,8 +47,8 @@ sup[is.na(sup$LastPresent),] # corresponds to a non-hatched nest ==> delete
 sup <- sup[!is.na(sup$LastPresent),]
 
 # Nest checking with weirdo initiation date
-table(sup$INITIATION) # see "IMP_169" and "INC"
-ini.pb <- sup[which(sup$INITIATION == "IMP_169" | sup$INITIATION == "INC"),] 
+table(sup$INITIATION, useNA = "always") # see "IMP_169", "INC", and NA
+ini.pb <- sup[which(sup$INITIATION == "IMP_169" | sup$INITIATION == "INC" | is.na(sup$INITIATION)),] 
 # *** Here problem with the estimation of the initiation date with early predated nests ! ***
 # Possibility to delete control nests in this subset, nests with "DEAD_EGG", and the only nest of 2015 (step 1)
 #but for the remaining supplemented nests
@@ -56,16 +56,20 @@ ini.pb <- sup[which(sup$INITIATION == "IMP_169" | sup$INITIATION == "INC"),]
 # step 1
 sup <- sup[-which(sup$ID == "SH71B"),]
 sup <- sup[-which(sup$INITIATION == "INC" & sup$SUPPL == "TEM"),]
+sup <- sup[-which(is.na(sup$INITIATION) & sup$SUPPL == "TEM"),]
 sup <- sup[-which(sup$INITIATION == "INC" & sup$HATCH == "DEAD_EGG"),]
 sup <- droplevels(sup)
-# 8 remaining nests in 2017 with unknown initiation date
-ini.pb <- sup[which(sup$INITIATION == "INC"),]
+table(sup$INITIATION, useNA = "always")
+ini.pb <- sup[which(sup$INITIATION == "INC" | is.na(sup$INITIATION)),] 
+# 5 & 8 remaining nests in 2016 & 2017, respectively, with unknown initiation date
 
 #### Relationship between the FirstFound dates and Initiation date in 2017 with linear model ####
 #### **** No conclusing **** ####
 goo.2017 <- goo[goo$AN == 2017,]
 summary(goo.2017)
 
+goo.2016 <- goo[goo$AN == 2016,]
+summary(goo.2016)
 # Keep only the nest with initiation date
 goo.2017 <- goo.2017[!is.na(goo.2017$Init),]
 goo.2017 <- droplevels(goo.2017)
@@ -87,7 +91,7 @@ ini.mod$Ini <- as.numeric(as.character(ini.mod$Ini))
 ini.mod$FF <- as.numeric(as.character(ini.mod$FF))
 summary(ini.mod)
 
-x11()
+#x11()
 plot(ini.mod$FF, ini.mod$Ini)
 hist(ini.mod$Ini)
 
@@ -122,10 +126,16 @@ Inidate.comp
 
 #### Mean date of the initiation date for all control nests ####
 #### **** Used value for the 8 nests without initiation date **** ####
-mean(as.numeric(goo.2017$Init))
-sup$INITIATION[which(sup$INITIATION == "INC")] <- floor(mean(as.numeric(goo.2017$Init)))
+# For 2017 nests
+mean(as.numeric(goo.2017$Init), na.rm = T)
+sup$INITIATION[which(sup$INITIATION == "INC" & sup$YEAR == 2017)] <- floor(mean(as.numeric(goo.2017$Init)))
 sup <- droplevels(sup)
 table(sup$INITIATION)
+
+# For 2016 nests
+sup$INITIATION[which(is.na(sup$INITIATION))] <- floor(mean(as.numeric(goo.2016$Init), na.rm = T))
+
+sup$INITIATION <- droplevels(sup$INITIATION)
 
 #### Adding of rows for each visit in SUPPLEMENTED nests data ####
 summary(sup)
@@ -164,15 +174,54 @@ sup.2 <- sup.2[order(sup.2$ID),]
 #write.table(dd, "GOOSE_suppl_nests_TO_COMPLETE.csv")
 
 # Delete Control nest in wetland Peksek cause repetition with colony nests
-sup.2 <- sup.2[!(sup.2$SUPPL == "TEM" & sup.2$HAB == "WET"),]
+sup.2 <- sup.2[!(sup.2$SUPPL == "TEM" & sup.2$HAB == "WET"),] 
 
 # VISIT_DATE matching with new completed file
 date <- read.csv("GOOSE_suppl_nests_visit_date_COMPLETED.csv", h = T, sep = ";")
-head(date)
 
-sup.2$VISIT_DATE <- date$VISIT_DATE[match(sup.2$ID, date$ID)]
+head(date)
+date <- date[order(date$ID),]
+names(date)[3] <- "coco"
+#sup.2$VISIT_DATE <- date$VISIT_DATE[match(sup.2$ID, date$ID)]
+sup.2 <- cbind(sup.2, date$coco, date$VISIT_DATE)
+
+summary(sup.2)
+#### **** warnings ! Check point pour voir si les visit_date coincide avec les bon ID **** ####
+
+# Add "Nest_type" variable to fit with the goo db
+sup.2$Nest_type <- "Supplementation"
+
+# For successful nests with impossible hatching dates (HATCH == "IMP_191" or "IMP_193"), use mean date between LastPresent and LastVisit
+
+sup.2$HATCH <- as.character(sup.2$HATCH)
+
+ for(i in 1:length(sup.2$ID)){
+   if(sup.2$NIDIF[i] == "S"){
+     if(sup.2$HATCH[i] == "IMP_191"){
+       sup.2$HATCH[i] <- round(mean(c(sup.2$LastPresent[i], sup.2$LastVisit[i])))
+       }else{
+     if(sup.2$HATCH[i] == "IMP_193"){
+       sup.2$HATCH[i] <- round(mean(c(sup.2$LastPresent[i], sup.2$LastVisit[i])))
+     }
+   }
+    
+   }
+   
+ }
+
+sup.2$HATCH[sup.2$NIDIF == "F"] <- NA
+sup.2$HATCH <- as.numeric(sup.2$HATCH)
+
+# Computation of exposition intervals
+
+for(i in unique(sup.2$ID)){
+  if(unique(sup.2$NIDIF[sup.2$ID == i]) == "S"){
+    
+  }else{
+    
+  }
+}
 
 #### **** Warning - Special care for nests with only one visit ! **** ####
-#### **** Division of the variable sup.2$HATCH **** ####
 ### **** Warning for the computation of the last exposition interval for each nest **** ####
 
