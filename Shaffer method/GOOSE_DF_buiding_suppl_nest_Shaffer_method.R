@@ -213,7 +213,7 @@ sup.2$HATCH <- as.character(sup.2$HATCH)
 sup.2$HATCH[sup.2$NIDIF == "F"] <- NA
 sup.2$HATCH <- as.numeric(sup.2$HATCH)
  
-#### Computation of exposition intervals ####
+#### *** Computation of exposition intervals *** ####
 sup.3 <- NULL
 for(i in unique(sup.2$ID)){
   if(unique(sup.2$NIDIF[sup.2$ID == i]) == "S"){
@@ -239,35 +239,124 @@ for(i in unique(sup.2$ID)){
 }
 summary(sup.3)
 unique(sup.2$ID) == unique(sup.3$ID)
+
+# Issue of nidification
+sup.3$NIDIF <- as.character(sup.3$NIDIF)
+sup.3$NIDIF[sup.3$NIDIF == "F"] <- 0
+sup.3$NIDIF[sup.3$NIDIF == "S"] <- 1
+
+sup.3$NIDIF <- as.numeric(sup.3$NIDIF)
 #utils::View(sup.3)
+
+#### Data cleaning of CONTROL nests monitoring ####
+rm(list = ls()[-c(7, 21)])
+goo.2 <- goo[,-c(13, 16)]
+summary(goo.2)
+
+# Change the names of variable if possible
+names(goo.2)[-c(5, 6, 11:13)] <- c("YEAR", "ID", "INITIATION", "INI_STATUS", "CLUTCH", "VISIT_DATE", "HAB", "ZONE", "NIDIF")
+
+# Habitat
+goo.2$HAB[goo.2$HAB == "Mesic"] <- "MES"
+goo.2$HAB[goo.2$HAB == "Wetland"] <- "WET"
+goo.2$HAB[goo.2$HAB == "Wetland/mesic"] <- NA
+
+goo.2$HAB <- as.factor(goo.2$HAB)
+
+# Zone
+table(goo.2$ZONE)
+goo.2$ZONE[goo.2$ZONE == "C2-riviere camp 2" | goo.2$ZONE == "C2-riviere du camp 2"] <- "C2-riviere camp 2"
+
+goo.2$ZONE <- as.factor(goo.2$ZONE)
+
+# ID / INITIATION / CLUTCH / INI_STATUS / Nest_type / NIDIF / Eclo_est / Eclo_reel
+goo.2$ID <- as.factor(goo.2$ID)
+goo.2$INITIATION <- as.numeric(goo.2$INITIATION)
+goo.2$CLUTCH <- as.numeric(goo.2$CLUTCH)
+goo.2$INI_STATUS <- as.factor(goo.2$INI_STATUS)
+goo.2$Nest_type <- as.factor(goo.2$Nest_type)
+goo.2$Eclo_reel <- as.numeric(goo.2$Eclo_reel)
+goo.2$Eclo_est <- as.numeric(goo.2$Eclo_est)
+
+goo.2$NIDIF[goo.2$NIDIF == "Yes"] <- 1
+goo.2$NIDIF[goo.2$NIDIF == "No"] <- 0
+goo.2$NIDIF[goo.2$NIDIF == "Unk"] <- NA
+
+goo.2$NIDIF <- as.numeric(goo.2$NIDIF)
+
+goo.2 <- goo.2[!is.na(goo.2$NIDIF),]
+
+
+# HACTCH
+table(goo.2$Eclo_est, useNA = "always")
+table(goo.2$Eclo_reel, useNA = "always")
+
+for(i in 1:dim(goo.2)[1]){
+  if(goo.2$NIDIF[i] == 1){
+    if(is.na(goo.2$Eclo_reel[i]) == F){
+      goo.2$HATCH[i] <- goo.2$Eclo_reel[i] 
+    }else{
+      goo.2$HATCH[i] <- goo.2$Eclo_est[i]
+    }
+  }else{
+    goo.2$HATCH[i] <- NA
+  }
+}
+# Deletion of 19 rows with no hatch date and no clutch size
+goo.2 <- goo.2[!(is.na(goo.2$HATCH) & goo.2$NIDIF == 1),]
+
+# Deletion of nests for which is.na(INITIATION) & is.na(CLUTCH)
+summary(goo.2[is.na(goo.2$INITIATION) & is.na(goo.2$CLUTCH),])
+dim(goo.2[is.na(goo.2$INITIATION) & is.na(goo.2$CLUTCH),])
+goo.2 <- goo.2[!(is.na(goo.2$INITIATION) & is.na(goo.2$CLUTCH)),]
+
+# Creation of VISIT_NUMBER and EXPO variables
+
+for(i in unique(goo.2$YEAR)){
+  dr <- goo.2[which(goo.2$YEAR == i),]
+  for(j in unique(dr$ID)){
+    goo.2$VISIT_NUMBER[goo.2$ID == j & goo.2$YEAR == i] <- length(dr$ID[dr$ID == j]) - 1
+  }
+}
+
+goo.2 <- goo.2[!(goo.2$VISIT_NUMBER == 0),] # deletion of nest with no re-visit
+
+# Computation of number of exposition days
+goo.3 <- NULL
+for(j in unique(goo.2$YEAR)){
+  sub <- goo.2[goo.2$YEAR == j,]
+  for(i in unique(sub$ID)){
+    if(unique(sub$NIDIF[sub$ID == i]) == 1){
+      EXPO <- diff(sub$VISIT_DATE[sub$ID == i])
+      dat <- sub[sub$ID == i,][-1,] #Delete the first visit of the nest
+      dat <- cbind(dat, EXPO = EXPO)
+      
+      if(unique(dat$HATCH) != tail(dat$VISIT_DATE, n = 1)){
+        # if last date of visit != date of HATCH, modification of the last EXPO value using the HATCH date
+        dat$EXPO[length(dat$EXPO)] <- unique(dat$HATCH) - tail(dat$VISIT_DATE, n = 2)[1] 
+      }
+      
+      goo.3 <- rbind(goo.3, dat)
+      
+    }else{
+      EXPO <- diff(sub$VISIT_DATE[sub$ID == i])
+      dat <- sub[sub$ID == i,][-1,] #Delete the first visit of the nest, so the nests with only one re-vist display only row (= only one exposition interval) in this dataset
+      dat <- cbind(dat, EXPO = EXPO)
+      dat$EXPO[length(dat$EXPO)] <- ceiling(tail(EXPO, n = 1)/2) # mean value corresponding to the incertainty of when the fail occurs 
+      
+      goo.3 <- rbind(goo.3, dat)
+    }
+  }
+}
+
+utils::View(goo.3[goo.3$EXPO <= 0,])
+#### WARNING **** Checker dans les données de GSGO et sup ! si des nids ont été revisité après constatation de echec ou succès **** ####
 
 #### CREATION OF THE COMPLETE DATASET ####
 rm(list = ls()[-c(7, 21)])
 goo.2 <- goo
 names(goo.2)
 names(sup.3)
-
-#### Cleaning variables of goo dataset ####
-# Deletion of Nest_found variable
-goo.2 <- goo.2[,-13]
-
-# Nesting success variable
-
-
-# Date of HATCH variable --- **** Do that after regularisation of the NIDIF variable !!! ***
-table(goo.2$Eclo_est, useNA = "always")
-table(goo.2$Eclo_reel, useNA = "always")
-for(i in 1:dim(goo.2)[1]){
-  if(goo.2$NIDIF[i] == "S"){
-    if(!is.na(goo.2$Eclo_reel[i])){
-      goo.2$HATCH[i] <- goo.2$Eclo_reel[i] 
-    }else{
-      goo.2$HATCH[i] <- goo.2$Eclo_est[i]
-    }
-  }else{
-    goo.2$HATCH <- NA
-  }
-}
 
 
 #### Add "Nest_type" variable to fit with the goo db ####
