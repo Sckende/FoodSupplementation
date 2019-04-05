@@ -167,31 +167,31 @@ sup.2$CLUTCH <- as.numeric(as.character(sup.2$CLUTCH))
 sup.2$YEAR <- as.numeric(sup.2$YEAR)
 summary(sup.2)
 
-# Ordering data per ID
+#### Ordering data per ID ####
 sup.2 <- sup.2[order(sup.2$ID),]
 # Subset to find information about visit date
 #dd <- sup.2[,c(1, 2, 3, 4, 5, 8, 16)]
 #write.table(dd, "GOOSE_suppl_nests_TO_COMPLETE.csv")
 
-# Delete Control nest in wetland Peksek cause repetition with colony nests
+##### Delete Control nest in wetland Peksek cause repetition with colony nests ####
 sup.2 <- sup.2[!(sup.2$SUPPL == "TEM" & sup.2$HAB == "WET"),] 
 
-# VISIT_DATE matching with new completed file
+#### VISIT_DATE matching with new completed file ####
 date <- read.csv("GOOSE_suppl_nests_visit_date_COMPLETED.csv", h = T, sep = ";")
 
 head(date)
 date <- date[order(date$ID),]
 names(date)[3] <- "coco"
 #sup.2$VISIT_DATE <- date$VISIT_DATE[match(sup.2$ID, date$ID)]
-sup.2 <- cbind(sup.2, date$coco, date$VISIT_DATE)
+sup.2 <- cbind(sup.2, coco = date$coco, VISIT_DATE = date$VISIT_DATE)
 
+table(as.character(sup.2$ID) == as.character(sup.2$coco)) # Check point to see whether all ID are the same between "ID" and "coco"
+# Need to have 1476 TRUE!
+sup.2 <- sup.2[,-19]
 summary(sup.2)
-#### **** warnings ! Check point pour voir si les visit_date coincide avec les bon ID **** ####
 
-# Add "Nest_type" variable to fit with the goo db
-sup.2$Nest_type <- "Supplementation"
-
-# For successful nests with impossible hatching dates (HATCH == "IMP_191" or "IMP_193"), use mean date between LastPresent and LastVisit
+#### Cleaning of the HATCH variable ####
+  # For successful nests with impossible hatching dates (HATCH ==   "IMP_191" or "IMP_193"), use mean date between LastPresent and LastVisit
 
 sup.2$HATCH <- as.character(sup.2$HATCH)
 
@@ -209,19 +209,66 @@ sup.2$HATCH <- as.character(sup.2$HATCH)
    
  }
 
+  # Failed nest has a NA for the date of hatching
 sup.2$HATCH[sup.2$NIDIF == "F"] <- NA
 sup.2$HATCH <- as.numeric(sup.2$HATCH)
-
-# Computation of exposition intervals
-
+ 
+#### Computation of exposition intervals ####
+sup.3 <- NULL
 for(i in unique(sup.2$ID)){
   if(unique(sup.2$NIDIF[sup.2$ID == i]) == "S"){
+    EXPO <- diff(sup.2$VISIT_DATE[sup.2$ID == i])
+    dat <- sup.2[sup.2$ID == i,][-1,] #Delete the first visit of the nest
+    dat <- cbind(dat, EXPO = EXPO)
+    
+    if(unique(dat$HATCH) != unique(dat$LastVisit)){
+      # if date of LastVisit != date of HATCH, modification of the last EXPO value using the HATCH date
+      dat$EXPO[length(dat$EXPO)] <- unique(dat$HATCH) - tail(dat$VISIT_DATE, n = 2)[1] 
+    }
+    
+    sup.3 <- rbind(sup.3, dat)
     
   }else{
+    EXPO <- diff(sup.2$VISIT_DATE[sup.2$ID == i])
+    dat <- sup.2[sup.2$ID == i,][-1,] #Delete the first visit of the nest, so the nests with only one re-vist display only row (= only one exposition interval) in this dataset
+    dat <- cbind(dat, EXPO = EXPO)
+    dat$EXPO[length(dat$EXPO)] <- ceiling(tail(EXPO, n = 1)/2) # mean value corresponding to the incertainty of when the fail occurs 
     
+    sup.3 <- rbind(sup.3, dat)
+  }
+}
+summary(sup.3)
+unique(sup.2$ID) == unique(sup.3$ID)
+#utils::View(sup.3)
+
+#### CREATION OF THE COMPLETE DATASET ####
+rm(list = ls()[-c(7, 21)])
+goo.2 <- goo
+names(goo.2)
+names(sup.3)
+
+#### Cleaning variables of goo dataset ####
+# Deletion of Nest_found variable
+goo.2 <- goo.2[,-13]
+
+# Nesting success variable
+
+
+# Date of HATCH variable --- **** Do that after regularisation of the NIDIF variable !!! ***
+table(goo.2$Eclo_est, useNA = "always")
+table(goo.2$Eclo_reel, useNA = "always")
+for(i in 1:dim(goo.2)[1]){
+  if(goo.2$NIDIF[i] == "S"){
+    if(!is.na(goo.2$Eclo_reel[i])){
+      goo.2$HATCH[i] <- goo.2$Eclo_reel[i] 
+    }else{
+      goo.2$HATCH[i] <- goo.2$Eclo_est[i]
+    }
+  }else{
+    goo.2$HATCH <- NA
   }
 }
 
-#### **** Warning - Special care for nests with only one visit ! **** ####
-### **** Warning for the computation of the last exposition interval for each nest **** ####
 
+#### Add "Nest_type" variable to fit with the goo db ####
+sup.3$Nest_type <- "Supplementation"
