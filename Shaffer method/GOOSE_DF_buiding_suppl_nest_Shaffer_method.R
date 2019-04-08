@@ -106,54 +106,41 @@ summary(goo.2[is.na(goo.2$INITIATION) & is.na(goo.2$CLUTCH),])
 dim(goo.2[is.na(goo.2$INITIATION) & is.na(goo.2$CLUTCH),])
 goo.2 <- goo.2[!(is.na(goo.2$INITIATION) & is.na(goo.2$CLUTCH)),]
 
-###### HERE I AM !!!!! #######
+
 # Check if HATCH == one of VISIT_DATE to avoid problem when computing EXPO variable 
 pp <- split(goo.2, paste(goo.2$YEAR, goo.2$ID))
-db <- lapply(pp, function(x){
-  if(unique(x$HATCH) %in% x$VISIT_DATE){
-    x <- x[!(x$VISIT_DATE > unique(x$HATCH)),]
-  }
-}) 
-db <- db[!sapply(db, is.null)]# Give all the nest with a visit the same day of the hatch AND at least one visit after the hatch date
+# db <- lapply(pp, function(x){
+#   if(unique(x$HATCH) %in% x$VISIT_DATE){
+#     x <- x[!(x$VISIT_DATE > unique(x$HATCH)),]
+#   }
+# }) 
+# db <- db[!sapply(db, is.null)]# Give all the nest with a visit the same day of the hatch AND at least one visit after the hatch date
 #Deletion of the rows with unnecessary visits
 pp <- lapply(pp, function(x){
   if(unique(x$HATCH) %in% x$VISIT_DATE){
     x <- x[!(x$VISIT_DATE > unique(x$HATCH)),]
+  
   }
-}) 
+  x
+}) # VOIR MODIFICATION ICI 
 
 goo.2 <- do.call("rbind", pp) #Probleme quand je veux refusionner le tableau avec les variables modifiées
 
 # Check if more than one visit after the hatch date (with HATCH between two visits)
 # In this case, deletion of rows with visit date > HATCH and creation of one new row with the last VISIT_DATE == HATCH
-db <- lapply(pp, function(x){
-  if(unique(x$NIDIF == 1)){
-    if(any(unique(x$HATCH) < x$VISIT_DATE)){
-      x
+pp <- split(goo.2, paste(goo.2$YEAR, goo.2$ID))
+pp <- lapply(pp, function(x){
+  if(x$NIDIF[1] == 1){
+    if(any(x$HATCH[1] < x$VISIT_DATE)){
+      x <- x[!(x$VISIT_DATE > x$HATCH[1]),]
+      x <- rbind(x, x[1,])
+      x$VISIT_DATE[nrow(x)] <- x$HATCH[1]
     }
   }
+  x
 }) 
 
-
-
-    x <- x[!(x$VISIT_DATE > unique(x$HATCH)),]
-    x <- rbind(x, x[1,])
-    x$VISIT_DATE[length(x$VISIT_DATE)] <- unique(x$HATCH)
-
-
-
-
-
-
-
-
-
-
-
-
-db <- db[!sapply(db, is.null)]
-
-goooo <- do.call("rbind", db)
+#### ********* NEED TO HAVE A CHECK POINT HERE ***************** ################
 
 # Creation of VISIT_NUMBER and EXPO variables
 goo.2 <- goo.2[order(goo.2$YEAR, goo.2$ID, goo.2$VISIT_DATE),] # To be sure that the visit dates are ordered
