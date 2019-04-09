@@ -62,8 +62,11 @@ table(goo.2$ZONE)
 goo.2$ZONE[goo.2$ZONE == "C2-riviere camp 2" | goo.2$ZONE == "C2-riviere du camp 2"] <- "C2-riviere camp 2"
 
 goo.2 <- goo.2[!(goo.2$ZONE == "C1-Lac aux Goelands" | goo.2$ZONE == "C1-rive sud"),] # Deletion of C1 nests
-
 goo.2$ZONE <- as.factor(goo.2$ZONE)
+
+# Nest_type -> deletion of "collared female" status
+table(goo.2$Nest_type)
+goo.2 <- goo.2[!(goo.2$Nest_type == "Collared female" | goo.2$Nest_type == "N/A" | goo.2$Nest_type == "Marked female"),]
 
 # ID / INITIATION / CLUTCH / INI_STATUS / Nest_type / NIDIF / Eclo_est / Eclo_reel
 goo.2$ID <- as.factor(goo.2$ID)
@@ -107,28 +110,47 @@ dim(goo.2[is.na(goo.2$INITIATION) & is.na(goo.2$CLUTCH),])
 goo.2 <- goo.2[!(is.na(goo.2$INITIATION) & is.na(goo.2$CLUTCH)),]
 
 
-# Check if HATCH == one of VISIT_DATE to avoid problem when computing EXPO variable 
+#### Check if more than one visit after the hatch date (with HATCH == one of VISIT_DATE) ####
+# If yes, deletion of following visits 
 pp <- split(goo.2, paste(goo.2$YEAR, goo.2$ID))
+
+  # TEST
 # db <- lapply(pp, function(x){
-#   if(unique(x$HATCH) %in% x$VISIT_DATE){
-#     x <- x[!(x$VISIT_DATE > unique(x$HATCH)),]
+#   if(x$HATCH[1] %in% x$VISIT_DATE){
+#     #x
+#     x <- x[!(x$VISIT_DATE > x$HATCH[1]),]
+#   }
+# })
+# db <- db[!sapply(db, is.null)]# Give all the nest with a visit the same day of the hatch AND at least one visit after the hatch date
+
+  # Test ok -> Deletion of the rows with unnecessary visits
+pp <- lapply(pp, function(x){
+  if(x$HATCH[1] %in% x$VISIT_DATE){
+    x <- x[!(x$VISIT_DATE > x$HATCH[1]),]
+    x
+  }
+  x # If the condition if() != TRUE, keep original x
+})
+
+#### Check if more than one visit after the hatch date (with HATCH between two visits) ####
+# In this case, deletion of rows with visit date > HATCH and creation of one new row with the last VISIT_DATE == HATCH
+
+ # Test
+# db <- lapply(pp, function(x){
+#   if(x$NIDIF[1] == 1){
+#     if(any(x$HATCH[1] < x$VISIT_DATE)){
+#       #x
+#       x <- x[!(x$VISIT_DATE > x$HATCH[1]),]
+#       x <- rbind(x, x[1,])
+#       x$VISIT_DATE[nrow(x)] <- x$HATCH[1]
+#       x
+#     }
 #   }
 # }) 
-# db <- db[!sapply(db, is.null)]# Give all the nest with a visit the same day of the hatch AND at least one visit after the hatch date
-#Deletion of the rows with unnecessary visits
-pp <- lapply(pp, function(x){
-  if(unique(x$HATCH) %in% x$VISIT_DATE){
-    x <- x[!(x$VISIT_DATE > unique(x$HATCH)),]
+# db <- db[!(sapply(db, is.null))]
+# db[1:10]
   
-  }
-  x
-}) # VOIR MODIFICATION ICI 
-
-goo.2 <- do.call("rbind", pp) #Probleme quand je veux refusionner le tableau avec les variables modifiées
-
-# Check if more than one visit after the hatch date (with HATCH between two visits)
-# In this case, deletion of rows with visit date > HATCH and creation of one new row with the last VISIT_DATE == HATCH
-pp <- split(goo.2, paste(goo.2$YEAR, goo.2$ID))
+  # Test ok -> Deletion of the rows with unnecessary visits
 pp <- lapply(pp, function(x){
   if(x$NIDIF[1] == 1){
     if(any(x$HATCH[1] < x$VISIT_DATE)){
@@ -137,73 +159,65 @@ pp <- lapply(pp, function(x){
       x$VISIT_DATE[nrow(x)] <- x$HATCH[1]
     }
   }
-  x
+  x # If the condition if() != TRUE, keep original x
 }) 
 
-#### ********* NEED TO HAVE A CHECK POINT HERE ***************** ################
-
-# Creation of VISIT_NUMBER and EXPO variables
+#### Creation of VISIT_NUMBER ####
+# The first visit, when the nest was found, is deleted 
 goo.2 <- goo.2[order(goo.2$YEAR, goo.2$ID, goo.2$VISIT_DATE),] # To be sure that the visit dates are ordered
 
-for(i in unique(goo.2$YEAR)){
-  dr <- goo.2[which(goo.2$YEAR == i),]
-  for(j in unique(dr$ID)){
-    goo.2$VISIT_NUMBER[goo.2$ID == j & goo.2$YEAR == i] <- length(dr$ID[dr$ID == j]) - 1
-  }
-}
+pp <- lapply(pp, function(x){
+  x$VISIT_NUMBER <- nrow(x) - 1
+  x
+})
 
+goo.2 <- do.call("rbind", pp)
+table(goo.2$VISIT_NUMBER)
 goo.2 <- goo.2[!(goo.2$VISIT_NUMBER == 0),] # deletion of nest with no re-visit
 
-# Computation of number of exposition days
-goo.3 <- NULL
-for(j in unique(goo.2$YEAR)){
-  sub <- goo.2[goo.2$YEAR == j,]
-  for(i in unique(sub$ID)){
-    if(unique(sub$NIDIF[sub$ID == i]) == 1){
-      EXPO <- diff(sub$VISIT_DATE[sub$ID == i])
-      dat <- sub[sub$ID == i,][-1,] #Delete the first visit of the nest
-      dat <- cbind(dat, EXPO = EXPO)
-      
-      if(unique(dat$HATCH) != tail(dat$VISIT_DATE, n = 1)){
-        # if last date of visit != date of HATCH, modification of the last EXPO value using the HATCH date
-        dat$EXPO[length(dat$EXPO)] <- unique(dat$HATCH) - tail(dat$VISIT_DATE, n = 2)[1] 
-      }
-      
-      goo.3 <- rbind(goo.3, dat)
-      
-    }else{
-      EXPO <- diff(sub$VISIT_DATE[sub$ID == i])
-      dat <- sub[sub$ID == i,][-1,] #Delete the first visit of the nest, so the nests with only one re-vist display only row (= only one exposition interval) in this dataset
-      dat <- cbind(dat, EXPO = EXPO)
-      dat$EXPO[length(dat$EXPO)] <- ceiling(tail(EXPO, n = 1)/2) # mean value corresponding to the incertainty of when the fail occurs 
-      
-      goo.3 <- rbind(goo.3, dat)
-    }
-  }
-}
+#### Creation of EXPO ####
+# For successful nests == Substraction between the VISIT_DATE 
+# For fail nests == idem except for the last value. HAs to be equal to the mean time between the two last visits
 
-summary(goo.3)
+  # TEST
+# fail <- lapply(pp, function(x){
+#   if(x$NIDIF[1] == 0){
+#     browser()
+#     y <- x$VISIT_DATE
+#     x <- x[-1,]
+#     x$EXPO <- diff(y)
+#     x$EXPO[nrow(x)] <- ceiling(x$EXPO[nrow(x)]/2)
+#     x
+#   }
+# })
+# fail <- fail[!(sapply(fail, is.null))]
 
-utils::View(goo.3[goo.3$EXPO <= 0,])
-
-#### Ckeck of the nests with problematic exposition ####
-# Check nests with redondant information about nesting issue
-ll <- split(goo.3, paste(goo.3$YEAR, goo.3$ID))
-
-EXPO.0 <- lapply(ll, function(x) {
-  if(any(x$EXPO == 0 & tail(x$VISIT_DATE, n = 2)[2] == unique(x$HATCH))){
+  # Application on the data frame
+pp <- split(goo.2, paste(goo.2$YEAR, goo.2$ID))
+pp <- lapply(pp, function(x){
+  if(x$NIDIF[1] == 1){
+    y <- x$VISIT_DATE
+    x <- x[-1,]#Delete the first visit of the nest, so the nests with only one re-vist display only row (= only one exposition interval) in this dataset
+    x$EXPO <- diff(y)
+    x
+  }else{
+    y <- x$VISIT_DATE
+    x <- x[-1,]#Delete the first visit of the nest, so the nests with only one re-vist display only row (= only one exposition interval) in this dataset
+    x$EXPO <- diff(y)
+    x$EXPO[nrow(x)] <- ceiling(x$EXPO[nrow(x)]/2)
     x
   }
 })
-EXPO.0 <- EXPO.0[!sapply(EXPO.0, is.null)]
-lapply(ll, function(x) print(tail(x$Stade, n = 2) %in% c("4", "5", "6", "7")))
-#### WARNING **** Checker dans les données de GSGO et sup ! si des nids ont été revisité après constatation de echec ou succès **** ####
-# ordonner les dates dans visit_date
-# POUR LES NIDS À SUCCÈS
-    # si Hatch inclus dans visit_date, virer les visit_date qui suivent
-    # si hath non inclus dans visit_date, virer les visit_date > HATCH et remplacer par HATCH
+
+goo.2 <- do.call("rbind", pp)
+summary(goo.2)
+table(goo.2$YEAR)
+table(goo.2$YEAR, goo.2$HAB)
+#### TO DO LIST ####
 # POUR LES NIDS EN ÉCHEC
     # Repérer le premier state qui stipule l'échec
+# Computation of age nest 
+# Check initiation date
 
 #### DATA CLEANING OF SUPPLEMENTED NEST MONITORING ####
 # Check if all ID are unique in the dataframe 
