@@ -26,7 +26,7 @@ names(goo)[1] <- "AN"
 
 goo <- goo[order(goo$AN, goo$No_ter, goo$Date),]
 
-# Check if there are ducplication in date for each nest
+#### Check if there are ducplication in date visit for each nest ####
 pp <- split(goo, paste(goo$AN, goo$No_ter), drop = T)
 dup <- lapply(pp, function(x) {
   if(any(duplicated(x$Date))){
@@ -44,31 +44,31 @@ pp <- lapply(pp, function(x){
 goo <- do.call("rbind", pp)
 
 
-# Change the names of variable if possible
+#### Change the names of variable if possible ####
 goo.2 <- goo[,-16]
 summary(goo.2)
 
 names(goo.2)[-c(5, 6, 9, 12:14)] <- c("YEAR", "ID", "INITIATION", "INI_STATUS", "CLUTCH", "VISIT_DATE", "HAB", "ZONE", "NIDIF")
 
-# Habitat
+#### Habitat ####
 goo.2$HAB[goo.2$HAB == "Mesic"] <- "MES"
 goo.2$HAB[goo.2$HAB == "Wetland"] <- "WET"
 goo.2$HAB[goo.2$HAB == "Wetland/mesic"] <- NA
 
 goo.2$HAB <- as.factor(goo.2$HAB)
 
-# Zone
+#### Zone ####
 table(goo.2$ZONE)
 goo.2$ZONE[goo.2$ZONE == "C2-riviere camp 2" | goo.2$ZONE == "C2-riviere du camp 2"] <- "C2-riviere camp 2"
 
 goo.2 <- goo.2[!(goo.2$ZONE == "C1-Lac aux Goelands" | goo.2$ZONE == "C1-rive sud"),] # Deletion of C1 nests
 goo.2$ZONE <- as.factor(goo.2$ZONE)
 
-# Nest_type -> deletion of "collared female" status
+#### Nest_type -> deletion of "collared female" status ####
 table(goo.2$Nest_type)
 goo.2 <- goo.2[!(goo.2$Nest_type == "Collared female" | goo.2$Nest_type == "N/A" | goo.2$Nest_type == "Marked female"),]
 
-# ID / INITIATION / CLUTCH / INI_STATUS / Nest_type / NIDIF / Eclo_est / Eclo_reel
+#### ID / INITIATION / CLUTCH / INI_STATUS / Nest_type / NIDIF / Eclo_est / Eclo_reel ####
 goo.2$ID <- as.factor(goo.2$ID)
 goo.2$INITIATION <- as.numeric(goo.2$INITIATION)
 goo.2$CLUTCH <- as.numeric(goo.2$CLUTCH)
@@ -86,25 +86,29 @@ goo.2$NIDIF <- as.numeric(goo.2$NIDIF)
 goo.2 <- goo.2[!is.na(goo.2$NIDIF),]
 
 
-# HACTCH
+#### HACTCH and HATCH_STATUS ####
 table(goo.2$Eclo_est, useNA = "always")
 table(goo.2$Eclo_reel, useNA = "always")
 
-for(i in 1:dim(goo.2)[1]){
+for(i in 1:nrow(goo.2)){
   if(goo.2$NIDIF[i] == 1){
     if(is.na(goo.2$Eclo_reel[i]) == F){
-      goo.2$HATCH[i] <- goo.2$Eclo_reel[i] 
+      goo.2$HATCH[i] <- goo.2$Eclo_reel[i]
+      goo.2$HATCH_STATUS[i] <- "TRUE"
     }else{
       goo.2$HATCH[i] <- goo.2$Eclo_est[i]
+      goo.2$HATCH_STATUS[i] <- "EST"
     }
   }else{
     goo.2$HATCH[i] <- NA
+    goo.2$HATCH_STATUS[i] <- NA 
   }
 }
+goo.2$HATCH_STATUS <- as.factor(goo.2$HATCH_STATUS)
 # Deletion of 19 rows with no hatch date and no clutch size
 goo.2 <- goo.2[!(is.na(goo.2$HATCH) & goo.2$NIDIF == 1),]
 
-# Deletion of nests for which is.na(INITIATION) & is.na(CLUTCH)
+#### Deletion of nests for which is.na(INITIATION) & is.na(CLUTCH) ####
 summary(goo.2[is.na(goo.2$INITIATION) & is.na(goo.2$CLUTCH),])
 dim(goo.2[is.na(goo.2$INITIATION) & is.na(goo.2$CLUTCH),])
 goo.2 <- goo.2[!(is.na(goo.2$INITIATION) & is.na(goo.2$CLUTCH)),]
@@ -162,12 +166,12 @@ pp <- lapply(pp, function(x){
   x # If the condition if() != TRUE, keep original x
 }) 
 
-#### Creation of VISIT_NUMBER ####
-# The first visit, when the nest was found, is deleted 
+#### Creation of VISIT_NUMBER & FirstFound ####
 goo.2 <- goo.2[order(goo.2$YEAR, goo.2$ID, goo.2$VISIT_DATE),] # To be sure that the visit dates are ordered
 
 pp <- lapply(pp, function(x){
-  x$VISIT_NUMBER <- nrow(x) - 1
+  x$VISIT_NUMBER <- nrow(x) - 1 # The first visit, when the nest was found, is not included in the number of visit 
+  x$FirstFound <- x$VISIT_DATE[1]
   x
 })
 
@@ -213,34 +217,54 @@ goo.2 <- do.call("rbind", pp)
 summary(goo.2)
 table(goo.2$YEAR)
 table(goo.2$YEAR, goo.2$HAB)
-#### TO DO LIST ####
-# POUR LES NIDS EN ÉCHEC
-    # Repérer le premier state qui stipule l'échec
-# Computation of age nest 
-# Check initiation date
+
+#### Check for failed nests with repeated failed status (= 8)
+pp <- lapply(pp, function(x){
+  if(x$NIDIF[1] == 0){
+    if(any(duplicated(x$Stade, incomparables = x$Stade[x$Stade < 8]))){
+      x <- x[-nrow(x),]
+      x
+    }else{
+      x 
+    }
+  }
+})
+
+# Here error in stade code for failed nests
+# lapply(rr, function(x){
+#   if(x$Stade[nrow(x)] != 8){
+#     x
+#   }
+# })
+
+#### Creation of missing variable to fit with the supplementation nests database ####
+goo.2$SUPPL <- "TEM"
+goo.2$SUPPL_DATE <- NA
+
+goo.3 <- goo.2[,-c(5, 6, 9)]
 
 #### DATA CLEANING OF SUPPLEMENTED NEST MONITORING ####
-# Check if all ID are unique in the dataframe 
-length(unique(sup$ID)) == dim(sup)[1]
+#### Check if all ID are unique in the dataframe ####
+length(unique(sup$ID)) == nrow(sup)
 sup$ID
 
-# Deletion of unused row - SUPPL == WF | PRED_BEF_SUPPL
+#### Deletion of unused row - SUPPL == WF | PRED_BEF_SUPPL ####
 sup <- droplevels(sup[sup$SUPPL != "WF" & sup$SUPPL != "PRED_BEF_SUPPL",])
 
-# Nest checking with is.na(NIDIF) - GM2W (2016) & TH15 (2016) -
+#### Nest checking with is.na(NIDIF) - GM2W (2016) & TH15 (2016) - ####
 sup[is.na(sup$NIDIF),]
-sup$NIDIF[sup$ID == "TH15"] <- "S"
-sup <- sup[!sup$ID == "GM2W",]
+sup$NIDIF[sup$ID == "TH15"] <- "S" # Success in raw data
+sup <- sup[!sup$ID == "GM2W",] # Unknown in raw data -> deletion
 
-# Nest checking with is.na(HATCH_STATUS)
+#### Nest checking with is.na(HATCH_STATUS) ####
 sup[is.na(sup$HATCH_STATUS),]
-sup <- sup[!is.na(sup$HATCH_STATUS),]
+sup <- sup[!is.na(sup$HATCH_STATUS),] # 2 nests, one of them is a non-hatched nest ==> deletion
 
-# Nest checking with is.na(LastPresent/LastVisit)
+#### Nest checking with is.na(LastPresent/LastVisit) ####
 sup[is.na(sup$LastPresent),] # corresponds to a non-hatched nest ==> delete
 sup <- sup[!is.na(sup$LastPresent),]
 
-# Nest checking with weirdo initiation date
+#### Nest checking with weirdo initiation date ####
 table(sup$INITIATION, useNA = "always") # see "IMP_169", "INC", and NA
 ini.pb <- sup[which(sup$INITIATION == "IMP_169" | sup$INITIATION == "INC" | is.na(sup$INITIATION)),] 
 # *** Here problem with the estimation of the initiation date with early predated nests ! ***
@@ -259,36 +283,79 @@ ini.pb <- sup[which(sup$INITIATION == "INC" | is.na(sup$INITIATION)),]
 
 #### Relationship between the FirstFound dates and Initiation date in 2017 with linear model ####
 #### **** No conclusing **** ####
-goo.2017 <- goo[goo$AN == 2017,]
+goo.2017 <- goo.3[goo.3$YEAR == 2017,]
 summary(goo.2017)
 
-goo.2016 <- goo[goo$AN == 2016,]
+goo.2016 <- goo.3[goo.3$YEAR == 2016,]
 summary(goo.2016)
 # Keep only the nest with initiation date
-goo.2017 <- goo.2017[!is.na(goo.2017$Init),]
+goo.2017 <- goo.2017[!is.na(goo.2017$INITIATION),]
 goo.2017 <- droplevels(goo.2017)
 summary(goo.2017)
-length(unique(goo.2017$No_ter))
+length(unique(goo.2017$ID))
 
-j <- unique(as.character(goo.2017$No_ter))
-ini.mod <- NULL
-for(i in j){
-  ini <- unique(goo.2017$Init[goo.2017$No_ter == i])
-  FF <- goo.2017$Date[goo.2017$No_ter == i][1]
-  
-  
-  ini.mod <- rbind(ini.mod, c(i, ini, FF))
-}
-ini.mod <- as.data.frame(ini.mod)
-names(ini.mod) <- c("ID", "Ini", "FF") 
-ini.mod$Ini <- as.numeric(as.character(ini.mod$Ini))
+
+
+tt <- split(goo.3, paste(goo.3$YEAR, goo.3$ID))
+ini.mod <- lapply(tt, function(x){
+  INI <- x$INITIATION[1]
+  FF <- x$FirstFound[1]
+  NEST <- as.character(x$ID[1])
+  YEAR <- x$YEAR[1]
+  x <- c(YEAR, NEST, INI, FF)
+  })
+
+ini.mod <- as.data.frame(do.call("rbind", ini.mod))
+names(ini.mod) <- c("YEAR", "NEST", "INI", "FF")
+ini.mod$YEAR <- as.numeric(as.character(ini.mod$YEAR))
+ini.mod$INI <- as.numeric(as.character(ini.mod$INI))
 ini.mod$FF <- as.numeric(as.character(ini.mod$FF))
 summary(ini.mod)
 
-#x11()
-plot(ini.mod$FF, ini.mod$Ini)
-hist(ini.mod$Ini)
+x11()
+par(mfrow = c(2,2))
 
+s <- split(ini.mod, ini.mod$YEAR)
+
+lapply(s, function(x){
+  x <- na.omit(x)
+  plot(x$FF, x$INI, main = x$YEAR[1], bty = "n", xlab = "FirstFound date", ylab = "Initiation date")
+  summary(lm(x$INI ~ x$FF))
+})
+
+x11()
+par(mfrow = c(2,2))
+
+lapply(s, function(x){
+  x <- na.omit(x)
+  h1 <- hist(x$INI, plot = F)
+  h2 <- hist(x$FF, plot =F)
+  #browser()
+  y <- max(h1$counts, h2$counts)
+  
+  hist(x$INI,
+       xlim = c(min(x$INI), max(x$FF)),
+       ylim = c(0, ceiling(y)),
+       col = rgb(1, 0, 0, 1/4),
+       breaks = length(min(x$INI):max(x$INI)),
+       main = x$YEAR[1],
+       xlab = "Julian date")
+  hist(x$FF,
+       xlim = c(min(x$INI),max(x$FF)),
+       ylim = c(0, ceiling(y)),
+       col = rgb(0, 0, 1, 1/4),
+       breaks = length(min(x$FF):max(x$FF)),
+       add = T,
+       main = "",
+       xlab = "")
+  legend(min(x$INI),
+         y,
+         c("Initiation", "FirstFound"),
+         fill = c(rgb(1, 0, 0, 1/4), rgb(0, 0, 1, 1/4)),
+         bty = "n")
+  
+})
+#### Here I Am ####
 scatter.smooth(x = ini.mod$FF,
                y = ini.mod$Ini,
                main = "Ini ~ FF")  # scatterplot
@@ -452,3 +519,8 @@ names(sup.3)
 
 #### Add "Nest_type" variable to fit with the goo db ####
 sup.3$Nest_type <- "Supplementation"
+
+
+#### TO DO LIST ####
+# Computation of age nest 
+# Check initiation date
