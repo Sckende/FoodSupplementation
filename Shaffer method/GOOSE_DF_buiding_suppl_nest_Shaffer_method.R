@@ -610,6 +610,67 @@ data <- lapply(tttt, function(x){
 data <- do.call("rbind", data)
 summary(data)
 
+
+#### Modeles test ####
+require(lme4)
+# Function link
+logexp <- function(exposure = 1) {
+  linkfun <- function(mu) qlogis(mu^(1/exposure))
+  ## FIXME: is there some trick we can play here to allow
+  ## evaluation in the context of the 'data' argument?
+  linkinv <- function(eta) plogis(eta)^exposure
+  logit_mu_eta <- function(eta) {
+    ifelse(abs(eta)>30,.Machine$double.eps,
+           exp(eta)/(1+exp(eta))^2)
+    ## OR .Call(stats:::C_logit_mu_eta, eta, PACKAGE = "stats")
+  }
+  mu.eta <- function(eta) {
+    exposure * plogis(eta)^(exposure-1) *
+      logit_mu_eta(eta)
+  }
+  valideta <- function(eta) TRUE
+  link <- paste("logexp(", deparse(substitute(exposure)), ")",
+                sep="")
+  structure(list(linkfun = linkfun, linkinv = linkinv,
+                 mu.eta = mu.eta, valideta = valideta,
+                 name = link),
+            class = "link-glm")
+}
+
+
+g0 <- glmer(NIDIF ~ 1 + (1|ID),
+           family = binomial(link = logexp(data$EXPO)),
+           data = data)
+summary(g0)
+#----------------------------------------------------#
+g <- glmer(NIDIF ~ NestAge + (1|ID),
+               family = binomial(link = logexp(data$EXPO)),
+               data = data)
+summary(g)
+
+#-----------------------------------------------------#
+g1 <- glmer(NIDIF ~ NestAge + HAB + (1|ID),
+           family = binomial(link = logexp(data$EXPO)),
+           data = data)
+summary(g1)
+
+#-----------------------------------------------------#
+data.supl <- data[!data$YEAR == 2005,]
+data.supl$SUPPL <- relevel(data.supl$SUPPL, "TEM")
+data.supl$SUPPL <- as.factor(data.supl$SUPPL)
+data.wat <- data.supl[-which(data.supl$SUPPL == "F"),]
+data.wat <- droplevels(data.wat)
+
+
+g.wat <- glmer(NIDIF ~ NestAge + HAB + SUPPL + (1|ID),
+            family = binomial(link = logexp(data.wat$EXPO)),
+            data = data.wat)
+summary(g.wat)
+
+g <- glm(NIDIF ~ NestAge + SUPPL,
+               family = binomial(link = logexp(data.supl$EXPO)),
+               data = data.supl)
+summary(g)
 #### TO DO LIST ####
 # Include local climate variables
     # Mean temperature
