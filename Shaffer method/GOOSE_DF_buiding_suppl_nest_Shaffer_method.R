@@ -609,3 +609,12 @@ data <- lapply(tttt, function(x){
     })
 data <- do.call("rbind", data)
 summary(data)
+
+#### TO DO LIST ####
+# Include local climate variables
+    # Mean temperature
+        # Between each visit intervals
+        # Between the initial and the final date
+    # Cumulative precipitation
+        # Between each visit intervals
+        # Between the initial and the final date
