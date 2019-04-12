@@ -179,7 +179,7 @@ goo.2 <- do.call("rbind", pp)
 table(goo.2$VISIT_NUMBER)
 goo.2 <- goo.2[!(goo.2$VISIT_NUMBER == 0),] # deletion of nest with no re-visit
 
-#### Creation of EXPO ####
+#### ***Creation of EXPO*** ####
 # For successful nests == Substraction between the VISIT_DATE 
 # For fail nests == idem except for the last value. HAs to be equal to the mean time between the two last visits
 
@@ -355,15 +355,16 @@ lapply(s, function(x){
          bty = "n")
   
 })
-#### Here I Am ####
+
 scatter.smooth(x = ini.mod$FF,
-               y = ini.mod$Ini,
+               y = ini.mod$INI,
                main = "Ini ~ FF")  # scatterplot
 par(mfrow = c(1, 2))
-boxplot(ini.mod$Ini)
+boxplot(ini.mod$INI)
 boxplot(ini.mod$FF)
 
-cor(ini.mod$Ini, ini.mod$FF) # No correlation between these two variables....
+ini.mod <- na.omit(ini.mod)
+cor(ini.mod$INI, ini.mod$FF) # No correlation between these two variables....
 
 
 
@@ -374,8 +375,8 @@ cor(ini.mod$Ini, ini.mod$FF) # No correlation between these two variables....
 d.FF <- c(173 , 170 , 162 , 171 , 167)
 Inidate.comp <- NULL
 for(i in d.FF){
-  m <- mean(ini.mod$Ini[ini.mod$FF == i])
-  dim <- length(ini.mod$Ini[ini.mod$FF == i])
+  m <- mean(ini.mod$INI[ini.mod$FF == i])
+  dim <- length(ini.mod$INI[ini.mod$FF == i])
   
   Inidate.comp <- rbind(Inidate.comp, c(i, m, dim))
 }
@@ -386,15 +387,15 @@ Inidate.comp
 
 
 #### Mean date of the initiation date for all control nests ####
-#### **** Used value for the 8 nests without initiation date **** ####
+#### **** Used value for nests without initiation date **** ####
 # For 2017 nests
-mean(as.numeric(goo.2017$Init), na.rm = T)
-sup$INITIATION[which(sup$INITIATION == "INC" & sup$YEAR == 2017)] <- floor(mean(as.numeric(goo.2017$Init)))
+mean(goo.2017$INITIATION, na.rm = T)
+sup$INITIATION[which(sup$INITIATION == "INC" & sup$YEAR == 2017)] <- floor(mean(as.numeric(goo.2017$INITIATION)))
 sup <- droplevels(sup)
 table(sup$INITIATION)
 
 # For 2016 nests
-sup$INITIATION[which(is.na(sup$INITIATION))] <- floor(mean(as.numeric(goo.2016$Init), na.rm = T))
+sup$INITIATION[which(is.na(sup$INITIATION))] <- floor(mean(goo.2016$INITIATION, na.rm = T))
 
 sup$INITIATION <- droplevels(sup$INITIATION)
 
@@ -475,32 +476,25 @@ sup.2$HATCH[sup.2$NIDIF == "F"] <- NA
 sup.2$HATCH <- as.numeric(sup.2$HATCH)
 
 #### *** Computation of exposition intervals *** ####
-sup.3 <- NULL
-for(i in unique(sup.2$ID)){
-  if(unique(sup.2$NIDIF[sup.2$ID == i]) == "S"){
-    EXPO <- diff(sup.2$VISIT_DATE[sup.2$ID == i])
-    dat <- sup.2[sup.2$ID == i,][-1,] #Delete the first visit of the nest
-    dat <- cbind(dat, EXPO = EXPO)
-    
-    if(unique(dat$HATCH) != unique(dat$LastVisit)){
-      # if date of LastVisit != date of HATCH, modification of the last EXPO value using the HATCH date
-      dat$EXPO[length(dat$EXPO)] <- unique(dat$HATCH) - tail(dat$VISIT_DATE, n = 2)[1] 
-    }
-    
-    sup.3 <- rbind(sup.3, dat)
-    
+exp <- split(sup.2, paste(sup.2$YEAR, sup.2$ID))
+tt <- lapply(exp, function(x){
+  if(x$NIDIF[1] == "S"){
+    x$VISIT_DATE[nrow(x)] <- x$HATCH[1]
+    x
   }else{
-    EXPO <- diff(sup.2$VISIT_DATE[sup.2$ID == i])
-    dat <- sup.2[sup.2$ID == i,][-1,] #Delete the first visit of the nest, so the nests with only one re-vist display only row (= only one exposition interval) in this dataset
-    dat <- cbind(dat, EXPO = EXPO)
-    dat$EXPO[length(dat$EXPO)] <- ceiling(tail(EXPO, n = 1)/2) # mean value corresponding to the incertainty of when the fail occurs 
-    
-    sup.3 <- rbind(sup.3, dat)
+    x$VISIT_DATE[nrow(x)] <- ceiling(mean(x$VISIT_DATE[nrow(x)], x$VISIT_DATE[nrow(x) - 1]))
+    x
   }
-}
+  expos <- diff(x$VISIT_DATE)
+  x <- x[-1,]
+  x$EXPO <- expos
+  x
+})
+
+sup.3 <- do.call("rbind", tt)
 summary(sup.3)
 
-unique(sup.2$ID) == unique(sup.3$ID) # Check point
+table(unique(sup.2$ID) == unique(sup.3$ID)) # Check point
 
 # Issue of nidification
 sup.3$NIDIF <- as.character(sup.3$NIDIF)
@@ -511,16 +505,107 @@ sup.3$NIDIF <- as.numeric(sup.3$NIDIF)
 #utils::View(sup.3)
 
 #### CREATION OF THE COMPLETE DATASET ####
-rm(list = ls()[-c(7, 21)])
-goo.2 <- goo
-names(goo.2)
+rm(list = ls()[-c(10, 22)])
+
+names(goo.3)
 names(sup.3)
+sup.3 <- sup.3[, -18]
 
+data <- merge(goo.3, sup.3, all = TRUE)
+data$SUPPL_DATE <- as.numeric(data$SUPPL_DATE)
+data$UTM_E <- as.numeric(data$UTM_E)
+data$UTM_N <- as.numeric(data$UTM_N)
+summary(data)
+#### Computation of NestAge variable ####
+# Check of INITIATION date 
 
-#### Add "Nest_type" variable to fit with the goo db ####
-sup.3$Nest_type <- "Supplementation"
+# ini.pb <- data[is.na(data$INITIATION),]
+# summary(ini.pb)
+# table(ini.pb$YEAR)
+# table(ini.pb$NIDIF)
+# 
+# 
+# ini <- split(ini.pb, paste(ini.pb$YEAR, ini.pb$ID))
+# 
+# tt <- lapply(ini, function(x){
+#   if(x$NIDIF[1] == 1){
+#     if(x$CLUTCH[1] <= 3){
+#       x$INITIATION <- x$HATCH[1] - (23 + x$CLUTCH[1] - 1)
+#       x$INI_STATUS <- "HATCH_EST"
+#       x
+#     }
+#     if(x$CLUTCH[1] > 3){
+#       x$INITIATION <- x$HATCH[1] - (23 + x$CLUTCH[1])
+#       x$INI_STATUS <- "HATCH_EST"
+#       x
+#     }
+#    }
+#   x$INITIATION <- floor(mean(goo.3$INITIATION[goo.3$YEAR == x$YEAR[1]], na.rm = T))
+#   x$INI_STATUS <- "MEAN"
+#   x
+# })
+# 
+# tt <- do.call("rbind", tt)
+# summary(tt)
+# 
+# table(tt$NIDIF)
+# tt[tt$NIDIF == 0,]
 
+# Use hatch date and clutch size to estimate initiation date
 
-#### TO DO LIST ####
-# Computation of age nest 
-# Check initiation date
+# Test --> ok
+tt <- split(data, paste(data$YEAR, data$ID))
+
+tt <- lapply(tt, function(x){
+  if(is.na(x$INITIATION[1])){
+    if(x$NIDIF[1] == 1){
+      if(x$CLUTCH[1] <= 3){
+        x$INITIATION <- x$HATCH[1] - (23 + x$CLUTCH[1] - 1)
+        x$INI_STATUS <- "HATCH_EST"
+        x
+      }
+      if(x$CLUTCH[1] > 3){
+        x$INITIATION <- x$HATCH[1] - (23 + x$CLUTCH[1])
+        x$INI_STATUS <- "HATCH_EST"
+        x
+      }
+    }
+    x$INITIATION <- floor(mean(goo.3$INITIATION[goo.3$YEAR == x$YEAR[1]], na.rm = T))
+    x$INI_STATUS <- "MEAN"
+    x
+  }
+  x
+})
+tt <- do.call("rbind", tt)
+
+data <- tt
+summary(data)
+
+# Check whether INITIATION DATE > FirstFound DATE AND deletion of them
+tt <- split(data, paste(data$YEAR, data$ID))
+ tttt <- lapply(tt, function(x){
+   if(x$INITIATION[1] <= x$FirstFound[1]){
+     x
+   }
+ })
+
+tttt <- tttt[!sapply(tttt, is.null)] #Nest with FirstFound DATE posterior or equal to the INITIATION DATE
+
+tttt <- do.call("rbind", tttt)
+data <- tttt
+
+# Calcul of NestAge
+tttt <- split(data, paste(data$YEAR, data$ID))
+
+tttt <- lapply(tttt, function(x){
+  x$NestAge <- x$VISIT_DATE - x$INITIATION[1]
+  x
+})
+
+data <- lapply(tttt, function(x){
+  if(all(x$NestAge <= 35)){
+    x
+  }
+    })
+data <- do.call("rbind", data)
+summary(data)
