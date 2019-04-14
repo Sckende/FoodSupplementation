@@ -610,6 +610,57 @@ data <- lapply(tttt, function(x){
 data <- do.call("rbind", data)
 summary(data)
 
+head(data)
+
+#### Fill NA for habitat with GPS points ####
+library(raster)
+library(sp)
+library(rgdal)
+library(mapview)
+library(sf)
+
+pol<-readOGR("C:/Users/HP_9470m/OneDrive - Université de Moncton/Doc doc doc/Ph.D. - ANALYSES/QGIS/GIS BYLOT/wetland_C2_region.shp")
+
+# Projection system
+proj4string(pol)
+
+d<-data
+coordinates(d)<-~UTM_E+UTM_N # Transforme un dataframe par un dataframe spacial et specifie les coordonnées dans l'ordre ~ X + Y
+# Homogeneization of projection system
+proj4string(d)<-proj4string(pol)
+
+mapview(list(st_as_sf(pol), st_as_sf(d)))
+# option "show in a new window" allows to see online
+# sf = simple feature
+# st = 
+o <- over(d, pol) # Check the superposition between d (GPS points) and pol (wetland polygons) - Be carefull, Tricky command!
+# Good idea to check if o is the same length of GPS points vector
+
+h <- ifelse(is.na(o$WETLANDS), "MES", "WET") # If gps point is not superposed with a wetland polygion, NA is returned
+
+d$HAB2<-ifelse(!d$HAB %in% c("MES", "WET"), h, as.character(d$HAB)) # Replacement of NA in HAB
+table(d$HAB == d$HAB2, useNA="always")
+
+data$HAB2 <- as.factor(d$HAB2)
+summary(data)
+data$YEAR <- as.factor(data$YEAR)
+data$SUPPL <- as.factor(data$SUPPL)
+data$SUPPL <- relevel(data$SUPPL, "TEM")
+
+#### Modification of NIDIF for the first visits to failed nests ####
+tt <- split(data, paste(data$YEAR, data$ID))
+
+tt <- lapply(tt, function(x){
+  if(x$NIDIF[1] == 0){
+    if(nrow(x) > 1){
+      x$NIDIF[1:(nrow(x)-1)] <- 1
+    }
+  }
+  x
+})
+
+data <- do.call("rbind", tt) # Doesn't work if there are null in the list
+row.names(data)<-1:nrow(data)
 
 #### Modeles test ####
 require(lme4)
@@ -637,40 +688,56 @@ logexp <- function(exposure = 1) {
             class = "link-glm")
 }
 
-
-g0 <- glmer(NIDIF ~ 1 + (1|ID),
+# Models
+g.0 <- glmer(NIDIF ~ 1 + (1|ID),
            family = binomial(link = logexp(data$EXPO)),
            data = data)
-summary(g0)
+summary(g.0)
 #----------------------------------------------------#
-g <- glmer(NIDIF ~ NestAge + (1|ID),
+g.1 <- glmer(NIDIF ~ NestAge + (1|ID),
                family = binomial(link = logexp(data$EXPO)),
                data = data)
-summary(g)
+summary(g.1)
 
 #-----------------------------------------------------#
-g1 <- glmer(NIDIF ~ NestAge + HAB + (1|ID),
-           family = binomial(link = logexp(data$EXPO)),
-           data = data)
-summary(g1)
+data.small <- data[!data$YEAR == 2005,]
+data.small <- droplevels(data.small)
+summary(data.small)
 
-#-----------------------------------------------------#
-data.supl <- data[!data$YEAR == 2005,]
-data.supl$SUPPL <- relevel(data.supl$SUPPL, "TEM")
-data.supl$SUPPL <- as.factor(data.supl$SUPPL)
-data.wat <- data.supl[-which(data.supl$SUPPL == "F"),]
-data.wat <- droplevels(data.wat)
+g.2 <- glmer(NIDIF ~ YEAR + (1|ID),
+           family = binomial(link = logexp(data.small$EXPO)),
+           data = data.small)
+summary(g.2)
 
+#----------------------------------------------------#
+g.3 <- glmer(NIDIF ~ NestAge + YEAR + (1|ID),
+             family = binomial(link = logexp(data.small$EXPO)),
+             data = data.small)
+summary(g.3)
 
-g.wat <- glmer(NIDIF ~ NestAge + HAB + SUPPL + (1|ID),
-            family = binomial(link = logexp(data.wat$EXPO)),
-            data = data.wat)
-summary(g.wat)
+#----------------------------------------------------#
+g.4 <- glmer(NIDIF ~ NestAge + HAB2 + YEAR + (1|ID),
+             family = binomial(link = logexp(data.small$EXPO)),
+             data = data.small)
+summary(g.4)
 
-g <- glm(NIDIF ~ NestAge + SUPPL,
-               family = binomial(link = logexp(data.supl$EXPO)),
-               data = data.supl)
-summary(g)
+#----------------------------------------------------#
+g.5 <- glmer(NIDIF ~ NestAge + SUPPL + YEAR + HAB2 + (1|ID),
+             family = binomial(link = logexp(data.small$EXPO)),
+             data = data.small)
+summary(g.5)
+library(visreg)
+visreg(g.5)
+
+library("DHARMa")
+sims <- simulateResiduals(g.5)
+x11()
+plot(sims)
+
+s <- simulate(g.5, 100)
+?simulate.merMod
+
+predict(g.5)
 #### TO DO LIST ####
 # Include local climate variables
     # Mean temperature
