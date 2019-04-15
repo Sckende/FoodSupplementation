@@ -660,89 +660,53 @@ tt <- lapply(tt, function(x){
 })
 
 data <- do.call("rbind", tt) # Doesn't work if there are null in the list
+
+#### Addition of local climate variables ####
+
+# RAINFALL
+rain <- read.table("PREC_precipitation_Bylot_1995-2017.txt", sep = "\t", dec = ",", h = T)
+summary(rain)
+rain <- na.omit(rain)
+
+# TEMPERATURE
+deg <- read.table("TEMP_PondInlet_1995-2017.csv", h = T, dec =".", sep = ";")
+#deg <- na.omit(deg)
+deg$JJ <- strptime(as.character(deg$Date), format = "%Y-%m-%d")
+deg$JJ <- deg$JJ$yday + 1 
+summary(deg)
+
+deg$Mean_Temp[deg$Year == 2016 & deg$JJ >= 180 & deg$JJ <= 195 & is.na(deg$Mean_Temp)] <- c(7.6, 4.8, 4.5, 3.5)
+deg$Mean_Temp[deg$Year == 2015 & deg$JJ >= 164 & deg$JJ <= 199 & is.na(deg$Mean_Temp)] <- 5.8 # Data from http://climate.weather.gc.ca/climate_data/daily_data_e.html?hlyRange=2004-09-18%7C2019-04-14&dlyRange=2005-01-26%7C2019-04-14&mlyRange=2005-04-01%7C2007-11-01&StationID=43223&Prov=NU&urlExtension=_e.html&searchType=stnName&optLimit=yearRange&StartYear=1840&EndYear=2019&selRowPerPage=25&Line=5&searchMethod=contains&Month=7&Day=1&txtStationName=Pond+Inlet&timeframe=2&Year=2016
+# Local climate variables
+local <- split(data, paste(data$YEAR, data$ID))
+local <- lapply(local, function(x){
+  #browser()
+  # Temperature
+  x$TEMP_NIDIF <- mean(deg$Mean_Temp[deg$Year == x$YEAR[1] & deg$JJ >= x$FirstFound[1] & deg$JJ <= x$VISIT_DATE[nrow(x)]])
+  x$TEMP_NIDIF_sd <- sd(deg$Mean_Temp[deg$Year == x$YEAR[1] & deg$JJ >= x$FirstFound[1] & deg$JJ <= x$VISIT_DATE[nrow(x)]])
+  # Precipitation
+  x$PREC_NIDIF <- sum(rain$RAIN[rain$YEAR == x$YEAR[1] & rain$JJ > x$FirstFound[1] & rain$JJ <= x$VISIT_DATE[nrow(x)]])
+  expo_date <- c(x$FirstFound[1], x$VISIT_DATE)
+  temp.expo <- NULL
+  prec.expo <- NULL
+  for(i in 2:length(expo_date)){
+    #browser()
+    q <- mean(deg$Mean_Temp[deg$Year == x$YEAR[1] & deg$JJ >= expo_date[i - 1] & deg$JJ <= expo_date[i]])
+    temp.expo[i - 1] <- q
+    
+    r <- sum(rain$RAIN[rain$YEAR == x$YEAR[1] & rain$JJ > expo_date[i - 1] & rain$JJ <= expo_date[i]])
+    prec.expo[i - 1] <- r
+  }
+  x$TEMP_EXPO <- temp.expo
+  x$PREC_EXPO <- prec.expo
+  x
+})
+
+local[1:5]
+data <- do.call("rbind", local)
 row.names(data)<-1:nrow(data)
+head(data)
 
-#### Modeles test ####
-require(lme4)
-# Function link
-logexp <- function(exposure = 1) {
-  linkfun <- function(mu) qlogis(mu^(1/exposure))
-  ## FIXME: is there some trick we can play here to allow
-  ## evaluation in the context of the 'data' argument?
-  linkinv <- function(eta) plogis(eta)^exposure
-  logit_mu_eta <- function(eta) {
-    ifelse(abs(eta)>30,.Machine$double.eps,
-           exp(eta)/(1+exp(eta))^2)
-    ## OR .Call(stats:::C_logit_mu_eta, eta, PACKAGE = "stats")
-  }
-  mu.eta <- function(eta) {
-    exposure * plogis(eta)^(exposure-1) *
-      logit_mu_eta(eta)
-  }
-  valideta <- function(eta) TRUE
-  link <- paste("logexp(", deparse(substitute(exposure)), ")",
-                sep="")
-  structure(list(linkfun = linkfun, linkinv = linkinv,
-                 mu.eta = mu.eta, valideta = valideta,
-                 name = link),
-            class = "link-glm")
-}
+summary(data)
 
-# Models
-g.0 <- glmer(NIDIF ~ 1 + (1|ID),
-           family = binomial(link = logexp(data$EXPO)),
-           data = data)
-summary(g.0)
-#----------------------------------------------------#
-g.1 <- glmer(NIDIF ~ NestAge + (1|ID),
-               family = binomial(link = logexp(data$EXPO)),
-               data = data)
-summary(g.1)
-
-#-----------------------------------------------------#
-data.small <- data[!data$YEAR == 2005,]
-data.small <- droplevels(data.small)
-summary(data.small)
-
-g.2 <- glmer(NIDIF ~ YEAR + (1|ID),
-           family = binomial(link = logexp(data.small$EXPO)),
-           data = data.small)
-summary(g.2)
-
-#----------------------------------------------------#
-g.3 <- glmer(NIDIF ~ NestAge + YEAR + (1|ID),
-             family = binomial(link = logexp(data.small$EXPO)),
-             data = data.small)
-summary(g.3)
-
-#----------------------------------------------------#
-g.4 <- glmer(NIDIF ~ NestAge + HAB2 + YEAR + (1|ID),
-             family = binomial(link = logexp(data.small$EXPO)),
-             data = data.small)
-summary(g.4)
-
-#----------------------------------------------------#
-g.5 <- glmer(NIDIF ~ NestAge + SUPPL + YEAR + HAB2 + (1|ID),
-             family = binomial(link = logexp(data.small$EXPO)),
-             data = data.small)
-summary(g.5)
-library(visreg)
-visreg(g.5)
-
-library("DHARMa")
-sims <- simulateResiduals(g.5)
-x11()
-plot(sims)
-
-s <- simulate(g.5, 100)
-?simulate.merMod
-
-predict(g.5)
-#### TO DO LIST ####
-# Include local climate variables
-    # Mean temperature
-        # Between each visit intervals
-        # Between the initial and the final date
-    # Cumulative precipitation
-        # Between each visit intervals
-        # Between the initial and the final date
+#write.table(data, "GOOSE_SHAFFER_database_all_nests_2005_2015-2017.csv")
