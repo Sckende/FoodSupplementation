@@ -100,6 +100,12 @@ cand.models[[7]] <- glmer(NIDIF ~ NestAge + HAB2 + YEAR + SUPPL*PREC_NIDIF + (1|
              nAGQ = 0)
 summary(cand.models[[7]]) # PB avec PREC_NIDIF car beaucoup de 0
 
+    # Global both
+cand.models[[16]] <- glmer(NIDIF ~ NestAge + HAB2 + YEAR + SUPPL*PREC_NIDIF + SUPPL*TEMP_NIDIF + (1|ID),
+                          family = binomial(link = logexp(data$EXPO)),
+                          data = data,
+                          nAGQ = 0)
+summary(cand.models[[16]]) # PB avec PREC_NIDIF car beaucoup de 0
     # EXPO temperature
 cand.models[[8]] <- glmer(NIDIF ~ NestAge + HAB2 + YEAR + SUPPL*TEMP_EXPO + (1|ID),
              family = binomial(link = logexp(data$EXPO)),
@@ -113,6 +119,13 @@ cand.models[[9]] <- glmer(NIDIF ~ NestAge + HAB2 + YEAR + SUPPL*PREC_EXPO + (1|I
              data = data,
              nAGQ = 0)
 summary(cand.models[[9]])
+
+    # EXPO both
+cand.models[[17]] <- glmer(NIDIF ~ NestAge + HAB2 + YEAR + SUPPL*TEMP_EXPO + SUPPL*PREC_EXPO + (1|ID),
+                          family = binomial(link = logexp(data$EXPO)),
+                          data = data,
+                          nAGQ = 0)
+summary(cand.models[[17]])
 
 #### Supplementation + Local climate effects ####
     # Global temperature
@@ -143,6 +156,20 @@ cand.models[[13]] <- glmer(NIDIF ~ NestAge + HAB2 + YEAR + SUPPL + PREC_EXPO + (
              nAGQ = 0)
 summary(cand.models[[13]])
 
+    # EXPO global
+cand.models[[14]] <- glmer(NIDIF ~ NestAge + HAB2 + YEAR + SUPPL + PREC_EXPO + TEMP_EXPO + (1|ID),
+                           family = binomial(link = logexp(data$EXPO)),
+                           data = data,
+                           nAGQ = 0)
+summary(cand.models[[14]])
+
+    # NIDIF global
+cand.models[[15]] <- glmer(NIDIF ~ NestAge + HAB2 + YEAR + SUPPL + PREC_NIDIF + TEMP_NIDIF + (1|ID),
+                           family = binomial(link = logexp(data$EXPO)),
+                           data = data,
+                           nAGQ = 0)
+summary(cand.models[[15]])
+
 #### AIC comparison ####
 Modnames <- paste("mod", 1:length(cand.models), sep = " ")
 aictab(cand.set = cand.models, modnames = Modnames, sort = TRUE)
@@ -151,11 +178,11 @@ print(aictab(cand.set = cand.models, modnames = Modnames, sort = TRUE),
       digits = 4, LL = TRUE)
 
 #### Simulations with the best modele ####
-sims <- simulateResiduals(cand.models[[6]])
+sims <- simulateResiduals(cand.models[[16]])
 x11()
 plot(sims)
 
-s <- simulate(cand.models[[6]], 100)
+s <- simulate(cand.models[[15]], 100)
 ?simulate.merMod
 
 plogis(predict(cand.models[[6]]))
