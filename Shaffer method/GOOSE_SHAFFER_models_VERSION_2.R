@@ -2,12 +2,23 @@
 
 setwd("C:/Users/HP_9470m/OneDrive - Université de Moncton/Doc doc doc/Ph.D. - ANALYSES/R analysis/Data")
 rm(list = ls())
+
+#### Packages ####
+library("lme4") # For generalised linear models
+library("visreg") # Vizualisation of model effects
+library("DHARMa") # For simulations
+library("AICcmodavg") # For AIC comparison
+
+#### Import data ####
 data <- read.table("GOOSE_SHAFFER_database_all_nests_2005_2015-2017.csv", h = T, sep = " ")
 summary(data)
 
-#### Modeles test ####
-require(lme4)
-# Function link
+data <- data[!data$YEAR == 2005,]
+data$YEAR <- as.factor(data$YEAR)
+data$SUPPL <- relevel(data$SUPPL, "TEM")
+data$HAB2 <- relevel(data$HAB2, "MES")
+
+#### Function link ####
 logexp <- function(exposure = 1) {
   linkfun <- function(mu) qlogis(mu^(1/exposure))
   ## FIXME: is there some trick we can play here to allow
@@ -31,87 +42,120 @@ logexp <- function(exposure = 1) {
             class = "link-glm")
 }
 
-# Models
-g.0 <- glmer(NIDIF ~ 1 + (1|ID),
+cand.models <- list()
+
+#### Basic models ####
+    # Null
+cand.models[[1]] <- glmer(NIDIF ~ 1 + (1|ID),
              family = binomial(link = logexp(data$EXPO)),
-             data = data)
-summary(g.0)
-#----------------------------------------------------#
-g.1 <- glmer(NIDIF ~ NestAge + (1|ID),
+             data = data,
+             nAGQ = 0)
+summary(cand.models[[1]])
+
+    # Known effects
+cand.models[[2]] <- glmer(NIDIF ~ NestAge + HAB2 + YEAR + (1|ID),
              family = binomial(link = logexp(data$EXPO)),
-             data = data)
-summary(g.1)
+             data = data,
+             nAGQ = 0)
+summary(cand.models[[2]])
 
-#-----------------------------------------------------#
-data.small <- data[!data$YEAR == 2005,]
-data.small <- droplevels(data.small)
-summary(data.small)
+#### Supplementation effects ####
+    # Additive effects of supplementation
+cand.models[[3]] <- glmer(NIDIF ~ NestAge + HAB2 + YEAR + SUPPL + (1|ID),
+             family = binomial(link = logexp(data$EXPO)),
+             data = data,
+             nAGQ = 0)
+summary(cand.models[[3]])
 
-g.2 <- glmer(NIDIF ~ YEAR + (1|ID),
-             family = binomial(link = logexp(data.small$EXPO)),
-             data = data.small)
-summary(g.2)
+#### *** WARNINGS - PB de convergence pour tous les modèles qui suivent *** ####
+    # Interaction effects - YEAR * SUPPL
+cand.models[[4]] <- glmer(NIDIF ~ NestAge + HAB2 + YEAR*SUPPL + (1|ID),
+             family = binomial(link = logexp(data$EXPO)),
+             data = data,
+             nAGQ = 0) #For the convergence
+summary(cand.models[[4]]) # Convergence problem
+# 
+# relgrad <- with(g.3@optinfo$derivs,solve(Hessian,gradient))
+# max(abs(relgrad))
 
-#----------------------------------------------------#
-g.3 <- glmer(NIDIF ~ NestAge + YEAR + (1|ID),
-             family = binomial(link = logexp(data.small$EXPO)),
-             data = data.small)
-summary(g.3)
+    # Interaction effects - HAB2 * SUPPL
+cand.models[[5]] <- glmer(NIDIF ~ NestAge + HAB2*SUPPL + YEAR + (1|ID),
+             family = binomial(link = logexp(data$EXPO)),
+             data = data,
+             nAGQ = 0)
+summary(cand.models[[5]])
 
-#----------------------------------------------------#
-g.4 <- glmer(NIDIF ~ NestAge + HAB2 + YEAR + (1|ID),
-             family = binomial(link = logexp(data.small$EXPO)),
-             data = data.small)
-summary(g.4)
+#### Supplementation*Local climate effects ####
+    # Global temperature
+cand.models[[6]] <- glmer(NIDIF ~ NestAge + HAB2 + YEAR + SUPPL*TEMP_NIDIF + (1|ID),
+             family = binomial(link = logexp(data$EXPO)),
+             data = data,
+             nAGQ = 0)
+summary(cand.models[[6]])
 
-#----------------------------------------------------#
-g.5 <- glmer(NIDIF ~ NestAge + SUPPL + YEAR + HAB2 + (1|ID),
-             family = binomial(link = logexp(data.small$EXPO)),
-             data = data.small)
-summary(g.5)
-library(visreg)
-visreg(g.5)
+    # Global precipitation
+cand.models[[7]] <- glmer(NIDIF ~ NestAge + HAB2 + YEAR + SUPPL*PREC_NIDIF + (1|ID),
+             family = binomial(link = logexp(data$EXPO)),
+             data = data,
+             nAGQ = 0)
+summary(cand.models[[7]]) # PB avec PREC_NIDIF car beaucoup de 0
 
-library("DHARMa")
-sims <- simulateResiduals(g.5)
+    # EXPO temperature
+cand.models[[8]] <- glmer(NIDIF ~ NestAge + HAB2 + YEAR + SUPPL*TEMP_EXPO + (1|ID),
+             family = binomial(link = logexp(data$EXPO)),
+             data = data,
+             nAGQ = 0)
+summary(cand.models[[8]])
+
+    # EXPO precipitation
+cand.models[[9]] <- glmer(NIDIF ~ NestAge + HAB2 + YEAR + SUPPL*PREC_EXPO + (1|ID),
+             family = binomial(link = logexp(data$EXPO)),
+             data = data,
+             nAGQ = 0)
+summary(cand.models[[9]])
+
+#### Supplementation + Local climate effects ####
+    # Global temperature
+cand.models[[10]] <- glmer(NIDIF ~ NestAge + HAB2 + YEAR + SUPPL  + TEMP_NIDIF + (1|ID),
+             family = binomial(link = logexp(data$EXPO)),
+             data = data,
+             nAGQ = 0)
+summary(cand.models[[10]])
+
+    # Global precipitation
+cand.models[11] <- glmer(NIDIF ~ NestAge + HAB2 + YEAR + SUPPL + PREC_NIDIF + (1|ID),
+             family = binomial(link = logexp(data$EXPO)),
+             data = data,
+             nAGQ = 0)
+summary(cand.models[[11]])
+
+    # EXPO temperature
+cand.models[[12]] <- glmer(NIDIF ~ NestAge + HAB2 + YEAR + SUPPL + TEMP_EXPO + (1|ID),
+             family = binomial(link = logexp(data$EXPO)),
+             data = data,
+             nAGQ = 0)
+summary(cand.models[[12]])
+
+    # EXPO precipitation
+cand.models[[13]] <- glmer(NIDIF ~ NestAge + HAB2 + YEAR + SUPPL + PREC_EXPO + (1|ID),
+             family = binomial(link = logexp(data$EXPO)),
+             data = data,
+             nAGQ = 0)
+summary(cand.models[[13]])
+
+#### AIC comparison ####
+Modnames <- paste("mod", 1:length(cand.models), sep = " ")
+aictab(cand.set = cand.models, modnames = Modnames, sort = TRUE)
+##round to 4 digits after decimal point and give log-likelihood
+print(aictab(cand.set = cand.models, modnames = Modnames, sort = TRUE),
+      digits = 4, LL = TRUE)
+
+#### Simulations with the best modele ####
+sims <- simulateResiduals(cand.models[[6]])
 x11()
 plot(sims)
 
-s <- simulate(g.5, 100)
+s <- simulate(cand.models[[6]], 100)
 ?simulate.merMod
 
-predict(g.5)
-
-#----------------------------------------------------#
-g.6 <- glmer(NIDIF ~ NestAge + SUPPL + YEAR + HAB2 + TEMP_NIDIF + (1|ID),
-             family = binomial(link = logexp(data.small$EXPO)),
-             data = data.small)
-summary(g.6)
-
-#----------------------------------------------------#
-g.7 <- glmer(NIDIF ~ NestAge + SUPPL + YEAR + HAB2 + PREC_NIDIF + (1|ID),
-             family = binomial(link = logexp(data.small$EXPO)),
-             data = data.small)
-summary(g.7)
-
-#----------------------------------------------------#
-g.8 <- glmer(NIDIF ~ NestAge + SUPPL + YEAR + HAB2 + PREC_NIDIF + TEMP_NIDIF + (1|ID),
-             family = binomial(link = logexp(data.small$EXPO)),
-             data = data.small)
-summary(g.8)
-#----------------------------------------------------#
-g.9 <- glmer(NIDIF ~ NestAge + SUPPL + YEAR + HAB2 + PREC_EXPO + TEMP_EXPO + (1|ID),
-             family = binomial(link = logexp(data.small$EXPO)),
-             data = data.small)
-summary(g.9)
-
-g.10 <- glm(NIDIF ~ NestAge + SUPPL + YEAR + HAB2 + PREC_EXPO,
-            family = binomial(link = logexp(data.small$EXPO)),
-            data = data.small)
-summary(g.10)
-
-g.11 <- glm(NIDIF ~ NestAge + SUPPL + YEAR + HAB2 + TEMP_EXPO,
-            family = binomial(link = logexp(data.small$EXPO)),
-            data = data.small)
-summary(g.11)
-
+plogis(predict(cand.models[[6]]))
