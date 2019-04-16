@@ -18,6 +18,8 @@ data$YEAR <- as.factor(data$YEAR)
 data$SUPPL <- relevel(data$SUPPL, "TEM")
 data$HAB2 <- relevel(data$HAB2, "MES")
 
+data <- data[!data$SUPPL == "W",]
+
 #### Function link ####
 logexp <- function(exposure = 1) {
   linkfun <- function(mu) qlogis(mu^(1/exposure))
@@ -134,6 +136,28 @@ cand.models[[17]] <- glmer(NIDIF ~ NestAge + HAB2 + YEAR + SUPPL*TEMP_EXPO + SUP
                           nAGQ = 0)
 summary(cand.models[[17]])
 
+#### Supplementation*Local climate effects + Supplementation*HAB ####
+    # Global temperature
+cand.models[[18]] <- glmer(NIDIF ~ NestAge + HAB2*SUPPL + YEAR + SUPPL*TEMP_NIDIF + (1|ID),
+                          family = binomial(link = logexp(data$EXPO)),
+                          data = data,
+                          nAGQ = 0)
+summary(cand.models[[18]])
+
+# Global precipitation
+cand.models[[19]] <- glmer(NIDIF ~ NestAge + HAB2*SUPPL + YEAR + SUPPL*PREC_NIDIF + (1|ID),
+                           family = binomial(link = logexp(data$EXPO)),
+                           data = data,
+                           nAGQ = 0)
+summary(cand.models[[19]])
+
+# Global both
+cand.models[[20]] <- glmer(NIDIF ~ NestAge + HAB2*SUPPL + YEAR + SUPPL*PREC_NIDIF + SUPPL*TEMP_NIDIF + (1|ID),
+                           family = binomial(link = logexp(data$EXPO)),
+                           data = data,
+                           nAGQ = 0)
+summary(cand.models[[20]])
+
 #### Supplementation + Local climate effects ####
     # Global temperature
 cand.models[[10]] <- glmer(NIDIF ~ NestAge + HAB2 + YEAR + SUPPL  + TEMP_NIDIF + (1|ID),
@@ -193,6 +217,7 @@ s <- simulate(cand.models[[15]], 100)
 ?simulate.merMod
 
 plogis(predict(cand.models[[6]]))
+
 
 #### Models for 2017 and supplementation food ####
 
