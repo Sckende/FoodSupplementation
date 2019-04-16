@@ -72,11 +72,18 @@ summary(cand.models[[3]])
 cand.models[[4]] <- glmer(NIDIF ~ NestAge + HAB2 + YEAR*SUPPL + (1|ID),
              family = binomial(link = logexp(data$EXPO)),
              data = data,
-             nAGQ = 0) #For the convergence
+             control = strict_tol
+             #nAGQ = 0
+             ) #For the convergence
 summary(cand.models[[4]]) # Convergence problem
 # 
 # relgrad <- with(g.3@optinfo$derivs,solve(Hessian,gradient))
 # max(abs(relgrad))
+
+strict_tol <- glmerControl(optCtrl = list(xtol_abs = 1e-8, ftol_abs = 1e-8))
+if (all(cand.models[[4]]@optinfo$optimizer == "nloptwrap")) {
+  cand.models.tol <- update(cand.models[[4]], control = strict_tol)
+}
 
     # Interaction effects - HAB2 * SUPPL
 cand.models[[5]] <- glmer(NIDIF ~ NestAge + HAB2*SUPPL + YEAR + (1|ID),
