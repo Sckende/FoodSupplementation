@@ -193,3 +193,68 @@ s <- simulate(cand.models[[15]], 100)
 ?simulate.merMod
 
 plogis(predict(cand.models[[6]]))
+
+#### Models for 2017 and supplementation food ####
+
+data.2017 <- data[data$YEAR == 2017 & !data$SUPPL == "W", ]
+data.2017 <- droplevels(data.2017)
+summary(data.2017)
+
+food.models <- list()
+
+food.models[[1]] <- glmer(NIDIF ~ NestAge + HAB2 + SUPPL + (1|ID),
+                          family = binomial(link = logexp(data.2017$EXPO)),
+                          nAGQ = 0,
+                          data = data.2017)
+summary(food.models[[1]])
+#----------------------------#
+food.models[[2]] <- glmer(NIDIF ~ NestAge + HAB2 + SUPPL + TEMP_NIDIF + (1|ID),
+                          family = binomial(link = logexp(data.2017$EXPO)),
+                          nAGQ = 0,
+                          data = data.2017)
+summary(food.models[[2]])
+#----------------------------#
+food.models[[3]] <- glmer(NIDIF ~ NestAge + HAB2 + SUPPL + PREC_NIDIF + (1|ID),
+                          family = binomial(link = logexp(data.2017$EXPO)),
+                          nAGQ = 0,
+                          data = data.2017)
+summary(food.models[[3]])
+#----------------------------#
+food.models[[4]] <- glmer(NIDIF ~ NestAge + HAB2 + SUPPL + PREC_NIDIF + TEMP_NIDIF + (1|ID),
+                          family = binomial(link = logexp(data.2017$EXPO)),
+                          nAGQ = 0,
+                          data = data.2017)
+summary(food.models[[4]])
+#----------------------------#
+food.models[[5]] <- glmer(NIDIF ~ NestAge + HAB2*SUPPL + PREC_NIDIF + TEMP_NIDIF + (1|ID),
+                          family = binomial(link = logexp(data.2017$EXPO)),
+                          nAGQ = 0,
+                          data = data.2017)
+summary(food.models[[5]])
+#----------------------------#
+food.models[[6]] <- glmer(NIDIF ~ NestAge + HAB2 + SUPPL*PREC_NIDIF + (1|ID),
+                          family = binomial(link = logexp(data.2017$EXPO)),
+                          nAGQ = 0,
+                          data = data.2017)
+summary(food.models[[6]])
+#----------------------------#
+food.models[[7]] <- glmer(NIDIF ~ NestAge + HAB2 + SUPPL*TEMP_NIDIF + (1|ID),
+                          family = binomial(link = logexp(data.2017$EXPO)),
+                          nAGQ = 0,
+                          data = data.2017)
+summary(food.models[[7]])
+#----------------------------#
+food.models[[8]] <- glmer(NIDIF ~ NestAge + HAB2 + SUPPL*TEMP_NIDIF + SUPPL*PREC_NIDIF + (1|ID),
+                          family = binomial(link = logexp(data.2017$EXPO)),
+                          nAGQ = 0,
+                          data = data.2017)
+summary(food.models[[8]])
+
+#### AIC comparison ####
+Modnames <- paste("mod", 1:length(food.models), sep = " ")
+aictab(cand.set = food.models, modnames = Modnames, sort = TRUE)
+##round to 4 digits after decimal point and give log-likelihood
+print(aictab(cand.set = food.models, modnames = Modnames, sort = TRUE),
+      digits = 4, LL = TRUE)
+
+summary(food.models[[4]])
