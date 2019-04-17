@@ -5,6 +5,7 @@ rm(list = ls())
 
 #### Packages ####
 library("lme4") # For generalised linear models
+library("glmmTMB")
 library("visreg") # Vizualisation of model effects
 library("DHARMa") # For simulations
 library("AICcmodavg") # For AIC comparison
@@ -18,7 +19,7 @@ data$YEAR <- as.factor(data$YEAR)
 data$SUPPL <- relevel(data$SUPPL, "TEM")
 data$HAB2 <- relevel(data$HAB2, "MES")
 
-data <- data[!data$SUPPL == "W",]
+#data <- data[!data$SUPPL == "W",]
 
 #### Function link ####
 logexp <- function(exposure = 1) {
@@ -50,33 +51,51 @@ cand.models <- list()
     # Null
 cand.models[[1]] <- glmer(NIDIF ~ 1 + (1|ID),
              family = binomial(link = logexp(data$EXPO)),
-             data = data,
-             nAGQ = 0)
+             #nAGQ = 0,
+             data = data)
 summary(cand.models[[1]])
 
     # Known effects
 cand.models[[2]] <- glmer(NIDIF ~ NestAge + HAB2 + YEAR + (1|ID),
              family = binomial(link = logexp(data$EXPO)),
-             data = data,
-             nAGQ = 0)
+             #nAGQ = 0,
+             data = data)
+
+cand.models[[2]] <- glm(NIDIF ~ NestAge + HAB2 + YEAR,
+                          family = binomial(link = logexp(data$EXPO)),
+                          #nAGQ = 0,
+                          data = data)
+
 summary(cand.models[[2]])
 
 #### Supplementation effects ####
     # Additive effects of supplementation
 cand.models[[3]] <- glmer(NIDIF ~ NestAge + HAB2 + YEAR + SUPPL + (1|ID),
              family = binomial(link = logexp(data$EXPO)),
-             data = data,
-             nAGQ = 0)
+             #nAGQ = 0,
+             data = data)
+
+cand.models[[3]] <- glm(NIDIF ~ NestAge + HAB2 + YEAR + SUPPL,
+                          family = binomial(link = logexp(data$EXPO)),
+                          #nAGQ = 0,
+                          data = data)
+
 summary(cand.models[[3]])
 
 #### *** WARNINGS - PB de convergence pour tous les modèles qui suivent *** ####
     # Interaction effects - YEAR * SUPPL
 cand.models[[4]] <- glmer(NIDIF ~ NestAge + HAB2 + YEAR*SUPPL + (1|ID),
              family = binomial(link = logexp(data$EXPO)),
-             data = data,
-             #control = strict_tol
-             nAGQ = 0
-             ) #For the convergence
+             #control = strict_tol,
+             #nAGQ = 0, #For the convergence
+             data = data
+             )
+
+cand.models[[4]] <- glm(NIDIF ~ NestAge + HAB2 + YEAR*SUPPL,
+                          family = binomial(link = logexp(data$EXPO)),
+                          data = data
+)
+
 summary(cand.models[[4]]) # Convergence problem
 # 
 # relgrad <- with(g.3@optinfo$derivs,solve(Hessian,gradient))
@@ -90,8 +109,13 @@ summary(cand.models[[4]]) # Convergence problem
     # Interaction effects - HAB2 * SUPPL
 cand.models[[5]] <- glmer(NIDIF ~ NestAge + HAB2*SUPPL + YEAR + (1|ID),
              family = binomial(link = logexp(data$EXPO)),
-             data = data,
-             nAGQ = 0)
+             #nAGQ = 0,
+             data = data)
+
+cand.models[[5]] <- glm(NIDIF ~ NestAge + HAB2*SUPPL + YEAR,
+                          family = binomial(link = logexp(data$EXPO)),
+                          data = data)
+
 summary(cand.models[[5]])
 
 #### Supplementation*Local climate effects ####
@@ -107,7 +131,7 @@ cand.models[[7]] <- glmer(NIDIF ~ NestAge + HAB2 + YEAR + SUPPL*PREC_NIDIF + (1|
              family = binomial(link = logexp(data$EXPO)),
              data = data,
              nAGQ = 0)
-summary(cand.models[[7]]) # PB avec PREC_NIDIF car beaucoup de 0
+summary(cand.models[[7]])
 
     # Global both
 cand.models[[16]] <- glmer(NIDIF ~ NestAge + HAB2 + YEAR + SUPPL*PREC_NIDIF + SUPPL*TEMP_NIDIF + (1|ID),
@@ -160,17 +184,28 @@ summary(cand.models[[20]])
 
 #### Supplementation + Local climate effects ####
     # Global temperature
-cand.models[[10]] <- glmer(NIDIF ~ NestAge + HAB2 + YEAR + SUPPL  + TEMP_NIDIF + (1|ID),
+cand.models[[10]] <- glmer(NIDIF ~ NestAge + HAB2 + #YEAR + 
+                             SUPPL  + TEMP_NIDIF + (1|ID),
              family = binomial(link = logexp(data$EXPO)),
-             data = data,
-             nAGQ = 0)
+             #nAGQ = 0,
+             data = data)
+
+cand.models[[10]] <- glm(NIDIF ~ NestAge + HAB2 + YEAR + SUPPL  + TEMP_NIDIF,
+                           family = binomial(link = logexp(data$EXPO)),
+                           data = data)
+
 summary(cand.models[[10]])
 
     # Global precipitation
 cand.models[11] <- glmer(NIDIF ~ NestAge + HAB2 + YEAR + SUPPL + PREC_NIDIF + (1|ID),
              family = binomial(link = logexp(data$EXPO)),
-             data = data,
-             nAGQ = 0)
+             #nAGQ = 0,
+             data = data)
+
+cand.models[[11]] <- glm(NIDIF ~ NestAge + HAB2 + YEAR + SUPPL  + PREC_NIDIF,
+                         family = binomial(link = logexp(data$EXPO)),
+                         data = data)
+
 summary(cand.models[[11]])
 
     # EXPO temperature
@@ -197,8 +232,13 @@ summary(cand.models[[14]])
     # NIDIF global
 cand.models[[15]] <- glmer(NIDIF ~ NestAge + HAB2 + YEAR + SUPPL + PREC_NIDIF + TEMP_NIDIF + (1|ID),
                            family = binomial(link = logexp(data$EXPO)),
-                           data = data,
-                           nAGQ = 0)
+                           #nAGQ = 0,
+                           data = data)
+
+cand.models[[15]] <- glm(NIDIF ~ NestAge + HAB2 + YEAR + SUPPL + PREC_NIDIF + TEMP_NIDIF,
+                           family = binomial(link = logexp(data$EXPO)),
+                           data = data)
+
 summary(cand.models[[15]])
 
 #### AIC comparison ####
@@ -209,14 +249,17 @@ print(aictab(cand.set = cand.models, modnames = Modnames, sort = TRUE),
       digits = 4, LL = TRUE)
 
 #### Simulations with the best modele ####
-sims <- simulateResiduals(cand.models[[16]])
+sims <- simulateResiduals(cand.models[[3]])
 x11()
 plot(sims)
 
-s <- simulate(cand.models[[15]], 100)
+s <- simulate(cand.models[[3]], 100)
+plot(s[,1])
+plot(data$NIDIF, col = "red", add = TRUE)
+plot(plogis(predict(cand.models[[3]])))
 ?simulate.merMod
 
-plogis(predict(cand.models[[6]]))
+plogis(predict(cand.models[[3]]))
 
 
 #### Models for 2017 and supplementation food ####
