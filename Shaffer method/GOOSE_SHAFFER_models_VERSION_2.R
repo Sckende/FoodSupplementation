@@ -6,6 +6,7 @@ rm(list = ls())
 #### Packages ####
 library("lme4") # For generalised linear models
 library("glmmTMB")
+library("optimx")
 library("visreg") # Vizualisation of model effects
 library("DHARMa") # For simulations
 library("AICcmodavg") # For AIC comparison
@@ -45,14 +46,79 @@ logexp <- function(exposure = 1) {
             class = "link-glm")
 }
 
-cand.models <- list()
 
+#### Colinearity checking ####
+# Colinearity is for multiple variables which explain the same proportion of the variance
+#fonction vif.mer (pour modèles mixtes):
+vif.mer <- function (fit) {
+  v <- vcov(fit)
+  nam <- names(fixef(fit))
+  ns <- sum(1 * (nam == "Intercept" | nam == "(Intercept)"))
+  if (ns > 0) {
+    v <- v[-(1:ns), -(1:ns), drop = FALSE]
+    nam <- nam[-(1:ns)]
+  }
+  d <- diag(v)^0.5
+  v <- diag(solve(v/(d %o% d)))
+  names(v) <- nam
+  v
+}
+
+#faire vif.mer(model) où model = modèle complet sans interactions, si une variable a une valeur >3 (Graham 2003), la supprimer et re-rouler vif.mer, jusqu'à ce que toutes les valeurs soient <3.
+
+model <- glmer(NIDIF ~ NestAge + HAB2 + YEAR + SUPPL + TEMP_NIDIF + PREC_NIDIF + (1|ID),
+               family = binomial(link = logexp(data$EXPO)),
+               data = data)
+vif.mer(model)
+# NestAge    HAB2WET   YEAR2016   YEAR2017     SUPPLF     SUPPLW TEMP_NIDIF PREC_NIDIF 
+# 2.629498   1.196131   3.767380   6.116633   1.083354   1.106481   4.982207   1.909370 
+#ensuite rouler le set de modèles  
+model <- glmer(NIDIF ~ NestAge + HAB2 + SUPPL + TEMP_NIDIF + PREC_NIDIF + (1|ID),
+               family = binomial(link = logexp(data$EXPO)),
+               data = data)
+vif.mer(model)
+
+# NestAge    HAB2WET     SUPPLF     SUPPLW TEMP_NIDIF PREC_NIDIF 
+# 1.456374   1.230185   1.084011   1.098437   1.453626   1.125000
+
+model <- glmer(NIDIF ~ NestAge + HAB2 + SUPPL + YEAR + (1|ID),
+               family = binomial(link = logexp(data$EXPO)),
+               data = data)
+vif.mer(model)
+
+# NestAge  HAB2WET   SUPPLF   SUPPLW YEAR2016 YEAR2017 
+# 1.059011 1.133831 1.100136 1.096697 1.607384 1.676832 
+
+model <- glmer(NIDIF ~ NestAge + HAB2 + SUPPL + YEAR + TEMP_EXPO + PREC_EXPO + (1|ID),
+               family = binomial(link = logexp(data$EXPO)),
+               data = data)
+vif.mer(model)
+# NestAge   HAB2WET    SUPPLF    SUPPLW  YEAR2016  YEAR2017 TEMP_EXPO PREC_EXPO 
+# 1.000329  1.000005  1.000000  1.000000  1.000001  1.000003  1.000302  1.000024
+# I do really not trust this output ... 
+
+model <- glmer(NIDIF ~ NestAge + HAB2 + SUPPL + TEMP_EXPO + PREC_EXPO + (1|ID),
+               family = binomial(link = logexp(data$EXPO)),
+               data = data)
+vif.mer(model)
+# NestAge   HAB2WET    SUPPLF    SUPPLW TEMP_EXPO PREC_EXPO 
+# 2.776589  1.127051  1.108564  1.081134  2.825169  1.095394
+
+
+#### I choose to keep YEAR rather than TEMP/PREC_NIDIF ####
+cand.models <- list()
+#### For hypothesis about supplementation and year effect ####
 #### Basic models ####
     # Null
 cand.models[[1]] <- glmer(NIDIF ~ 1 + (1|ID),
              family = binomial(link = logexp(data$EXPO)),
              #nAGQ = 0,
              data = data)
+
+# cand.models[[1]] <- glm(NIDIF ~ 1,
+#                           family = binomial(link = logexp(data$EXPO)),
+#                           data = data)
+
 summary(cand.models[[1]])
 
     # Known effects
@@ -61,10 +127,10 @@ cand.models[[2]] <- glmer(NIDIF ~ NestAge + HAB2 + YEAR + (1|ID),
              #nAGQ = 0,
              data = data)
 
-cand.models[[2]] <- glm(NIDIF ~ NestAge + HAB2 + YEAR,
-                          family = binomial(link = logexp(data$EXPO)),
-                          #nAGQ = 0,
-                          data = data)
+# cand.models[[2]] <- glm(NIDIF ~ NestAge + HAB2 + YEAR,
+#                           family = binomial(link = logexp(data$EXPO)),
+#                           #nAGQ = 0,
+#                           data = data)
 
 summary(cand.models[[2]])
 
@@ -75,10 +141,10 @@ cand.models[[3]] <- glmer(NIDIF ~ NestAge + HAB2 + YEAR + SUPPL + (1|ID),
              #nAGQ = 0,
              data = data)
 
-cand.models[[3]] <- glm(NIDIF ~ NestAge + HAB2 + YEAR + SUPPL,
-                          family = binomial(link = logexp(data$EXPO)),
-                          #nAGQ = 0,
-                          data = data)
+# cand.models[[3]] <- glm(NIDIF ~ NestAge + HAB2 + YEAR + SUPPL,
+#                           family = binomial(link = logexp(data$EXPO)),
+#                           #nAGQ = 0,
+#                           data = data)
 
 summary(cand.models[[3]])
 
@@ -86,38 +152,66 @@ summary(cand.models[[3]])
     # Interaction effects - YEAR * SUPPL
 cand.models[[4]] <- glmer(NIDIF ~ NestAge + HAB2 + YEAR*SUPPL + (1|ID),
              family = binomial(link = logexp(data$EXPO)),
-             #control = strict_tol,
-             #nAGQ = 0, #For the convergence
-             data = data
-             )
+             control = glmerControl(optimizer = "optimx",
+                                    calc.derivs = FALSE,
+                                    optCtrl = list(method = "nlminb",
+                                                   starttests = FALSE,
+                                                   kkt = FALSE)), # For the convergence
+             #nAGQ = 0, 
+             data = data)
 
-cand.models[[4]] <- glm(NIDIF ~ NestAge + HAB2 + YEAR*SUPPL,
-                          family = binomial(link = logexp(data$EXPO)),
-                          data = data
-)
+# cand.models[[4]] <- glm(NIDIF ~ NestAge + HAB2 + YEAR*SUPPL,
+#                           family = binomial(link = logexp(data$EXPO)),
+#                           data = data
+# )
 
-summary(cand.models[[4]]) # Convergence problem
-# 
-# relgrad <- with(g.3@optinfo$derivs,solve(Hessian,gradient))
-# max(abs(relgrad))
-
-# strict_tol <- glmerControl(optCtrl = list(xtol_abs = 1e-8, ftol_abs = 1e-8))
-# if (all(cand.models[[4]]@optinfo$optimizer == "nloptwrap")) {
-#   cand.models.tol <- update(cand.models[[4]], control = strict_tol)
-# }
+summary(cand.models[[4]]) # Here Variance of random effects is weird with nlminb optimizer. AND estimates of model is equivalent when I use nAGQ = 0, with a more realistic variance of random effects
 
     # Interaction effects - HAB2 * SUPPL
 cand.models[[5]] <- glmer(NIDIF ~ NestAge + HAB2*SUPPL + YEAR + (1|ID),
              family = binomial(link = logexp(data$EXPO)),
+             control = glmerControl(optimizer = "optimx",
+                                    calc.derivs = FALSE,
+                                    optCtrl = list(method = "nlminb",
+                                                   starttests = FALSE,
+                                                   kkt = FALSE)), # For the convergence
              #nAGQ = 0,
              data = data)
 
-cand.models[[5]] <- glm(NIDIF ~ NestAge + HAB2*SUPPL + YEAR,
-                          family = binomial(link = logexp(data$EXPO)),
-                          data = data)
+# cand.models[[5]] <- glm(NIDIF ~ NestAge + HAB2*SUPPL + YEAR,
+#                           family = binomial(link = logexp(data$EXPO)),
+#                           data = data)
 
 summary(cand.models[[5]])
 
+    # Interaction effects - HAB2 * SUPPL and YEAR * SUPPL
+cand.models[[6]] <- glmer(NIDIF ~ NestAge + HAB2*SUPPL + YEAR*SUPPL + (1|ID),
+                          family = binomial(link = logexp(data$EXPO)),
+                          control = glmerControl(optimizer = "optimx",
+                                                 calc.derivs = FALSE,
+                                                 optCtrl = list(method = "nlminb",
+                                                                starttests = FALSE,
+                                                                kkt = FALSE)), # For the convergence
+                          #nAGQ = 0,
+                          data = data)
+
+# cand.models[[6]] <- glm(NIDIF ~ NestAge + HAB2*SUPPL + YEAR*SUPPL,
+#                         family = binomial(link = logexp(data$EXPO)),
+#                         data = data)
+
+summary(cand.models[[6]])
+
+#### AIC comparison ####
+Modnames <- paste("mod", 1:length(cand.models), sep = " ")
+aictab(cand.set = cand.models, modnames = Modnames, sort = TRUE)
+##round to 4 digits after decimal point and give log-likelihood
+print(aictab(cand.set = cand.models, modnames = Modnames, sort = TRUE),
+      digits = 4, LL = TRUE)
+
+
+
+#### For hypothesis about climate effects - When problems rise ! ####
+#### *** WARNINGS - Have to change names of model *** ####
 #### Supplementation*Local climate effects ####
     # Global temperature
 cand.models[[6]] <- glmer(NIDIF ~ NestAge + HAB2 + YEAR + SUPPL*TEMP_NIDIF + (1|ID),
@@ -249,7 +343,7 @@ print(aictab(cand.set = cand.models, modnames = Modnames, sort = TRUE),
       digits = 4, LL = TRUE)
 
 #### Simulations with the best modele ####
-sims <- simulateResiduals(cand.models[[3]])
+sims <- simulateResiduals(cand.models[[4]])
 x11()
 plot(sims)
 
