@@ -148,7 +148,6 @@ cand.models[[3]] <- glmer(NIDIF ~ NestAge + HAB2 + YEAR + SUPPL + (1|ID),
 
 summary(cand.models[[3]])
 
-#### *** WARNINGS - PB de convergence pour tous les modèles qui suivent *** ####
     # Interaction effects - YEAR * SUPPL
 cand.models[[4]] <- glmer(NIDIF ~ NestAge + HAB2 + YEAR*SUPPL + (1|ID),
              family = binomial(link = logexp(data$EXPO)),
@@ -168,21 +167,24 @@ cand.models[[4]] <- glmer(NIDIF ~ NestAge + HAB2 + YEAR*SUPPL + (1|ID),
 summary(cand.models[[4]]) # Here Variance of random effects is weird with nlminb optimizer. AND estimates of model is equivalent when I use nAGQ = 0, with a more realistic variance of random effects
 
     # Interaction effects - HAB2 * SUPPL
-cand.models[[5]] <- glmer(NIDIF ~ NestAge + HAB2*SUPPL + YEAR + (1|ID),
-             family = binomial(link = logexp(data$EXPO)),
-             control = glmerControl(optimizer = "optimx",
-                                    calc.derivs = FALSE,
-                                    optCtrl = list(method = "nlminb",
-                                                   starttests = FALSE,
-                                                   kkt = FALSE)), # For the convergence
-             #nAGQ = 0,
-             data = data)
+# optimx optimizer ==> "Nelder-Mead", "BFGS", "L-BFGS-B", "CG", "nlminb", "ucminf", "nlm", "uobyqa", "newuoa", "bobyqa", "Rcgmin", "Rvmmin", "spg"
+  
+  cand.models[[5]] <- glmer(NIDIF ~ NestAge + HAB2*SUPPL + YEAR + (1|ID),
+                            family = binomial(link = logexp(data$EXPO)),
+                            control = glmerControl(optimizer = "optimx",
+                                                   calc.derivs = FALSE,
+                                                   optCtrl = list(method = "nlminb",
+                                                                  starttests = FALSE,
+                                                                  kkt = FALSE)), # For the convergence
+                            #nAGQ = 0,
+                            data = data)
+  
+  # cand.models[[5]] <- glm(NIDIF ~ NestAge + HAB2*SUPPL + YEAR,
+  #                           family = binomial(link = logexp(data$EXPO)),
+  #                           data = data)
+  
+  summary(cand.models[[5]])
 
-# cand.models[[5]] <- glm(NIDIF ~ NestAge + HAB2*SUPPL + YEAR,
-#                           family = binomial(link = logexp(data$EXPO)),
-#                           data = data)
-
-summary(cand.models[[5]])
 
     # Interaction effects - HAB2 * SUPPL and YEAR * SUPPL
 cand.models[[6]] <- glmer(NIDIF ~ NestAge + HAB2*SUPPL + YEAR*SUPPL + (1|ID),
@@ -206,6 +208,82 @@ Modnames <- paste("mod", 1:length(cand.models), sep = " ")
 aictab(cand.set = cand.models, modnames = Modnames, sort = TRUE)
 ##round to 4 digits after decimal point and give log-likelihood
 print(aictab(cand.set = cand.models, modnames = Modnames, sort = TRUE),
+      digits = 4, LL = TRUE)
+
+#### Test for the random effect ####
+
+# créer une variable dummy (juste des 1)
+
+data$Dummy <- factor(rep(1, each = length(data$ID))) 
+# où ID est une variable (ici l'ID de ma femelle)
+
+#comparer les structures (avec modèle le plus complexe), il faut bien garder la même structure d'effets fixes ! :
+rand=list()
+rand[[1]] <- glmer(NIDIF ~ NestAge + HAB2*SUPPL + YEAR*SUPPL + (1|ID),
+                   family = binomial(link = logexp(data$EXPO)),
+                   control = glmerControl(optimizer = "optimx",
+                                          check.nlev.gtr.1="ignore",#argument qui permet de contourner le fait que ton facteur n'a qu'un niveau
+                                          calc.derivs = FALSE,
+                                          optCtrl = list(method = "nlminb",
+                                                         starttests = FALSE,
+                                                         kkt = FALSE)), # For the convergence
+                   #nAGQ = 0,
+                   data = data)
+ 
+summary(rand[[1]])
+
+rand[[2]] <- glmer(NIDIF ~ NestAge + HAB2 + YEAR + (1|ID),
+                   family = binomial(link = logexp(data$EXPO)),
+                   #nAGQ = 0,
+                   data = data)
+summary(rand[[2]])
+
+rand[[3]] <- glmer(NIDIF ~ NestAge + HAB2 + YEAR + SUPPL + (1|ID),
+                family = binomial(link = logexp(data$EXPO)),
+                #nAGQ = 0,
+                data = data)
+summary(rand[[3]])
+
+rand[[4]] <- glmer(NIDIF ~ NestAge + HAB2 + YEAR*SUPPL + (1|ID),
+                   family = binomial(link = logexp(data$EXPO)),
+                   control = glmerControl(optimizer = "optimx",
+                                          calc.derivs = FALSE,
+                                          optCtrl = list(method = "nlminb",
+                                                         starttests = FALSE,
+                                                         kkt = FALSE)), # For the convergence
+                   #nAGQ = 0, 
+                   data = data)
+summary(rand[[4]])
+
+rand[[5]] <- glmer(NIDIF ~ NestAge + HAB2*SUPPL + YEAR + (1|ID),
+                          family = binomial(link = logexp(data$EXPO)),
+                          control = glmerControl(optimizer = "optimx",
+                                                 calc.derivs = FALSE,
+                                                 optCtrl = list(method = "nlminb",
+                                                                starttests = FALSE,
+                                                                kkt = FALSE)), 
+                          data = data)
+
+summary(rand[[5]])
+
+
+rand[[6]] <- glmer(NIDIF ~ NestAge + HAB2*SUPPL + YEAR*SUPPL + (1|ID),
+                          family = binomial(link = logexp(data$EXPO)),
+                          control = glmerControl(optimizer = "optimx",
+                                                 calc.derivs = FALSE,
+                                                 optCtrl = list(method = "nlminb",
+                                                                starttests = FALSE,
+                                                                kkt = FALSE)),
+                          #nAGQ = 0,
+                          data = data)
+summary(rand[[6]])
+
+
+#comparer par anova/LRT ou AIC
+Modnames <- paste("mod", 1:length(rand), sep = " ")
+aictab(cand.set = rand, modnames = Modnames, sort = TRUE)
+##round to 4 digits after decimal point and give log-likelihood
+print(aictab(cand.set = rand, modnames = Modnames, sort = TRUE),
       digits = 4, LL = TRUE)
 
 
