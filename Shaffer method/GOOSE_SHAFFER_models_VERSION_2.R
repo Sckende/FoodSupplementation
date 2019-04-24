@@ -106,88 +106,85 @@ vif.mer(model)
 
 
 #### I choose to keep YEAR rather than TEMP/PREC_NIDIF ####
-cand.models <- list()
+glmer.models <- list()
+glm.models <- list()
 #### For hypothesis about supplementation and year effect ####
 #### Basic models ####
     # Null
-cand.models[[1]] <- glmer(NIDIF ~ 1 + (1|ID),
+glmer.models[[1]] <- glmer(NIDIF ~ 1 + (1|ID),
              family = binomial(link = logexp(data$EXPO)),
              #nAGQ = 0,
              data = data)
 
-# cand.models[[1]] <- glm(NIDIF ~ 1,
-#                           family = binomial(link = logexp(data$EXPO)),
-#                           data = data)
+glm.models[[1]] <- glm(NIDIF ~ 1,
+                          family = binomial(link = logexp(data$EXPO)),
+                          data = data)
 
-summary(cand.models[[1]])
+summary(glmer.models[[1]])
 
     # Known effects
-cand.models[[2]] <- glmer(NIDIF ~ NestAge + HAB2 + YEAR + (1|ID),
+glmer.models[[2]] <- glmer(NIDIF ~ NestAge + HAB2 + YEAR + (1|ID),
              family = binomial(link = logexp(data$EXPO)),
              #nAGQ = 0,
              data = data)
 
-# cand.models[[2]] <- glm(NIDIF ~ NestAge + HAB2 + YEAR,
-#                           family = binomial(link = logexp(data$EXPO)),
-#                           #nAGQ = 0,
-#                           data = data)
+glm.models[[2]] <- glm(NIDIF ~ NestAge + HAB2 + YEAR,
+                          family = binomial(link = logexp(data$EXPO)),
+                          data = data)
 
-summary(cand.models[[2]])
+summary(glmer.models[[2]])
 
 #### Supplementation effects ####
     # Additive effects of supplementation
-cand.models[[3]] <- glmer(NIDIF ~ NestAge + HAB2 + YEAR + SUPPL + (1|ID),
+glmer.models[[3]] <- glmer(NIDIF ~ NestAge + HAB2 + YEAR + SUPPL + (1|ID),
              family = binomial(link = logexp(data$EXPO)),
              #nAGQ = 0,
              data = data)
 
-# cand.models[[3]] <- glm(NIDIF ~ NestAge + HAB2 + YEAR + SUPPL,
-#                           family = binomial(link = logexp(data$EXPO)),
-#                           #nAGQ = 0,
-#                           data = data)
+glm.models[[3]] <- glm(NIDIF ~ NestAge + HAB2 + YEAR + SUPPL,
+                          family = binomial(link = logexp(data$EXPO)),
+                          data = data)
 
-summary(cand.models[[3]])
+summary(glmer.models[[3]])
 
     # Interaction effects - YEAR * SUPPL
-cand.models[[4]] <- glmer(NIDIF ~ NestAge + HAB2 + YEAR*SUPPL + (1|ID),
+glmer.models[[4]] <- glmer(NIDIF ~ NestAge + HAB2 + YEAR*SUPPL + (1|ID),
              family = binomial(link = logexp(data$EXPO)),
              control = glmerControl(optimizer = "optimx",
                                     calc.derivs = FALSE,
                                     optCtrl = list(method = "nlminb",
                                                    starttests = FALSE,
-                                                   kkt = FALSE)), # For the convergence
-             #nAGQ = 0, 
+                                                   kkt = FALSE)), # For the convergence 
              data = data)
 
-# cand.models[[4]] <- glm(NIDIF ~ NestAge + HAB2 + YEAR*SUPPL,
-#                           family = binomial(link = logexp(data$EXPO)),
-#                           data = data
-# )
+glm.models[[4]] <- glm(NIDIF ~ NestAge + HAB2 + YEAR*SUPPL,
+                          family = binomial(link = logexp(data$EXPO)),
+                          data = data
+)
 
-summary(cand.models[[4]]) # Here Variance of random effects is weird with nlminb optimizer. AND estimates of model is equivalent when I use nAGQ = 0, with a more realistic variance of random effects
+summary(glmer.models[[4]]) # Here Variance of random effects is weird with nlminb optimizer. AND estimates of model is equivalent when I use nAGQ = 0, with a more realistic variance of random effects
 
     # Interaction effects - HAB2 * SUPPL
 # optimx optimizer ==> "Nelder-Mead", "BFGS", "L-BFGS-B", "CG", "nlminb", "ucminf", "nlm", "uobyqa", "newuoa", "bobyqa", "Rcgmin", "Rvmmin", "spg"
   
-  cand.models[[5]] <- glmer(NIDIF ~ NestAge + HAB2*SUPPL + YEAR + (1|ID),
+glmer.models[[5]] <- glmer(NIDIF ~ NestAge + HAB2*SUPPL + YEAR + (1|ID),
                             family = binomial(link = logexp(data$EXPO)),
                             control = glmerControl(optimizer = "optimx",
                                                    calc.derivs = FALSE,
                                                    optCtrl = list(method = "nlminb",
                                                                   starttests = FALSE,
                                                                   kkt = FALSE)), # For the convergence
-                            #nAGQ = 0,
                             data = data)
   
-  # cand.models[[5]] <- glm(NIDIF ~ NestAge + HAB2*SUPPL + YEAR,
-  #                           family = binomial(link = logexp(data$EXPO)),
-  #                           data = data)
-  
-  summary(cand.models[[5]])
+glm.models[[5]] <- glm(NIDIF ~ NestAge + HAB2*SUPPL + YEAR,
+                            family = binomial(link = logexp(data$EXPO)),
+                            data = data)
+
+summary(glmer.models[[5]])
 
 
     # Interaction effects - HAB2 * SUPPL and YEAR * SUPPL
-cand.models[[6]] <- glmer(NIDIF ~ NestAge + HAB2*SUPPL + YEAR*SUPPL + (1|ID),
+glmer.models[[6]] <- glmer(NIDIF ~ NestAge + HAB2*SUPPL + YEAR*SUPPL + (1|ID),
                           family = binomial(link = logexp(data$EXPO)),
                           control = glmerControl(optimizer = "optimx",
                                                  calc.derivs = FALSE,
@@ -197,18 +194,18 @@ cand.models[[6]] <- glmer(NIDIF ~ NestAge + HAB2*SUPPL + YEAR*SUPPL + (1|ID),
                           #nAGQ = 0,
                           data = data)
 
-# cand.models[[6]] <- glm(NIDIF ~ NestAge + HAB2*SUPPL + YEAR*SUPPL,
-#                         family = binomial(link = logexp(data$EXPO)),
-#                         data = data)
+glm.models[[6]] <- glm(NIDIF ~ NestAge + HAB2*SUPPL + YEAR*SUPPL,
+                        family = binomial(link = logexp(data$EXPO)),
+                        data = data)
 
-summary(cand.models[[6]])
+summary(glmer.models[[6]])
 
 #### AIC comparison ####
-Modnames <- paste("mod", 1:length(cand.models), sep = " ")
-aictab(cand.set = cand.models, modnames = Modnames, sort = TRUE)
-##round to 4 digits after decimal point and give log-likelihood
-print(aictab(cand.set = cand.models, modnames = Modnames, sort = TRUE),
-      digits = 4, LL = TRUE)
+Modnames <- paste("mod", 1:length(glmer.models), sep = " ")
+aictab(cand.set = glmer.models, modnames = Modnames, sort = TRUE)
+
+Modnames <- paste("mod", 1:length(glm.models), sep = " ")
+aictab(cand.set = glm.models, modnames = Modnames, sort = TRUE)
 
 #### Test for the random effect ####
 
@@ -291,15 +288,45 @@ print(aictab(cand.set = rand, modnames = Modnames, sort = TRUE),
 #### For hypothesis about climate effects - When problems rise ! ####
 #### *** WARNINGS - Have to change names of model *** ####
 #### Supplementation*Local climate effects ####
+clim.mod <- list()
+
+clim.mod[[1]] <- glmer(NIDIF ~ NestAge + HAB2 + scale(TEMP_NIDIF) + (1|ID),
+                       family = binomial(link = logexp(data$EXPO)),
+                       data = data)
+summary(clim.mod[[1]])
+
+#-------------------#
+
+clim.mod[[2]] <- glmer(NIDIF ~ NestAge + HAB2 + poly(scale(TEMP_NIDIF), 2) + (1|ID),
+                       family = binomial(link = logexp(data$EXPO)),
+                       control = glmerControl(optimizer = "optimx",
+                                              calc.derivs = FALSE,
+                                              optCtrl = list(method = "nlminb",
+                                                             starttests = FALSE,
+                                                             kkt = FALSE)),
+                       data = data)
+summary(clim.mod[[2]])
+
+#-------------------#
+
+clim.mod[[3]] <- glmer(NIDIF ~ NestAge + HAB2 + scale(TEMP_NIDIF) + poly(scale(TEMP_NIDIF), 2) + (1|ID),
+                       family = binomial(link = logexp(data$EXPO)),
+                       control = glmerControl(optimizer = "optimx",
+                                              calc.derivs = FALSE,
+                                              optCtrl = list(method = "nlminb",
+                                                             starttests = FALSE,
+                                                             kkt = FALSE)),
+                       data = data)
+summary(clim.mod[[3]])
+
     # Global temperature
-cand.models[[6]] <- glmer(NIDIF ~ NestAge + HAB2 + YEAR + SUPPL*TEMP_NIDIF + (1|ID),
+clim.mod[[1]] <- glmer(NIDIF ~ NestAge + HAB2 + SUPPL + poly(TEMP_NIDIF, 2) + (1|ID),
              family = binomial(link = logexp(data$EXPO)),
-             data = data,
-             nAGQ = 0)
-summary(cand.models[[6]])
+             data = data)
+summary(clim.models[[1]])
 
     # Global precipitation
-cand.models[[7]] <- glmer(NIDIF ~ NestAge + HAB2 + YEAR + SUPPL*PREC_NIDIF + (1|ID),
+cand.models[[7]] <- glmer(NIDIF ~ NestAge + HAB2 + YEAR + SUPPL + PREC_NIDIF + (1|ID),
              family = binomial(link = logexp(data$EXPO)),
              data = data,
              nAGQ = 0)
