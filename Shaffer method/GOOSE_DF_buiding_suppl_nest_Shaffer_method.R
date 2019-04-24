@@ -699,12 +699,14 @@ local <- lapply(local, function(x){
   }
   x$TEMP_EXPO <- temp.expo
   x$PREC_EXPO <- prec.expo
+  x$ID.2 <- paste(x$YEAR[1], x$ID[1], sep = ".")
   x
 })
 
 local[1:5]
 data <- do.call("rbind", local)
 row.names(data)<-1:nrow(data)
+data$ID.2 <- as.factor(data$ID.2)
 head(data)
 
 summary(data)
