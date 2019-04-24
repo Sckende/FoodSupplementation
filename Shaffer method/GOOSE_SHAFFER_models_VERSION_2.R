@@ -113,8 +113,11 @@ glm.models <- list()
     # Null
 glmer.models[[1]] <- glmer(NIDIF ~ 1 + (1|ID),
              family = binomial(link = logexp(data$EXPO)),
-             #nAGQ = 0,
              data = data)
+
+gg <- glmer(NIDIF ~ 1 + (1|ID.2),
+            family = binomial(link = logexp(data$EXPO)),
+            data = data)
 
 glm.models[[1]] <- glm(NIDIF ~ 1,
                           family = binomial(link = logexp(data$EXPO)),
@@ -125,8 +128,11 @@ summary(glmer.models[[1]])
     # Known effects
 glmer.models[[2]] <- glmer(NIDIF ~ NestAge + HAB2 + YEAR + (1|ID),
              family = binomial(link = logexp(data$EXPO)),
-             #nAGQ = 0,
              data = data)
+
+gg.2 <- glmer(NIDIF ~ NestAge + HAB2 + YEAR + (1|ID.2),
+              family = binomial(link = logexp(data$EXPO)),
+              data = data)
 
 glm.models[[2]] <- glm(NIDIF ~ NestAge + HAB2 + YEAR,
                           family = binomial(link = logexp(data$EXPO)),
@@ -138,7 +144,6 @@ summary(glmer.models[[2]])
     # Additive effects of supplementation
 glmer.models[[3]] <- glmer(NIDIF ~ NestAge + HAB2 + YEAR + SUPPL + (1|ID),
              family = binomial(link = logexp(data$EXPO)),
-             #nAGQ = 0,
              data = data)
 
 glm.models[[3]] <- glm(NIDIF ~ NestAge + HAB2 + YEAR + SUPPL,
@@ -169,6 +174,7 @@ summary(glmer.models[[4]]) # Here Variance of random effects is weird with nlmin
   
 glmer.models[[5]] <- glmer(NIDIF ~ NestAge + HAB2*SUPPL + YEAR + (1|ID),
                             family = binomial(link = logexp(data$EXPO)),
+                            #nAGQ = 0,
                             control = glmerControl(optimizer = "optimx",
                                                    calc.derivs = FALSE,
                                                    optCtrl = list(method = "nlminb",
