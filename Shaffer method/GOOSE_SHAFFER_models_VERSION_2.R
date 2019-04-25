@@ -451,6 +451,94 @@ aictab(cand.set = cand.models, modnames = Modnames, sort = TRUE)
 print(aictab(cand.set = cand.models, modnames = Modnames, sort = TRUE),
       digits = 4, LL = TRUE)
 
+#### For hypothesis about climate effects - GLM  ####
+
+clim.glm <- list()
+
+clim.glm[[1]] <- glm(NIDIF ~ 1,
+                     family = binomial(link = logexp(data$EXPO)),
+                     data = data)
+
+clim.glm[[2]] <- glm(NIDIF ~ NestAge + HAB2 + YEAR ,
+                     family = binomial(link = logexp(data$EXPO)),
+                     data = data)
+
+clim.glm[[3]] <- glm(NIDIF ~ NestAge + HAB2 + YEAR + SUPPL + PREC_NIDIF + TEMP_NIDIF,
+                     family = binomial(link = logexp(data$EXPO)),
+                     data = data)
+
+clim.glm[[4]] <- glm(NIDIF ~ NestAge + HAB2 + YEAR + SUPPL + PREC_NIDIF,
+                     family = binomial(link = logexp(data$EXPO)),
+                     data = data)
+
+clim.glm[[5]] <- glm(NIDIF ~ NestAge + HAB2 + YEAR + SUPPL + TEMP_NIDIF,
+                     family = binomial(link = logexp(data$EXPO)),
+                     data = data)
+
+clim.glm[[6]] <- glm(NIDIF ~ NestAge + HAB2 + YEAR + SUPPL*TEMP_NIDIF,
+                     family = binomial(link = logexp(data$EXPO)),
+                     data = data)
+
+clim.glm[[7]] <- glm(NIDIF ~ NestAge + HAB2 + YEAR + SUPPL*PREC_NIDIF,
+                     family = binomial(link = logexp(data$EXPO)),
+                     data = data)
+
+clim.glm[[8]] <- glm(NIDIF ~ NestAge + HAB2 + YEAR + SUPPL*PREC_NIDIF + SUPPL*TEMP_NIDIF,
+                     family = binomial(link = logexp(data$EXPO)),
+                     data = data)
+
+clim.glm[[9]] <- glm(NIDIF ~ NestAge + HAB2 + YEAR*SUPPL + SUPPL*PREC_NIDIF + SUPPL*TEMP_NIDIF,
+                     family = binomial(link = logexp(data$EXPO)),
+                     data = data)
+
+clim.glm[[9]] <- glm(NIDIF ~ NestAge + HAB2 + YEAR*SUPPL + PREC_NIDIF + TEMP_NIDIF,
+                     family = binomial(link = logexp(data$EXPO)),
+                     data = data)
+
+clim.glm[[10]] <- glm(NIDIF ~ NestAge + HAB2 + YEAR*SUPPL + PREC_NIDIF*SUPPL + TEMP_NIDIF,
+                     family = binomial(link = logexp(data$EXPO)),
+                     data = data)
+
+clim.glm[[11]] <- glm(NIDIF ~ NestAge + HAB2 + YEAR*SUPPL + PREC_NIDIF + TEMP_NIDIF*SUPPL,
+                     family = binomial(link = logexp(data$EXPO)),
+                     data = data)
+
+# AIC table
+Modnames <- paste("mod", 1:length(clim.glm), sep = " ")
+aictab(cand.set = clim.glm, modnames = Modnames, sort = TRUE)
+
+# Simulation test 
+
+#### REPRENDRE ICIIIIIII ####
+# Predictions
+  # New dataframe for predictions with Reference level of year == 2015 and habitat == MES
+data$YEAR <- relevel(data$YEAR, "2015")
+
+pred <- data.frame(NestAge = mean(data$NestAge),
+                   HAB2 = factor(rep(c("MES", "WET"), 9), levels = c("MES", "WET")),
+                   YEAR = factor(c(rep("2015", 6), rep("2016", 6), rep("2017", 6)), levels = c("2015", "2016", "2017")),
+                   SUPPL = factor(rep(c(rep("TEM", 2), rep("F", 2), rep("W", 2)), 3), levels = c("TEM", "F", "W")))
+
+pp <- predict(glm.models[[4]], newdata = pred, se.fit = TRUE)
+
+plogis(pp[[1]])^27
+plogis(pp[[2]])^27
+
+data.predict <- as.data.frame(pp)[,-3]
+data.predict$SE.upper <- data.predict$fit + data.predict$se.fit
+data.predict$SE.lower <- data.predict$fit - data.predict$se.fit
+
+data.predict <- apply(data.predict, MARGIN = 2, plogis)
+
+# Transformation for Nesting Success values
+data.predict <- apply(data.predict, MARGIN = 2, function(x){
+  x <- x^27
+  x
+})
+data.predict <- cbind(pred, data.predict)
+
+color <- c("chartreuse3", "darkorange2", "cyan3")[as.numeric(data.predict$SUPPL)] 
+color.2 <- c("chartreuse4", "darkorange3", "cyan4")[as.numeric(data.predict$SUPPL)]
 #### Simulations with the best modele ####
 sims <- simulateResiduals(cand.models[[4]])
 x11()
