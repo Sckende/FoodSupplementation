@@ -153,6 +153,8 @@ glm.models[[3]] <- glm(NIDIF ~ NestAge + HAB2 + YEAR + SUPPL,
 summary(glmer.models[[3]])
 
     # Interaction effects - YEAR * SUPPL
+
+data$YEAR <- relevel(data$YEAR, "2017")
 glmer.models[[4]] <- glmer(NIDIF ~ NestAge + HAB2 + YEAR*SUPPL + (1|ID),
              family = binomial(link = logexp(data$EXPO)),
              control = glmerControl(optimizer = "optimx",
@@ -167,9 +169,92 @@ glm.models[[4]] <- glm(NIDIF ~ NestAge + HAB2 + YEAR*SUPPL,
                           data = data
 )
 
-summary(glmer.models[[4]]) # Here Variance of random effects is weird with nlminb optimizer. AND estimates of model is equivalent when I use nAGQ = 0, with a more realistic variance of random effects
+summary(glm.models[[4]]) # Here Variance of random effects is weird with nlminb optimizer. AND estimates of model is equivalent when I use nAGQ = 0, with a more realistic variance of random effects
 
-    # Interaction effects - HAB2 * SUPPL
+# Predictions - Laurent style
+pred <- data.frame(NestAge = mean(data$NestAge), HAB2 = factor(rep(c("MES", "WET"), 9), levels = c("MES", "WET")), YEAR = factor(c(rep("2015", 6), rep("2016", 6), rep("2017", 6)), levels = c("2015", "2016", "2017")), SUPPL = factor(rep(c(rep("TEM", 2), rep("F", 2), rep("W", 2)), 3), levels = c("TEM", "F", "W")))
+pp <- predict(glm.models[[4]], newdata = pred, se.fit = TRUE)
+
+plogis(pp[[1]])^27
+plogis(pp[[2]])^27
+
+data.predict <- as.data.frame(pp)[,-3]
+data.predict$SE.upper <- data.predict$fit + data.predict$se.fit
+data.predict$SE.lower <- data.predict$fit - data.predict$se.fit
+
+data.predict <- apply(data.predict, MARGIN = 2, plogis)
+
+# Transformation for Nesting Success values
+data.predict <- apply(data.predict, MARGIN = 2, function(x){
+  x <- x^27
+  x
+})
+data.predict <- cbind(pred, data.predict)
+
+color <- c("chartreuse3", "darkorange2", "cyan3")[as.numeric(data.predict$SUPPL)] 
+color.2 <- c("chartreuse4", "darkorange3", "cyan4")[as.numeric(data.predict$SUPPL)] 
+
+#x11()
+
+png("C:/Users/HP_9470m/Dropbox/PHD. Claire/Chapitres de thèse/CHAPTER 1 - Geese nesting success & supplemented nests/PAPER_V2/Figures/GOOSE_Nesting_succ_suppl.tiff",
+    res=300,
+    width=30,
+    height=25,
+    pointsize=12,
+    unit="cm",
+    bg="transparent")
+
+bplot <- barplot(data.predict$fit,
+        space = c(rep(c(0.2, 0), 3), rep(c(0.4, 0, 0.2, 0, 0.2, 0), 2)),
+        ylim = c(0, 1),
+        las = 1,
+        # angle = rep(c(45, 45, 135, 135, 11, 11), 3),
+        # density = 30, # angle & border are for the texture of bars
+        col = color,
+        border = color.2)
+
+# Modification de texture 
+# barplot(data.predict$fit,
+#         space = c(rep(c(0.2, 0), 3), rep(c(0.4, 0, 0.2, 0, 0.2, 0), 2)),
+#         col = color.2,
+#         border = color.2,
+#         angle = rep(c(135, 135, 45, 45, 11, 11), 3),
+#         density = 30,
+#         add = TRUE,
+#         xaxt = "n",
+#         yaxt = "n")
+
+axis(1, at = bplot, rep(c("MES", "WET"), 9), lty = 0, cex.axis = 0.8, las = 1)
+legend(bplot[length(bplot)-2], 1.0, legend = c("Control", "Food", "Water"), pch = 15, pt.cex = 2, col = c("chartreuse3", "darkorange2", "cyan3"), bty = "n")
+
+arrows(x0 = bplot,
+       y0 = data.predict$fit,
+       x1 = bplot,
+       y1 = data.predict$SE.upper,
+       angle = 90,
+       length = 0,
+       col = c("chartreuse4", "chartreuse4", "darkorange3", "darkorange3", "cyan4", "cyan4"))
+arrows(x0 = bplot,
+       y0 = data.predict$fit,
+       x1 = bplot,
+       y1 = data.predict$SE.lower,
+       angle = 90,
+       length = 0,
+       col = c("chartreuse4", "chartreuse4", "darkorange3", "darkorange3", "cyan4", "cyan4"))
+
+mtext(c("2015", "2016", "2017"),
+      side = 1,
+      line = 3.5,
+      at = c(mean(c(bplot[[3]], bplot[[4]])), mean(c(bplot[[9]], bplot[[10]])), mean(c(bplot[[15]], bplot[[16]]))),
+      cex = 2)
+mtext("Goose nesting success",
+      side = 2,
+      line = -3.5,
+      las = 1,
+      at = 1.05)
+
+dev.off()
+# Interaction effects - HAB2 * SUPPL
 # optimx optimizer ==> "Nelder-Mead", "BFGS", "L-BFGS-B", "CG", "nlminb", "ucminf", "nlm", "uobyqa", "newuoa", "bobyqa", "Rcgmin", "Rvmmin", "spg"
   
 glmer.models[[5]] <- glmer(NIDIF ~ NestAge + HAB2*SUPPL + YEAR + (1|ID),
@@ -285,13 +370,9 @@ summary(rand[[6]])
 #comparer par anova/LRT ou AIC
 Modnames <- paste("mod", 1:length(rand), sep = " ")
 aictab(cand.set = rand, modnames = Modnames, sort = TRUE)
-##round to 4 digits after decimal point and give log-likelihood
-print(aictab(cand.set = rand, modnames = Modnames, sort = TRUE),
-      digits = 4, LL = TRUE)
 
 
-
-#### For hypothesis about climate effects - When problems rise ! ####
+#### For hypothesis about climate effects - When problems arise ! ####
 #### *** WARNINGS - Have to change names of model *** ####
 #### Supplementation*Local climate effects ####
 clim.mod <- list()
