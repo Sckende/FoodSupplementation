@@ -213,7 +213,7 @@ summary(glm.models[[6]])
 # aictab(cand.set = glmer.models, modnames = Modnames, sort = TRUE)
 
 Modnames <- paste("mod", 1:length(glm.models), sep = " ")
-aictab(cand.set = glm.models, modnames = Modnames, sort = TRUE)
+AIC <- aictab(cand.set = glm.models, modnames = Modnames, sort = TRUE)
 
 #### Test for the random effect ####
 
