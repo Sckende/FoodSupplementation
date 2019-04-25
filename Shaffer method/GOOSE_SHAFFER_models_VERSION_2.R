@@ -106,63 +106,63 @@ vif.mer(model)
 
 
 #### I choose to keep YEAR rather than TEMP/PREC_NIDIF ####
-glmer.models <- list()
+#glmer.models <- list()
 glm.models <- list()
+
 #### For hypothesis about supplementation and year effect ####
 #### Basic models ####
     # Null
-glmer.models[[1]] <- glmer(NIDIF ~ 1 + (1|ID),
-             family = binomial(link = logexp(data$EXPO)),
-             data = data)
-
-gg <- glmer(NIDIF ~ 1 + (1|ID.2),
-            family = binomial(link = logexp(data$EXPO)),
-            data = data)
+# glmer.models[[1]] <- glmer(NIDIF ~ 1 + (1|ID),
+#              family = binomial(link = logexp(data$EXPO)),
+#              data = data)
+# 
+# gg <- glmer(NIDIF ~ 1 + (1|ID.2),
+#             family = binomial(link = logexp(data$EXPO)),
+#             data = data)
 
 glm.models[[1]] <- glm(NIDIF ~ 1,
                           family = binomial(link = logexp(data$EXPO)),
                           data = data)
 
-summary(glmer.models[[1]])
+summary(glm.models[[1]])
 
     # Known effects
-glmer.models[[2]] <- glmer(NIDIF ~ NestAge + HAB2 + YEAR + (1|ID),
-             family = binomial(link = logexp(data$EXPO)),
-             data = data)
-
-gg.2 <- glmer(NIDIF ~ NestAge + HAB2 + YEAR + (1|ID.2),
-              family = binomial(link = logexp(data$EXPO)),
-              data = data)
+# glmer.models[[2]] <- glmer(NIDIF ~ NestAge + HAB2 + YEAR + (1|ID),
+#              family = binomial(link = logexp(data$EXPO)),
+#              data = data)
+# 
+# gg.2 <- glmer(NIDIF ~ NestAge + HAB2 + YEAR + (1|ID.2),
+#               family = binomial(link = logexp(data$EXPO)),
+#               data = data)
 
 glm.models[[2]] <- glm(NIDIF ~ NestAge + HAB2 + YEAR,
                           family = binomial(link = logexp(data$EXPO)),
                           data = data)
 
-summary(glmer.models[[2]])
+summary(glm.models[[2]])
 
 #### Supplementation effects ####
     # Additive effects of supplementation
-glmer.models[[3]] <- glmer(NIDIF ~ NestAge + HAB2 + YEAR + SUPPL + (1|ID),
-             family = binomial(link = logexp(data$EXPO)),
-             data = data)
+# glmer.models[[3]] <- glmer(NIDIF ~ NestAge + HAB2 + YEAR + SUPPL + (1|ID),
+#              family = binomial(link = logexp(data$EXPO)),
+#              data = data)
 
 glm.models[[3]] <- glm(NIDIF ~ NestAge + HAB2 + YEAR + SUPPL,
                           family = binomial(link = logexp(data$EXPO)),
                           data = data)
 
-summary(glmer.models[[3]])
+summary(glm.models[[3]])
 
     # Interaction effects - YEAR * SUPPL
 
-data$YEAR <- relevel(data$YEAR, "2017")
-glmer.models[[4]] <- glmer(NIDIF ~ NestAge + HAB2 + YEAR*SUPPL + (1|ID),
-             family = binomial(link = logexp(data$EXPO)),
-             control = glmerControl(optimizer = "optimx",
-                                    calc.derivs = FALSE,
-                                    optCtrl = list(method = "nlminb",
-                                                   starttests = FALSE,
-                                                   kkt = FALSE)), # For the convergence 
-             data = data)
+# glmer.models[[4]] <- glmer(NIDIF ~ NestAge + HAB2 + YEAR*SUPPL + (1|ID),
+#              family = binomial(link = logexp(data$EXPO)),
+#              control = glmerControl(optimizer = "optimx",
+#                                     calc.derivs = FALSE,
+#                                     optCtrl = list(method = "nlminb",
+#                                                    starttests = FALSE,
+#                                                    kkt = FALSE)), # For the convergence 
+#              data = data)
 
 glm.models[[4]] <- glm(NIDIF ~ NestAge + HAB2 + YEAR*SUPPL,
                           family = binomial(link = logexp(data$EXPO)),
@@ -171,129 +171,46 @@ glm.models[[4]] <- glm(NIDIF ~ NestAge + HAB2 + YEAR*SUPPL,
 
 summary(glm.models[[4]]) # Here Variance of random effects is weird with nlminb optimizer. AND estimates of model is equivalent when I use nAGQ = 0, with a more realistic variance of random effects
 
-# Predictions - Laurent style
-pred <- data.frame(NestAge = mean(data$NestAge), HAB2 = factor(rep(c("MES", "WET"), 9), levels = c("MES", "WET")), YEAR = factor(c(rep("2015", 6), rep("2016", 6), rep("2017", 6)), levels = c("2015", "2016", "2017")), SUPPL = factor(rep(c(rep("TEM", 2), rep("F", 2), rep("W", 2)), 3), levels = c("TEM", "F", "W")))
-pp <- predict(glm.models[[4]], newdata = pred, se.fit = TRUE)
-
-plogis(pp[[1]])^27
-plogis(pp[[2]])^27
-
-data.predict <- as.data.frame(pp)[,-3]
-data.predict$SE.upper <- data.predict$fit + data.predict$se.fit
-data.predict$SE.lower <- data.predict$fit - data.predict$se.fit
-
-data.predict <- apply(data.predict, MARGIN = 2, plogis)
-
-# Transformation for Nesting Success values
-data.predict <- apply(data.predict, MARGIN = 2, function(x){
-  x <- x^27
-  x
-})
-data.predict <- cbind(pred, data.predict)
-
-color <- c("chartreuse3", "darkorange2", "cyan3")[as.numeric(data.predict$SUPPL)] 
-color.2 <- c("chartreuse4", "darkorange3", "cyan4")[as.numeric(data.predict$SUPPL)] 
-
-#x11()
-
-png("C:/Users/HP_9470m/Dropbox/PHD. Claire/Chapitres de thèse/CHAPTER 1 - Geese nesting success & supplemented nests/PAPER_V2/Figures/GOOSE_Nesting_succ_suppl.tiff",
-    res=300,
-    width=30,
-    height=25,
-    pointsize=12,
-    unit="cm",
-    bg="transparent")
-
-bplot <- barplot(data.predict$fit,
-        space = c(rep(c(0.2, 0), 3), rep(c(0.4, 0, 0.2, 0, 0.2, 0), 2)),
-        ylim = c(0, 1),
-        las = 1,
-        # angle = rep(c(45, 45, 135, 135, 11, 11), 3),
-        # density = 30, # angle & border are for the texture of bars
-        col = color,
-        border = color.2)
-
-# Modification de texture 
-# barplot(data.predict$fit,
-#         space = c(rep(c(0.2, 0), 3), rep(c(0.4, 0, 0.2, 0, 0.2, 0), 2)),
-#         col = color.2,
-#         border = color.2,
-#         angle = rep(c(135, 135, 45, 45, 11, 11), 3),
-#         density = 30,
-#         add = TRUE,
-#         xaxt = "n",
-#         yaxt = "n")
-
-axis(1, at = bplot, rep(c("MES", "WET"), 9), lty = 0, cex.axis = 0.8, las = 1)
-legend(bplot[length(bplot)-2], 1.0, legend = c("Control", "Food", "Water"), pch = 15, pt.cex = 2, col = c("chartreuse3", "darkorange2", "cyan3"), bty = "n")
-
-arrows(x0 = bplot,
-       y0 = data.predict$fit,
-       x1 = bplot,
-       y1 = data.predict$SE.upper,
-       angle = 90,
-       length = 0,
-       col = c("chartreuse4", "chartreuse4", "darkorange3", "darkorange3", "cyan4", "cyan4"))
-arrows(x0 = bplot,
-       y0 = data.predict$fit,
-       x1 = bplot,
-       y1 = data.predict$SE.lower,
-       angle = 90,
-       length = 0,
-       col = c("chartreuse4", "chartreuse4", "darkorange3", "darkorange3", "cyan4", "cyan4"))
-
-mtext(c("2015", "2016", "2017"),
-      side = 1,
-      line = 3.5,
-      at = c(mean(c(bplot[[3]], bplot[[4]])), mean(c(bplot[[9]], bplot[[10]])), mean(c(bplot[[15]], bplot[[16]]))),
-      cex = 2)
-mtext("Goose nesting success",
-      side = 2,
-      line = -3.5,
-      las = 1,
-      at = 1.05)
-
-dev.off()
 # Interaction effects - HAB2 * SUPPL
 # optimx optimizer ==> "Nelder-Mead", "BFGS", "L-BFGS-B", "CG", "nlminb", "ucminf", "nlm", "uobyqa", "newuoa", "bobyqa", "Rcgmin", "Rvmmin", "spg"
   
-glmer.models[[5]] <- glmer(NIDIF ~ NestAge + HAB2*SUPPL + YEAR + (1|ID),
-                            family = binomial(link = logexp(data$EXPO)),
-                            #nAGQ = 0,
-                            control = glmerControl(optimizer = "optimx",
-                                                   calc.derivs = FALSE,
-                                                   optCtrl = list(method = "nlminb",
-                                                                  starttests = FALSE,
-                                                                  kkt = FALSE)), # For the convergence
-                            data = data)
+# glmer.models[[5]] <- glmer(NIDIF ~ NestAge + HAB2*SUPPL + YEAR + (1|ID),
+#                             family = binomial(link = logexp(data$EXPO)),
+#                             #nAGQ = 0,
+#                             control = glmerControl(optimizer = "optimx",
+#                                                    calc.derivs = FALSE,
+#                                                    optCtrl = list(method = "nlminb",
+#                                                                   starttests = FALSE,
+#                                                                   kkt = FALSE)), # For the convergence
+#                             data = data)
   
 glm.models[[5]] <- glm(NIDIF ~ NestAge + HAB2*SUPPL + YEAR,
                             family = binomial(link = logexp(data$EXPO)),
                             data = data)
 
-summary(glmer.models[[5]])
+summary(glm.models[[5]])
 
 
     # Interaction effects - HAB2 * SUPPL and YEAR * SUPPL
-glmer.models[[6]] <- glmer(NIDIF ~ NestAge + HAB2*SUPPL + YEAR*SUPPL + (1|ID),
-                          family = binomial(link = logexp(data$EXPO)),
-                          control = glmerControl(optimizer = "optimx",
-                                                 calc.derivs = FALSE,
-                                                 optCtrl = list(method = "nlminb",
-                                                                starttests = FALSE,
-                                                                kkt = FALSE)), # For the convergence
-                          #nAGQ = 0,
-                          data = data)
+# glmer.models[[6]] <- glmer(NIDIF ~ NestAge + HAB2*SUPPL + YEAR*SUPPL + (1|ID),
+#                           family = binomial(link = logexp(data$EXPO)),
+#                           control = glmerControl(optimizer = "optimx",
+#                                                  calc.derivs = FALSE,
+#                                                  optCtrl = list(method = "nlminb",
+#                                                                 starttests = FALSE,
+#                                                                 kkt = FALSE)), # For the convergence
+#                           #nAGQ = 0,
+#                           data = data)
 
 glm.models[[6]] <- glm(NIDIF ~ NestAge + HAB2*SUPPL + YEAR*SUPPL,
                         family = binomial(link = logexp(data$EXPO)),
                         data = data)
 
-summary(glmer.models[[6]])
+summary(glm.models[[6]])
 
 #### AIC comparison ####
-Modnames <- paste("mod", 1:length(glmer.models), sep = " ")
-aictab(cand.set = glmer.models, modnames = Modnames, sort = TRUE)
+# Modnames <- paste("mod", 1:length(glmer.models), sep = " ")
+# aictab(cand.set = glmer.models, modnames = Modnames, sort = TRUE)
 
 Modnames <- paste("mod", 1:length(glm.models), sep = " ")
 aictab(cand.set = glm.models, modnames = Modnames, sort = TRUE)
@@ -612,3 +529,157 @@ print(aictab(cand.set = food.models, modnames = Modnames, sort = TRUE),
       digits = 4, LL = TRUE)
 
 summary(food.models[[4]])
+
+
+#### Sample size for each group per YEAR/HAB/Treatment ####
+size <- split(data, paste(data$YEAR, data$SUPPL, data$HAB2))
+
+
+group.size <- lapply(size, function(x){
+  sample_size <- length(unique(x$ID))
+  t <- c(as.character(x$YEAR[1]), as.character(x$HAB2[1]), as.character(x$SUPPL[1]), sample_size)
+
+})
+
+group.size <- as.data.frame(do.call("rbind", group.size))
+group.size$V4 <- as.numeric(as.character(group.size$V4))
+
+summary(group.size)
+levels(group.size$V3)
+
+group.size$V3 <- factor(group.size$V3,levels(group.size$V3)[c(2, 1, 3)])
+
+group.size <- group.size[with(group.size, order(V1, V3, V2)),]
+# or
+# group.size[order(group.size$V1, group.size$V3, group.size$V2),]
+
+group.size$V5 <- paste("(", group.size$V4, ")", sep = "")
+
+#### Predictions for the best glm model - Laurent style ####
+
+summary(glm.models[[4]])
+
+# Modification of reference level to check effect
+data$YEAR <- relevel(data$YEAR, "2017")
+data$YEAR <- relevel(data$YEAR, "2016")
+glm.models[[4]] <- glm(NIDIF ~ NestAge + HAB2 + YEAR*SUPPL,
+                       family = binomial(link = logexp(data$EXPO)),
+                       data = data
+)
+
+# New dataframe for predictions with Reference level of year == 2015 and habitat == MES
+data$YEAR <- relevel(data$YEAR, "2015")
+glm.models[[4]] <- glm(NIDIF ~ NestAge + HAB2 + YEAR*SUPPL,
+                       family = binomial(link = logexp(data$EXPO)),
+                       data = data
+)
+
+pred <- data.frame(NestAge = mean(data$NestAge),
+                   HAB2 = factor(rep(c("MES", "WET"), 9), levels = c("MES", "WET")),
+                   YEAR = factor(c(rep("2015", 6), rep("2016", 6), rep("2017", 6)), levels = c("2015", "2016", "2017")),
+                   SUPPL = factor(rep(c(rep("TEM", 2), rep("F", 2), rep("W", 2)), 3), levels = c("TEM", "F", "W")))
+
+pp <- predict(glm.models[[4]], newdata = pred, se.fit = TRUE)
+
+plogis(pp[[1]])^27
+plogis(pp[[2]])^27
+
+data.predict <- as.data.frame(pp)[,-3]
+data.predict$SE.upper <- data.predict$fit + data.predict$se.fit
+data.predict$SE.lower <- data.predict$fit - data.predict$se.fit
+
+data.predict <- apply(data.predict, MARGIN = 2, plogis)
+
+# Transformation for Nesting Success values
+data.predict <- apply(data.predict, MARGIN = 2, function(x){
+  x <- x^27
+  x
+})
+data.predict <- cbind(pred, data.predict)
+
+color <- c("chartreuse3", "darkorange2", "cyan3")[as.numeric(data.predict$SUPPL)] 
+color.2 <- c("chartreuse4", "darkorange3", "cyan4")[as.numeric(data.predict$SUPPL)] 
+
+#x11()
+
+png("C:/Users/HP_9470m/Dropbox/PHD. Claire/Chapitres de thèse/CHAPTER 1 - Geese nesting success & supplemented nests/PAPER_V2/Figures/GOOSE_Nesting_succ_suppl.tiff",
+    res=300,
+    width=30,
+    height=25,
+    pointsize=12,
+    unit="cm",
+    bg="transparent")
+#par(mar = c(5.1, 4.1, 4.1, 2.1))
+
+bplot <- barplot(data.predict$fit,
+                 space = c(rep(c(0.2, 0), 3), rep(c(0.4, 0, 0.2, 0, 0.2, 0), 2)),
+                 ylim = c(0, 1),
+                 las = 1,
+                 # angle = rep(c(45, 45, 135, 135, 11, 11), 3),
+                 # density = 30, # angle & border are for the texture of bars
+                 col = color,
+                 border = color.2,
+                 cex.axis = 1.2)
+
+# Modification de texture 
+# barplot(data.predict$fit,
+#         space = c(rep(c(0.2, 0), 3), rep(c(0.4, 0, 0.2, 0, 0.2, 0), 2)),
+#         col = color.2,
+#         border = color.2,
+#         angle = rep(c(135, 135, 45, 45, 11, 11), 3),
+#         density = 30,
+#         add = TRUE,
+#         xaxt = "n",
+#         yaxt = "n")
+
+axis(1,
+     at = bplot,
+     rep(c("MES", "WET"), 9),
+     lty = 0,
+     cex.axis = 0.8,
+     las = 1)
+
+legend(bplot[length(bplot)-2],
+       1.020,
+       legend = c("Control", "Food", "Water"),
+       pch = 15,
+       pt.cex = 2,
+       col = c("chartreuse3", "darkorange2", "cyan3"),
+       bty = "n",
+       cex = 1.2)
+
+arrows(x0 = bplot,
+       y0 = data.predict$fit,
+       x1 = bplot,
+       y1 = data.predict$SE.upper,
+       angle = 90,
+       length = 0,
+       col = c("chartreuse4", "chartreuse4", "darkorange3", "darkorange3", "cyan4", "cyan4"),
+       lwd = 2)
+arrows(x0 = bplot,
+       y0 = data.predict$fit,
+       x1 = bplot,
+       y1 = data.predict$SE.lower,
+       angle = 90,
+       length = 0,
+       col = c("chartreuse4", "chartreuse4", "darkorange3", "darkorange3", "cyan4", "cyan4"),
+       lwd = 2)
+
+mtext(c("2015", "2016", "2017"),
+      side = 1,
+      line = 3.5,
+      at = c(mean(c(bplot[[3]], bplot[[4]])), mean(c(bplot[[9]], bplot[[10]])), mean(c(bplot[[15]], bplot[[16]]))),
+      cex = 2)
+mtext("Goose nesting success",
+      side = 2,
+      line = -7,
+      las = 1,
+      at = 1.05,
+      cex = 1.2)
+
+text(x = bplot,
+     y = 0.2,
+     labels = paste("(", group.size$V4, ")", sep = ""),
+     cex = 1.2)
+
+dev.off()
