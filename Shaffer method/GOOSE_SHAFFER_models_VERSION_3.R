@@ -126,8 +126,14 @@ summary(glm.models[[6]])
 # -------------------- #
 #### AIC comparison ####
 # -------------------- #
+h <- lapply(glm.models, function(x){
+  j <- print(x$formula)
+  j
+  })
+h <- as.vector(as.character(h))
+h <- do.call("rbind", as.character(h))
 
-Modnames <- paste("mod", 1:length(glm.models), sep = " ")
+Modnames <- paste(paste("mod", 1:length(glm.models), sep = " "), h, sep = "-")
 AIC <- aictab(cand.set = glm.models, modnames = Modnames, sort = TRUE)
 AIC
 
@@ -136,7 +142,7 @@ AIC
 # -------------------------------------------------------- #
 
 summary(glm.models[[4]])
-
+Anova(glm.models[[4]])
   # Checking what is happening when the YEAR reference level changes
 data$YEAR <- relevel(data$YEAR, "2017")
 data$YEAR <- relevel(data$YEAR, "2016")
@@ -249,9 +255,9 @@ text(x = bplot,
 dev.off()
 
 
-# -------------------------------------------------- #
-#### For hypothesis about climate effects - GLM  ####
-# ------------------------------------------------- #
+# ----------------------------------------------------------- #
+#### For hypothesis about climate effects AND YEAR - GLM  ####
+# --------------------------------------------------------- #
 
 # Test for the polynomial effect of the Temperature variable
 # To do that, compare the most complex model with limear, then polynomial effect
@@ -273,22 +279,22 @@ poly.test.TEMP[[3]] <- glm(NIDIF ~ NestAge + HAB2*SUPPL + YEAR*SUPPL + SUPPL*PRE
 Modnames <- paste("mod", 1:length(poly.test.TEMP), sep = " ")
 aictab(cand.set = poly.test.TEMP, modnames = Modnames, sort = TRUE) # the best model displays a quadratic effect
 
-# poly.test.PREC <- list()
-# 
-# poly.test.PREC[[1]] <- glm(NIDIF ~ NestAge + HAB2*SUPPL + YEAR*SUPPL + SUPPL*scale(PREC_NIDIF) + SUPPL*scale(TEMP_NIDIF),
-#                       family = binomial(link = logexp(data$EXPO)),
-#                       data = data)
-# 
-# poly.test.PREC[[2]] <- glm(NIDIF ~ NestAge + HAB2*SUPPL + YEAR*SUPPL + SUPPL*poly(scale(PREC_NIDIF), 2) + SUPPL*scale(TEMP_NIDIF),
-#                       family = binomial(link = logexp(data$EXPO)),
-#                       data = data)
-# 
-# poly.test.PREC[[3]] <- glm(NIDIF ~ NestAge + HAB2*SUPPL + YEAR*SUPPL + SUPPL*poly(scale(PREC_NIDIF), 3) + SUPPL*scale(TEMP_NIDIF),
-#                       family = binomial(link = logexp(data$EXPO)),
-#                       data = data)
-# 
-# Modnames <- paste("mod", 1:length(poly.test.PREC), sep = " ")
-# aictab(cand.set = poly.test.PREC, modnames = Modnames, sort = TRUE)
+poly.test.PREC <- list()
+
+poly.test.PREC[[1]] <- glm(NIDIF ~ NestAge + HAB2*SUPPL + YEAR*SUPPL + SUPPL*scale(PREC_NIDIF) + SUPPL*scale(TEMP_NIDIF),
+                      family = binomial(link = logexp(data$EXPO)),
+                      data = data)
+
+poly.test.PREC[[2]] <- glm(NIDIF ~ NestAge + HAB2*SUPPL + YEAR*SUPPL + SUPPL*poly(scale(PREC_NIDIF), 2) + SUPPL*scale(TEMP_NIDIF),
+                      family = binomial(link = logexp(data$EXPO)),
+                      data = data)
+
+poly.test.PREC[[3]] <- glm(NIDIF ~ NestAge + HAB2*SUPPL + YEAR*SUPPL + SUPPL*poly(scale(PREC_NIDIF), 3) + SUPPL*scale(TEMP_NIDIF),
+                      family = binomial(link = logexp(data$EXPO)),
+                      data = data)
+
+Modnames <- paste("mod", 1:length(poly.test.PREC), sep = " ")
+aictab(cand.set = poly.test.PREC, modnames = Modnames, sort = TRUE) # the best model SEEMS to display a quadratic effect
 
 # Set of models
 
@@ -302,7 +308,7 @@ clim.glm[[2]] <- glm(NIDIF ~ NestAge + HAB2 + YEAR ,
                      family = binomial(link = logexp(data$EXPO)),
                      data = data)
 
-clim.glm[[3]] <- glm(NIDIF ~ NestAge + HAB2 + YEAR + SUPPL + PREC_NIDIF + poly(TEMP_NIDIF, 2),
+clim.glm[[3]] <- glm(NIDIF ~ NestAge + HAB2 + YEAR + SUPPL + PREC_NIDIF + poly(scale(TEMP_NIDIF), 2),
                      family = binomial(link = logexp(data$EXPO)),
                      data = data)
 
@@ -510,95 +516,239 @@ text(x = bplot,
      labels = paste("(", group.size$V4, ")", sep = ""),
      cex = 1.2)
 
-# --------- #
-# TEST ZONE #
-# --------- #
-data.test <- data[data$YEAR == 2016,]
-data.test <- data
+# --------------------------------------------------------------- #
+#### For hypothesis about climate effects WITHOUT YEAR - GLM  ####
+# ------------------------------------------------------------- #
+#dt <- data
 
+#data <- dt[dt$YEAR == "2015",]
+#data <- data[!(data$ID.2 == "2016.GM13F" | data$ID.2 == "2016.GM3F"),]
+# Test without YEAR in models because predictions of this kind of model are not good
+
+test.glm.add <- list()
+
+test.glm.add[[1]] <- glm(NIDIF ~ 1,
+                     family = binomial(link = logexp(data$EXPO)),
+                     data = data)
+
+test.glm.add[[2]] <- glm(NIDIF ~ NestAge + HAB2 + SUPPL ,
+                     family = binomial(link = logexp(data$EXPO)),
+                     data = data)
+
+test.glm.add[[3]] <- glm(NIDIF ~ NestAge + HAB2 + SUPPL + poly(PREC_NIDIF) + poly(TEMP_NIDIF, 2),
+                     family = binomial(link = logexp(data$EXPO)),
+                     data = data)
+
+test.glm.add[[4]] <- glm(NIDIF ~ NestAge + HAB2 + SUPPL + poly(PREC_NIDIF, 2),
+                     family = binomial(link = logexp(data$EXPO)),
+                     data = data)
+
+test.glm.add[[5]] <- glm(NIDIF ~ NestAge + HAB2 + SUPPL + poly(TEMP_NIDIF, 2),
+                     family = binomial(link = logexp(data$EXPO)),
+                     data = data)
+
+test.glm.add[[6]] <- glm(NIDIF ~ NestAge + HAB2 + SUPPL*poly(PREC_NIDIF) + poly(TEMP_NIDIF, 2),
+                         family = binomial(link = logexp(data$EXPO)),
+                         data = data)
+
+test.glm.add[[7]] <- glm(NIDIF ~ NestAge + SUPPL*HAB2 + SUPPL*poly(PREC_NIDIF) + poly(TEMP_NIDIF, 2),
+                         family = binomial(link = logexp(data$EXPO)),
+                         data = data)
+test.glm.add[[8]] <- glm(NIDIF ~ NestAge + HAB2 + SUPPL*poly(PREC_NIDIF,2) + SUPPL*poly(TEMP_NIDIF, 2),
+                     family = binomial(link = logexp(data$EXPO)),
+                     data = data)
+
+# AIC table
+Modnames <- paste("mod", 1:length(test.glm.add), sep = " ")
+AIC.test <- aictab(cand.set = test.glm.add, modnames = Modnames, sort = TRUE)
+AIC.test
+
+# --------------- #
+
+# data$PREC_NIDIF <- as.vector(scale(data$PREC_NIDIF))
+# data$TEMP_NIDIF <- as.vector(scale(data$TEMP_NIDIF))
 
 test.glm <- list()
 
 test.glm[[1]] <- glm(NIDIF ~ 1,
-                     family = binomial(link = logexp(data.test$EXPO)),
-                     data = data.test)
+                     family = binomial(link = logexp(data$EXPO)),
+                     data = data)
 
-test.glm[[2]] <- glm(NIDIF ~ NestAge + HAB2 ,
-                     family = binomial(link = logexp(data.test$EXPO)),
-                     data = data.test)
+test.glm[[2]] <- glm(NIDIF ~ NestAge + HAB2 + SUPPL,
+                     family = binomial(link = logexp(data$EXPO)),
+                     data = data)
 
-test.glm[[3]] <- glm(NIDIF ~ NestAge + HAB2 + SUPPL + PREC_NIDIF + poly(TEMP_NIDIF, 2),
-                     family = binomial(link = logexp(data.test$EXPO)),
-                     data = data.test)
+test.glm[[3]] <- glm(NIDIF ~ NestAge + HAB2 + SUPPL*poly(TEMP_NIDIF, 2),
+                     family = binomial(link = logexp(data$EXPO)),
+                     data = data)
 
-test.glm[[4]] <- glm(NIDIF ~ NestAge + HAB2 + SUPPL + PREC_NIDIF,
-                     family = binomial(link = logexp(data.test$EXPO)),
-                     data = data.test)
+test.glm[[4]] <- glm(NIDIF ~ NestAge + HAB2 + SUPPL*poly(PREC_NIDIF,2),
+                     family = binomial(link = logexp(data$EXPO)),
+                     data = data)
 
-test.glm[[5]] <- glm(NIDIF ~ NestAge + HAB2 + SUPPL + poly(TEMP_NIDIF, 2),
-                     family = binomial(link = logexp(data.test$EXPO)),
-                     data = data.test)
+test.glm[[5]] <- glm(NIDIF ~ NestAge + HAB2 + SUPPL*poly(PREC_NIDIF,2) + SUPPL*poly(TEMP_NIDIF, 2),
+                     family = binomial(link = logexp(data$EXPO)),
+                     data = data)
 
-test.glm[[6]] <- glm(NIDIF ~ NestAge + HAB2 + SUPPL*poly(TEMP_NIDIF, 2),
-                     family = binomial(link = logexp(data.test$EXPO)),
-                     data = data.test)
+test.glm[[6]] <- glm(NIDIF ~ NestAge + HAB2 + poly(PREC_NIDIF,2) + poly(TEMP_NIDIF, 2),
+                      family = binomial(link = logexp(data$EXPO)),
+                      data = data)
 
-test.glm[[7]] <- glm(NIDIF ~ NestAge + HAB2 + SUPPL*PREC_NIDIF,
-                     family = binomial(link = logexp(data.test$EXPO)),
-                     data = data.test)
+test.glm[[7]] <- glm(NIDIF ~ NestAge + HAB2 + poly(PREC_NIDIF,2)*SUPPL + poly(TEMP_NIDIF, 2),
+                      family = binomial(link = logexp(data$EXPO)),
+                      data = data)
 
-test.glm[[8]] <- glm(NIDIF ~ NestAge + HAB2 + SUPPL*PREC_NIDIF + SUPPL*poly(TEMP_NIDIF, 2),
-                     family = binomial(link = logexp(data.test$EXPO)),
-                     data = data.test)
+test.glm[[8]] <- glm(NIDIF ~ NestAge + HAB2 + poly(PREC_NIDIF,2) + poly(TEMP_NIDIF, 2)*SUPPL,
+                      family = binomial(link = logexp(data$EXPO)),
+                      data = data)
 
-test.glm[[9]] <- glm(NIDIF ~ NestAge + HAB2 + PREC_NIDIF + poly(TEMP_NIDIF, 2),
-                      family = binomial(link = logexp(data.test$EXPO)),
-                      data = data.test)
+test.glm[[9]] <- glm(NIDIF ~ NestAge + HAB2*SUPPL + SUPPL*poly(PREC_NIDIF) + SUPPL*poly(TEMP_NIDIF, 2),
+                      family = binomial(link = logexp(data$EXPO)),
+                      data = data)
 
-test.glm[[10]] <- glm(NIDIF ~ NestAge + HAB2 + PREC_NIDIF*SUPPL + poly(TEMP_NIDIF, 2),
-                      family = binomial(link = logexp(data.test$EXPO)),
-                      data = data.test)
+test.glm[[10]] <- glm(NIDIF ~ NestAge + HAB2*SUPPL + poly(PREC_NIDIF,2) + poly(TEMP_NIDIF, 2),
+                      family = binomial(link = logexp(data$EXPO)),
+                      data = data)
 
-test.glm[[11]] <- glm(NIDIF ~ NestAge + HAB2 + PREC_NIDIF + poly(TEMP_NIDIF, 2)*SUPPL,
-                      family = binomial(link = logexp(data.test$EXPO)),
-                      data = data.test)
+test.glm[[11]] <- glm(NIDIF ~ NestAge + HAB2*SUPPL + poly(PREC_NIDIF,2)*SUPPL + poly(TEMP_NIDIF, 2),
+                      family = binomial(link = logexp(data$EXPO)),
+                      data = data)
 
-test.glm[[12]] <- glm(NIDIF ~ NestAge + HAB2*SUPPL + SUPPL*PREC_NIDIF + SUPPL*poly(TEMP_NIDIF, 2),
-                      family = binomial(link = logexp(data.test$EXPO)),
-                      data = data.test)
+test.glm[[12]] <- glm(NIDIF ~ NestAge + HAB2*SUPPL + poly(PREC_NIDIF,2) + poly(TEMP_NIDIF, 2)*SUPPL,
+                      family = binomial(link = logexp(data$EXPO)),
+                      data = data)
 
-test.glm[[13]] <- glm(NIDIF ~ NestAge + HAB2*SUPPL + PREC_NIDIF + poly(TEMP_NIDIF, 2),
-                      family = binomial(link = logexp(data.test$EXPO)),
-                      data = data.test)
+# ------------------------------------------------------------------------ #
 
-test.glm[[14]] <- glm(NIDIF ~ NestAge + HAB2*SUPPL + PREC_NIDIF + poly(TEMP_NIDIF, 2),
-                      family = binomial(link = logexp(data.test$EXPO)),
-                      data = data.test)
+test.glm[[13]] <- glm(NIDIF ~ NestAge + HAB2 + SUPPL + poly(PREC_NIDIF) + poly(TEMP_NIDIF, 2),
+                         family = binomial(link = logexp(data$EXPO)),
+                         data = data)
 
-test.glm[[15]] <- glm(NIDIF ~ NestAge + HAB2*SUPPL + PREC_NIDIF*SUPPL + poly(TEMP_NIDIF, 2),
-                      family = binomial(link = logexp(data.test$EXPO)),
-                      data = data.test)
+test.glm[[14]] <- glm(NIDIF ~ NestAge + HAB2 + SUPPL + poly(PREC_NIDIF, 2),
+                         family = binomial(link = logexp(data$EXPO)),
+                         data = data)
 
-test.glm[[16]] <- glm(NIDIF ~ NestAge + HAB2*SUPPL + PREC_NIDIF + poly(TEMP_NIDIF, 2)*SUPPL,
-                      family = binomial(link = logexp(data.test$EXPO)),
-                      data = data.test)
+test.glm[[15]] <- glm(NIDIF ~ NestAge + HAB2 + SUPPL + poly(TEMP_NIDIF, 2),
+                         family = binomial(link = logexp(data$EXPO)),
+                         data = data)
+
+test.glm[[16]] <- glm(NIDIF ~ NestAge + HAB2 + SUPPL*poly(PREC_NIDIF) + poly(TEMP_NIDIF, 2),
+                         family = binomial(link = logexp(data$EXPO)),
+                         data = data)
+
+test.glm[[17]] <- glm(NIDIF ~ NestAge + SUPPL*HAB2 + SUPPL*poly(PREC_NIDIF) + poly(TEMP_NIDIF, 2),
+                         family = binomial(link = logexp(data$EXPO)),
+                         data = data)
 
 # AIC table
 Modnames <- paste("mod", 1:length(test.glm), sep = " ")
-AIC.test <- aictab(cand.set = test.glm, modnames = Modnames, sort = TRUE)
-AIC.test
+AIC.test.2 <- aictab(cand.set = test.glm, modnames = Modnames, sort = TRUE)
+AIC.test.2
 
-summary(test.glm[[8]])
-Anova(test.glm[[8]])
+summary(test.glm[[5]])
+Anova(test.glm[[5]])
+plot(test.glm[[5]])
 
-summary(test.glm[[12]])
-Anova(test.glm[[12]])
+test.glm[[5]] <- glm(NIDIF ~ NestAge + HAB2 + SUPPL * poly(PREC_NIDIF, 
+                                                             2) + SUPPL *poly(TEMP_NIDIF, 2),
+                     family = binomial(link = logexp(data$EXPO)),
+                     data = data)
+
+# Predictions
+
+pred.TEM <- data.frame(NestAge = mean(data$NestAge),
+                       HAB2 = "MES",
+                       SUPPL = "TEM",
+                       PREC_NIDIF = mean(data$PREC_NIDIF),
+                       TEMP_NIDIF = seq(1.8, 8.5, 0.01))
+
+pp.TEM <- predict(test.glm[[5]], newdata = pred.TEM, se.fit = TRUE)
+
+pred.W <- data.frame(NestAge = mean(data$NestAge),
+                       HAB2 = "MES",
+                       SUPPL = "W",
+                       PREC_NIDIF = mean(data$PREC_NIDIF),
+                       TEMP_NIDIF = seq(1.8, 8.5, 0.01))
+
+pp.W <- predict(test.glm[[5]], newdata = pred.W, se.fit = TRUE)
+
+pred.F <- data.frame(NestAge = mean(data$NestAge),
+                       HAB2 = "MES",
+                       SUPPL = "F",
+                       PREC_NIDIF = mean(data$PREC_NIDIF),
+                       TEMP_NIDIF = seq(1.8, 8.5, 0.01))
+
+pp.F <- predict(test.glm[[5]], newdata = pred.F, se.fit = TRUE)
+
+#par(mfrow = c(2, 2)) 
+x11()
+plot(pred.TEM$TEMP_NIDIF, plogis(pp.TEM[[1]]), type = "l", ylim = c(0, 1))
+points(data$TEMP_NIDIF, data$NIDIF)
+lines(pred.TEM$TEMP_NIDIF, plogis(pp.TEM[[1]] + 2*pp.TEM[[2]]), ylim = c(0, 1), col = "red")
+lines(pred.TEM$TEMP_NIDIF, plogis(pp.TEM[[1]] - 2*pp.TEM[[2]]), ylim = c(0, 1), col = "red")
+
+lines(pred.W$TEMP_NIDIF, plogis(pp.W[[1]]), col = "blue")
+lines(pred.F$TEMP_NIDIF, plogis(pp.F[[1]]), col = "orange")
 
 
+# TEST WITH LINEAR EFFECT OF TEMP AND PREC
+
+test.glm[[5]] <- glm(NIDIF ~ NestAge + HAB2 + SUPPL*PREC_NIDIF + SUPPL*TEMP_NIDIF,
+                     family = binomial(link = logexp(data$EXPO)),
+                     data = data)
+
+# Predictions
+
+pred.TEM <- data.frame(NestAge = mean(data$NestAge),
+                       HAB2 = "MES",
+                       SUPPL = "TEM",
+                       PREC_NIDIF = mean(data$PREC_NIDIF),
+                       TEMP_NIDIF = seq(1.8, 8.5, 0.01))
+
+pp.TEM <- predict(test.glm[[5]], newdata = pred.TEM, se.fit = TRUE)
+
+pred.W <- data.frame(NestAge = mean(data$NestAge),
+                     HAB2 = "MES",
+                     SUPPL = "W",
+                     PREC_NIDIF = mean(data$PREC_NIDIF),
+                     TEMP_NIDIF = seq(1.8, 8.5, 0.01))
+
+pp.W <- predict(test.glm[[5]], newdata = pred.W, se.fit = TRUE)
+
+pred.F <- data.frame(NestAge = mean(data$NestAge),
+                     HAB2 = "MES",
+                     SUPPL = "F",
+                     PREC_NIDIF = mean(data$PREC_NIDIF),
+                     TEMP_NIDIF = seq(1.8, 8.5, 0.01))
+
+pp.F <- predict(test.glm[[5]], newdata = pred.F, se.fit = TRUE)
+
+#par(mfrow = c(2, 2)) 
+x11()
+plot(pred.TEM$TEMP_NIDIF, plogis(pp.TEM[[1]]), type = "l", ylim = c(0, 1))
+#points(data$TEMP_NIDIF, data$NIDIF)
+lines(pred.TEM$TEMP_NIDIF, plogis(pp.TEM[[1]] + 2*pp.TEM[[2]]), ylim = c(0, 1), col = "grey", lty = 3)
+lines(pred.TEM$TEMP_NIDIF, plogis(pp.TEM[[1]] - 2*pp.TEM[[2]]), ylim = c(0, 1), col = "grey", lty = 3)
+
+lines(pred.W$TEMP_NIDIF, plogis(pp.W[[1]]), col = "blue", lty = 1)
+lines(pred.TEM$TEMP_NIDIF, plogis(pp.W[[1]] + 2*pp.W[[2]]), ylim = c(0, 1), col = "darkblue", lty = 3)
+lines(pred.TEM$TEMP_NIDIF, plogis(pp.W[[1]] - 2*pp.W[[2]]), ylim = c(0, 1), col = "darkblue", lty = 3)
+
+x11()
+plot(pred.TEM$TEMP_NIDIF, plogis(pp.TEM[[1]]), type = "l", ylim = c(0, 1))
+#points(data$TEMP_NIDIF, data$NIDIF)
+lines(pred.TEM$TEMP_NIDIF, plogis(pp.TEM[[1]] + 2*pp.TEM[[2]]), ylim = c(0, 1), col = "grey", lty = 3)
+lines(pred.TEM$TEMP_NIDIF, plogis(pp.TEM[[1]] - 2*pp.TEM[[2]]), ylim = c(0, 1), col = "grey", lty = 3)
+
+lines(pred.F$TEMP_NIDIF, plogis(pp.F[[1]]), col = "orange", lty = 1)
+lines(pred.TEM$TEMP_NIDIF, plogis(pp.F[[1]] + 2*pp.F[[2]]), ylim = c(0, 1), col = "dark red", lty = 3)
+lines(pred.TEM$TEMP_NIDIF, plogis(pp.F[[1]] - 2*pp.F[[2]]), ylim = c(0, 1), col = "darkred", lty = 3)
+
+#### Trash ####
 # Exploration of temperature and precipitation variables
 
 boxplot(data$PREC_NIDIF~data$YEAR)
 boxplot(data$TEMP_NIDIF~data$YEAR)
 
 plot(data$INITIATION, data$TEMP_NIDIF)
-x11()
+
