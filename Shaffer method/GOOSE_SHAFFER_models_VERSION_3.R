@@ -11,6 +11,7 @@ library("visreg") # Vizualisation of model effects
 library("DHARMa") # For simulations
 library("AICcmodavg") # For AIC comparison
 library("car") # For the Anova command
+library("multcomp") # For the contrast test
 
 #### Import data ####
 data <- read.table("GOOSE_SHAFFER_database_all_nests_2005_2015-2017.csv", h = T, sep = " ")
@@ -131,11 +132,45 @@ h <- lapply(glm.models, function(x){
   j
   })
 h <- as.vector(as.character(h))
-h <- do.call("rbind", as.character(h))
+
 
 Modnames <- paste(paste("mod", 1:length(glm.models), sep = " "), h, sep = "-")
 AIC <- aictab(cand.set = glm.models, modnames = Modnames, sort = TRUE)
 AIC
+
+# Contrast analysis for the best model
+
+summary(glht(glm.models[[4]], mcp(SUPPL = "Tukey")))
+# Construction of a contrast matrix based on Tukey-contrasts for YEAR in a block-diagonal way, i.e., for each level of SUPPL
+
+Tuk <- contrMat(table(data$YEAR), "Tukey")
+
+kk1 <- cbind(Tuk, matrix(0, nrow = nrow(Tuk), ncol = ncol(Tuk)), matrix(0, nrow = nrow(Tuk), ncol = ncol(Tuk)))
+rownames(kk1) <- paste(levels(data$SUPPL)[1], rownames(kk1), sep = ":")
+
+kk2 <- cbind(matrix(0, nrow = nrow(Tuk), ncol = ncol(Tuk)), Tuk, matrix(0, nrow = nrow(Tuk), ncol = ncol(Tuk)))
+rownames(kk2) <- paste(levels(data$SUPPL)[2], rownames(kk2), sep = ":")
+
+kk3 <- cbind(matrix(0, nrow = nrow(Tuk), ncol = ncol(Tuk)), matrix(0, nrow = nrow(Tuk), ncol = ncol(Tuk)), Tuk)
+rownames(kk3) <- paste(levels(data$SUPPL)[3], rownames(kk3), sep = ":")
+
+kk <- rbind(kk1, kk2, kk3)
+colnames(kk) <- c(colnames(Tuk), colnames(Tuk), colnames(Tuk))
+
+# Perform the test
+data$Y.S <- with(data, interaction(YEAR, SUPPL))
+cell <- glm(NIDIF ~ Y.S - 1, data = data)
+summary(glht(cell, linfct = kk)) 
+
+# OR
+
+tmpp <- expand.grid(YEAR = unique(data$YEAR),
+                   SUPPL = unique(data$SUPPL), 
+                   NestAge = mean(data$NestAge),
+                   HAB2 = "MES")
+x <- model.matrix(~ NestAge + HAB2 + YEAR*SUPPL,
+                  family = binomial(link = logexp(data$EXPO)), data = tmpp)
+?glht(glm.models[[4]], linfct = x)
 
 # -------------------------------------------------------- #
 #### Predictions for the best glm model - Laurent style ####
@@ -547,6 +582,10 @@ test.glm.add[[5]] <- glm(NIDIF ~ NestAge + HAB2 + SUPPL + poly(TEMP_NIDIF, 2),
                      family = binomial(link = logexp(data$EXPO)),
                      data = data)
 
+test.glm.add[[6]] <- glm(NIDIF ~ NestAge + HAB2 + poly(TEMP_NIDIF, 2) + poly(PREC_NIDIF, 2),
+                         family = binomial(link = logexp(data$EXPO)),
+                         data = data)
+# ---------------------------------------------------------------------- #
 test.glm.add[[6]] <- glm(NIDIF ~ NestAge + HAB2 + SUPPL*poly(PREC_NIDIF) + poly(TEMP_NIDIF, 2),
                          family = binomial(link = logexp(data$EXPO)),
                          data = data)
@@ -752,3 +791,47 @@ boxplot(data$TEMP_NIDIF~data$YEAR)
 
 plot(data$INITIATION, data$TEMP_NIDIF)
 
+
+### Plot for model NIDIF ~ NestAge + HAB + PREC^2 + TEMP^2 
+
+pred.TEMP <- data.frame(NestAge = mean(data$NestAge),
+                       HAB2 = "MES",
+                       PREC_NIDIF = mean(data$PREC_NIDIF),
+                       TEMP_NIDIF = seq(0.5, 8.5, 0.01))
+pp <- predict(test.glm.add[[6]], newdata = pred.TEMP, se.fit = TRUE)
+plot(pred.TEMP$TEMP_NIDIF, plogis(pp[[1]]), type = "l", ylim = c(0, 1), bty = "n")
+#points(data$TEMP_NIDIF, data$NIDIF)
+lines(pred.TEMP$TEMP_NIDIF, plogis(pp[[1]] + 2*pp[[2]]), ylim = c(0, 1), col = "grey", lty = 3)
+lines(pred.TEMP$TEMP_NIDIF, plogis(pp[[1]] - 2*pp[[2]]), ylim = c(0, 1), col = "grey", lty = 3)
+
+pred.TEMP <- data.frame(NestAge = mean(data$NestAge),
+                        HAB2 = "WET",
+                        PREC_NIDIF = mean(data$PREC_NIDIF),
+                        TEMP_NIDIF = seq(0.5, 8.5, 0.01))
+pp <- predict(test.glm.add[[6]], newdata = pred.TEMP, se.fit = TRUE)
+lines(pred.TEMP$TEMP_NIDIF, plogis(pp[[1]]), type = "l", ylim = c(0, 1), bty = "n", col = "blue")
+#points(data$TEMP_NIDIF, data$NIDIF)
+lines(pred.TEMP$TEMP_NIDIF, plogis(pp[[1]] + 2*pp[[2]]), ylim = c(0, 1), col = "deepskyblue", lty = 3)
+lines(pred.TEMP$TEMP_NIDIF, plogis(pp[[1]] - 2*pp[[2]]), ylim = c(0, 1), col = "deepskyblue", lty = 3)
+
+
+x11()
+pred.TEMP <- data.frame(NestAge = mean(data$NestAge),
+                        HAB2 = "MES",
+                        TEMP_NIDIF = mean(data$PREC_NIDIF),
+                        PREC_NIDIF = seq(0, 7.5, 0.01))
+pp <- predict(test.glm.add[[6]], newdata = pred.TEMP, se.fit = TRUE)
+plot(pred.TEMP$PREC_NIDIF, plogis(pp[[1]]), type = "l", ylim = c(0, 1), bty = "n")
+#points(data$TEMP_NIDIF, data$NIDIF)
+lines(pred.TEMP$PREC_NIDIF, plogis(pp[[1]] + 2*pp[[2]]), ylim = c(0, 1), col = "grey", lty = 3)
+lines(pred.TEMP$PREC_NIDIF, plogis(pp[[1]] - 2*pp[[2]]), ylim = c(0, 1), col = "grey", lty = 3)
+
+pred.TEMP <- data.frame(NestAge = mean(data$NestAge),
+                        HAB2 = "WET",
+                        TEMP_NIDIF = mean(data$PREC_NIDIF),
+                        PREC_NIDIF = seq(0, 7.5, 0.01))
+pp <- predict(test.glm.add[[6]], newdata = pred.TEMP, se.fit = TRUE)
+lines(pred.TEMP$PREC_NIDIF, plogis(pp[[1]]), type = "l", ylim = c(0, 1), bty = "n", col = "blue")
+#points(data$TEMP_NIDIF, data$NIDIF)
+lines(pred.TEMP$PREC_NIDIF, plogis(pp[[1]] + 2*pp[[2]]), ylim = c(0, 1), col = "deepskyblue", lty = 3)
+lines(pred.TEMP$PREC_NIDIF, plogis(pp[[1]] - 2*pp[[2]]), ylim = c(0, 1), col = "deepskyblue", lty = 3)
