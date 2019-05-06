@@ -13,6 +13,7 @@ library("AICcmodavg") # For AIC comparison
 library("car") # For the Anova command
 library("multcomp") # For the contrast analysis
 library("emmeans") # For the contrast analysis
+library("modEvA") # For the variance explained
 
 #### Import data ####
 data <- read.table("GOOSE_SHAFFER_database_all_nests_2005_2015-2017.csv", h = T, sep = " ")
@@ -142,6 +143,7 @@ AIC
 # Contrast analysis for the best model
 anova(glm.models[[4]])
 Anova(glm.models[[4]])
+Dsquared(glm.models[[4]])
 
 # emmeans package
 
@@ -187,6 +189,71 @@ x <- model.matrix(~ NestAge + HAB2 + YEAR*SUPPL,
 ?glht(glm.models[[4]], linfct = x)
 
 # -------------------------------------------------------- #
+#### Predictions for the best glm model - estimés + IC ####
+# ------------------------------------------------------ #
+
+pred <- data.frame(NestAge = mean(data$NestAge),
+                   HAB2 = "MES",
+                   YEAR = factor(c(rep("2015", 3), rep("2016", 3), rep("2017", 3)), levels = c("2015", "2016", "2017")),
+                   SUPPL = factor(rep(c("TEM", "F", "W"), 3), levels = c("TEM", "F", "W")))
+
+pp <- predict(glm.models[[4]], newdata = pred, se.fit = TRUE)
+pp
+
+pred <- cbind(pred, FIT = pp$fit, SE = pp$se.fit, N = as.vector(table(data$SUPPL, data$YEAR)))
+pred
+
+pred$IC_low <- pred$FIT - 1.96*(pred$SE/sqrt(pred$N))
+pred$IC_high <- pred$FIT + 1.96*(pred$SE/sqrt(pred$N))
+
+
+
+pred$FIT <- plogis(pred$FIT)
+pred$IC_low <- plogis(pred$IC_low)
+pred$IC_high <- plogis(pred$IC_high)
+
+#x11()
+
+# png("C:/Users/HP_9470m/Dropbox/PHD. Claire/Chapitres de thèse/CHAPTER 1 - Geese nesting success & supplemented nests/PAPER_V2/Figures/GOOSE_DSR_int_conf.tiff",
+#     res=300,
+#     width=30,
+#     height=25,
+#     pointsize=12,
+#     unit="cm",
+#     bg="transparent")
+
+plot(pred$FIT[pred$SUPPL == "TEM"], type = "l", ylim = c(min(pred$IC_low), 1), bty = "n", lwd = 2, xaxt = "n", xlab = "", ylab = "Daily survival rate", col = "chartreuse3")
+lines(pred$FIT[pred$SUPPL == "W"], col = "cyan3", lwd = 2)
+lines(pred$FIT[pred$SUPPL == "F"], col = "darkorange2", lwd = 2)
+
+col <- c("chartreuse3", "cyan3", "darkorange2")
+s <- c("TEM", "W", "F")
+for(i in 1:3){
+  arrows(x0 = c(1, 2, 3),
+         y0 = pred$FIT[pred$SUPPL == s[i]],
+         x1 = c(1, 2, 3),
+         y1 = pred$IC_high[pred$SUPPL == s[i]],
+         angle = 90,
+         length = 0,
+         col = col[i],
+         lwd = 2)
+  
+  arrows(x0 = c(1, 2, 3),
+         y0 = pred$FIT[pred$SUPPL == s[i]],
+         x1 = c(1, 2, 3),
+         y1 = pred$IC_low[pred$SUPPL == s[i]],
+         angle = 90,
+         length = 0,
+         col = col[i],
+         lwd = 2)
+  
+}
+axis(1, at = c(1, 2, 3), labels = c("2015", "2016", "2017"))
+legend("topright", bty = "n", legend = c("TEMOIN", "WATER", "FOOD"), col = col, lty = 1)
+
+dev.off()
+
+# -------------------------------------------------------- #
 #### Predictions for the best glm model - Laurent style ####
 # -------------------------------------------------------- #
 
@@ -229,6 +296,10 @@ data.predict <- apply(data.predict, MARGIN = 2, function(x){
   x
 })
 data.predict <- cbind(pred, data.predict)
+data.predict <- cbind(data.predict, group.size)
+data.predict$IC_low <- data.predict$fit - 1.96*((data.predict$SE.upper - data.predict$fit)/sqrt(data.predict$V4))
+data.predict$IC_high <- data.predict$fit + 1.96*((data.predict$SE.upper - data.predict$fit)/sqrt(data.predict$V4))
+
 
   # Plot the results
 color <- c("chartreuse3", "darkorange2", "cyan3")[as.numeric(data.predict$SUPPL)] 
@@ -270,7 +341,7 @@ legend(bplot[length(bplot)-2],
 arrows(x0 = bplot,
        y0 = data.predict$fit,
        x1 = bplot,
-       y1 = data.predict$SE.upper,
+       y1 = data.predict$IC_high,
        angle = 90,
        length = 0,
        col = c("chartreuse4", "chartreuse4", "darkorange3", "darkorange3", "cyan4", "cyan4"),
@@ -278,7 +349,7 @@ arrows(x0 = bplot,
 arrows(x0 = bplot,
        y0 = data.predict$fit,
        x1 = bplot,
-       y1 = data.predict$SE.lower,
+       y1 = data.predict$IC_low,
        angle = 90,
        length = 0,
        col = c("chartreuse4", "chartreuse4", "darkorange3", "darkorange3", "cyan4", "cyan4"),
@@ -455,6 +526,7 @@ plot(sims.2)
 # -------------------------------- #
 #### Computation of predictions ####
 # -------------------------------- #
+
 
 # Predictions
   # New dataframe for predictions with Reference level of year == 2015 and habitat == MES
@@ -849,66 +921,3 @@ lines(pred.TEMP$PREC_NIDIF, plogis(pp[[1]]), type = "l", ylim = c(0, 1), bty = "
 #points(data$TEMP_NIDIF, data$NIDIF)
 lines(pred.TEMP$PREC_NIDIF, plogis(pp[[1]] + 2*pp[[2]]), ylim = c(0, 1), col = "deepskyblue", lty = 3)
 lines(pred.TEMP$PREC_NIDIF, plogis(pp[[1]] - 2*pp[[2]]), ylim = c(0, 1), col = "deepskyblue", lty = 3)
-
-
-# Modele glm.models[[4]]
-pred <- data.frame(NestAge = mean(data$NestAge),
-                   HAB2 = "MES",
-                   YEAR = factor(c(rep("2015", 3), rep("2016", 3), rep("2017", 3)), levels = c("2015", "2016", "2017")),
-                   SUPPL = factor(rep(c("TEM", "F", "W"), 3), levels = c("TEM", "F", "W")))
-
-pp <- predict(glm.models[[4]], newdata = pred, se.fit = TRUE)
-pp
-
-pred <- cbind(pred, FIT = pp$fit, SE = pp$se.fit, N = as.vector(table(data$SUPPL, data$YEAR)))
-pred
-
-pred$IC_low <- pred$FIT - 1.96*(pred$SE/sqrt(pred$N))
-pred$IC_high <- pred$FIT + 1.96*(pred$SE/sqrt(pred$N))
-
-
-
-pred$FIT <- plogis(pred$FIT)
-pred$IC_low <- plogis(pred$IC_low)
-pred$IC_high <- plogis(pred$IC_high)
-
-#x11()
-
-# png("C:/Users/HP_9470m/Dropbox/PHD. Claire/Chapitres de thèse/CHAPTER 1 - Geese nesting success & supplemented nests/PAPER_V2/Figures/GOOSE_DSR_int_conf.tiff",
-#     res=300,
-#     width=30,
-#     height=25,
-#     pointsize=12,
-#     unit="cm",
-#     bg="transparent")
-
-plot(pred$FIT[pred$SUPPL == "TEM"], type = "l", ylim = c(min(pred$IC_low), 1), bty = "n", lwd = 2, xaxt = "n", xlab = "", ylab = "Daily survival rate", col = "chartreuse3")
-lines(pred$FIT[pred$SUPPL == "W"], col = "cyan3", lwd = 2)
-lines(pred$FIT[pred$SUPPL == "F"], col = "darkorange2", lwd = 2)
-
-col <- c("chartreuse3", "cyan3", "darkorange2")
-s <- c("TEM", "W", "F")
-for(i in 1:3){
-  arrows(x0 = c(1, 2, 3),
-         y0 = pred$FIT[pred$SUPPL == s[i]],
-         x1 = c(1, 2, 3),
-         y1 = pred$IC_high[pred$SUPPL == s[i]],
-         angle = 90,
-         length = 0,
-         col = col[i],
-         lwd = 2)
-  
-  arrows(x0 = c(1, 2, 3),
-         y0 = pred$FIT[pred$SUPPL == s[i]],
-         x1 = c(1, 2, 3),
-         y1 = pred$IC_low[pred$SUPPL == s[i]],
-         angle = 90,
-         length = 0,
-         col = col[i],
-         lwd = 2)
-  
-}
-axis(1, at = c(1, 2, 3), labels = c("2015", "2016", "2017"))
-legend("topright", bty = "n", legend = c("TEMOIN", "WATER", "FOOD"), col = col, lty = 1)
-
-dev.off()
