@@ -143,6 +143,7 @@ AIC
 # Contrast analysis for the best model
 anova(glm.models[[4]])
 Anova(glm.models[[4]])
+confint(glm.models[[4]])
 Dsquared(glm.models[[4]])
 
 # emmeans package
