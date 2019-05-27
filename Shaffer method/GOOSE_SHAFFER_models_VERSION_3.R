@@ -189,9 +189,9 @@ x <- model.matrix(~ NestAge + HAB2 + YEAR*SUPPL,
                   family = binomial(link = logexp(data$EXPO)), data = tmpp)
 ?glht(glm.models[[4]], linfct = x)
 
-# -------------------------------------------------------- #
-#### Predictions for the best glm model - estimés + IC ####
-# ------------------------------------------------------ #
+# ----------------------------------------------------------------------------- #
+#### Predictions for the best glm model per SUPPL and YEAR - estimates + IC ####
+# --------------------------------------------------------------------------- #
 
 pred <- data.frame(NestAge = mean(data$NestAge),
                    HAB2 = "MES",
@@ -290,25 +290,30 @@ data.predict <- as.data.frame(pp)[,-3]
 data.predict$SE.upper <- data.predict$fit + data.predict$se.fit
 data.predict$SE.lower <- data.predict$fit - data.predict$se.fit
 
-data.predict <- apply(data.predict, MARGIN = 2, plogis)
+data.predict$group.size <- group.size$V4
 
-data.predict <- apply(data.predict, MARGIN = 2, function(x){
+data.predict$IC_low <- data.predict$fit - 1.96*(data.predict$se.fit/sqrt(group.size$V4))
+data.predict$IC_up <- data.predict$fit + 1.96*(data.predict$se.fit/sqrt(group.size$V4))
+
+data.predict.DSR <- apply(data.predict[,-2], MARGIN = 2, plogis)
+
+data.predict.NS <- apply(data.predict.DSR, MARGIN = 2, function(x){
   x <- x^27
   x
 })
-data.predict <- cbind(pred, data.predict)
-data.predict <- cbind(data.predict, group.size)
-data.predict$IC_low <- data.predict$fit - 1.96*((data.predict$SE.upper - data.predict$fit)/sqrt(data.predict$V4))
-data.predict$IC_high <- data.predict$fit + 1.96*((data.predict$SE.upper - data.predict$fit)/sqrt(data.predict$V4))
 
+data.predict.DSR <- cbind(data.predict.DSR, group.size)
+names(data.predict.DSR)[7:10] <- c("YEAR", "HAB", "SUPPL", "GROUP.SIZE")
+data.predict.NS <- cbind(data.predict.NS, group.size)
+names(data.predict.NS)[7:10] <- c("YEAR", "HAB", "SUPPL", "GROUP.SIZE")
 
   # Plot the results
-color <- c("chartreuse3", "darkorange2", "cyan3")[as.numeric(data.predict$SUPPL)] 
-color.2 <- c("chartreuse4", "darkorange3", "cyan4")[as.numeric(data.predict$SUPPL)] 
+color <- c("chartreuse3", "darkorange2", "cyan3")[as.numeric(data.predict.NS$SUPPL)] 
+color.2 <- c("chartreuse4", "darkorange3", "cyan4")[as.numeric(data.predict.NS$SUPPL)] 
 
 x11()
 
-# png("C:/Users/HP_9470m/Dropbox/PHD. Claire/Chapitres de thèse/CHAPTER 1 - Geese nesting success & supplemented nests/PAPER_V2/Figures/GOOSE_Nesting_succ_suppl.tiff",
+# png("C:/Users/HP_9470m/Dropbox/PHD. Claire/Chapitres de thèse/CHAPTER 1 - Geese nesting success & supplemented nests/PAPER_V2/Figures/GOOSE_NS+IC.tiff",
 #     res=300,
 #     width=30,
 #     height=25,
@@ -316,7 +321,7 @@ x11()
 #     unit="cm",
 #     bg="transparent")
 
-bplot <- barplot(data.predict$fit,
+bplot <- barplot(data.predict.NS$fit,
                  space = c(rep(c(0.2, 0), 3), rep(c(0.4, 0, 0.2, 0, 0.2, 0), 2)),
                  ylim = c(0, 1),
                  las = 1,
@@ -340,17 +345,17 @@ legend(bplot[length(bplot)-2],
        cex = 1.2)
 
 arrows(x0 = bplot,
-       y0 = data.predict$fit,
+       y0 = data.predict.NS$fit,
        x1 = bplot,
-       y1 = data.predict$IC_high,
+       y1 = data.predict.NS$IC_up,
        angle = 90,
        length = 0,
        col = c("chartreuse4", "chartreuse4", "darkorange3", "darkorange3", "cyan4", "cyan4"),
        lwd = 2)
 arrows(x0 = bplot,
-       y0 = data.predict$fit,
+       y0 = data.predict.NS$fit,
        x1 = bplot,
-       y1 = data.predict$IC_low,
+       y1 = data.predict.NS$IC_low,
        angle = 90,
        length = 0,
        col = c("chartreuse4", "chartreuse4", "darkorange3", "darkorange3", "cyan4", "cyan4"),
@@ -370,7 +375,7 @@ mtext("Goose nesting success",
 
 text(x = bplot,
      y = 0.2,
-     labels = paste("(", group.size$V4, ")", sep = ""),
+     labels = paste("(", data.predict.NS$GROUP.SIZE, ")", sep = ""),
      cex = 1.2)
 
 dev.off()
