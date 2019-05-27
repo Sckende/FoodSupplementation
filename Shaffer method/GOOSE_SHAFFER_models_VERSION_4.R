@@ -142,6 +142,115 @@ AIC
 summary(foo[[4]])
 summary(foo[[6]])
 
+# ---------------------------------- #
+#### ANOVA & Confident intervals ####
+# -------------------------------- #
+
+anova(foo[[4]])
+Anova(foo[[4]])
+confint(foo[[4]])
+Dsquared(foo[[4]])
+x11();plot(simulateResiduals(foo[[4]]))
+
+# ----------------------------------------------------------------------------- #
+#### Predictions for the best glm model per SUPPL and YEAR - estimates + IC ####
+# --------------------------------------------------------------------------- #
+
+pred <- data.frame(NestAge = mean(d.foo$NestAge),
+                   HAB2 = factor(rep(c("MES", "WET"), 6), levels = c("MES", "WET")),
+                   YEAR = factor(c(rep("2015", 4), rep("2016", 4), rep("2017", 4)), levels = c("2015", "2016", "2017")),
+                   SUPPL = factor(rep(c(rep("TEM", 2), rep("W", 2)), 3), levels = c("TEM", "W")))
+
+pp <- predict(foo[[4]], newdata = pred, se.fit = TRUE)
+pp
+
+pred <- cbind(pred, FIT = pp$fit, SE = pp$se.fit, N = group.size$n[!group.size$suppl == "F"])
+pred
+
+pred$IC_low <- pred$FIT - 1.96*(pred$SE/sqrt(pred$N))
+pred$IC_high <- pred$FIT + 1.96*(pred$SE/sqrt(pred$N))
+
+
+
+pred$FIT <- plogis(pred$FIT)
+pred$IC_low <- plogis(pred$IC_low)
+pred$IC_high <- plogis(pred$IC_high)
+
+pred$NS <- pred$FIT^27
+pred$IC_low_NS <- pred$IC_low^27
+pred$IC_high_NS <- pred$IC_high^27
+
+x11()
+
+# png("C:/Users/HP_9470m/Dropbox/PHD. Claire/Chapitres de thèse/CHAPTER 1 - Geese nesting success & supplemented nests/PAPER_V2/Figures/GOOSE_DSR_int_conf.tiff",
+#     res=300,
+#     width=30,
+#     height=25,
+#     pointsize=12,
+#     unit="cm",
+#     bg="transparent")
+color <- c("chartreuse3", "darkorange3")[as.numeric(pred$SUPPL)] 
+color.2 <- c("chartreuse4", "darkorange4")[as.numeric(pred$SUPPL)]
+
+bplot <- barplot(pred$NS,
+                 space = c(rep(c(0.2, 0), 2), rep(c(0.4, 0, 0.2, 0), 2)),
+                 ylim = c(0, 1),
+                 las = 1,
+                 col = color,
+                 border = color.2,
+                 cex.axis = 1.2)
+axis(1,
+     at = bplot,
+     rep(c("MES", "WET"), 6),
+     lty = 0,
+     cex.axis = 0.8,
+     las = 1,
+     main = "Food supplementation")
+
+legend(bplot[length(bplot)-2],
+       1.020,
+       legend = c("Control", "Water"),
+       pch = 15,
+       pt.cex = 2,
+       col = c("chartreuse3", "darkorange3"),
+       bty = "n",
+       cex = 1.2)
+
+arrows(x0 = bplot,
+       y0 = pred$NS,
+       x1 = bplot,
+       y1 = pred$IC_high_NS,
+       angle = 90,
+       length = 0,
+       col = c("chartreuse4", "chartreuse4", "darkorange4", "darkorange4"),
+       lwd = 2)
+arrows(x0 = bplot,
+       y0 = pred$NS,
+       x1 = bplot,
+       y1 = pred$IC_low_NS,
+       angle = 90,
+       length = 0,
+       col = c("chartreuse4", "chartreuse4", "darkorange4", "darkorange4"),
+       lwd = 2)
+
+mtext(c("2015", "2016", "2017"),
+      side = 1,
+      line = 3.5,
+      at = c(mean(c(bplot[[2]], bplot[[3]])), mean(c(bplot[[6]], bplot[[7]])), mean(c(bplot[[10]], bplot[[11]]))),
+      cex = 2)
+mtext("Goose nesting success",
+      side = 2,
+      line = -7,
+      las = 1,
+      at = 1.05,
+      cex = 1.2)
+
+text(x = bplot,
+     y = 0.2,
+     labels = paste("(", pred$N, ")", sep = ""),
+     cex = 1.2)
+dev.off()
+
 # ---------------------------- #
 #### Water supplementation ####
 # -------------------------- #
@@ -207,3 +316,245 @@ print(AIC, digit = 2)
 summary(wat[[3]])
 summary(wat[[4]])
 summary(wat[[5]])
+
+# ---------------------------------- #
+#### ANOVA & Confident intervals ####
+# -------------------------------- #
+
+anova(wat[[3]])
+Anova(wat[[3]])
+confint(wat[[3]])
+Dsquared(wat[[3]])
+x11(); plot(simulateResiduals(wat[[3]]))
+
+# ----------------------------------------------------------------------------- #
+#### Predictions for the best glm model per SUPPL and YEAR - estimates + IC ####
+# --------------------------------------------------------------------------- #
+
+pred <- data.frame(NestAge = mean(d.wat$NestAge),
+                   HAB2 = factor(rep(c("MES", "WET"), 6), levels = c("MES", "WET")),
+                   YEAR = factor(c(rep("2015", 4), rep("2016", 4), rep("2017", 4)), levels = c("2015", "2016", "2017")),
+                   SUPPL = factor(rep(c(rep("TEM", 2), rep("W", 2)), 3), levels = c("TEM", "W")))
+
+pp <- predict(wat[[3]], newdata = pred, se.fit = TRUE)
+pp
+
+pred <- cbind(pred, FIT = pp$fit, SE = pp$se.fit, N = group.size$n[!group.size$suppl == "F"])
+pred
+
+pred$IC_low <- pred$FIT - 1.96*(pred$SE/sqrt(pred$N))
+pred$IC_high <- pred$FIT + 1.96*(pred$SE/sqrt(pred$N))
+
+
+
+pred$FIT <- plogis(pred$FIT)
+pred$IC_low <- plogis(pred$IC_low)
+pred$IC_high <- plogis(pred$IC_high)
+
+pred$NS <- pred$FIT^27
+pred$IC_low_NS <- pred$IC_low^27
+pred$IC_high_NS <- pred$IC_high^27
+
+x11()
+
+# png("C:/Users/HP_9470m/Dropbox/PHD. Claire/Chapitres de thèse/CHAPTER 1 - Geese nesting success & supplemented nests/PAPER_V2/Figures/GOOSE_DSR_int_conf.tiff",
+#     res=300,
+#     width=30,
+#     height=25,
+#     pointsize=12,
+#     unit="cm",
+#     bg="transparent")
+color <- c("chartreuse3", "cyan3")[as.numeric(pred$SUPPL)] 
+color.2 <- c("chartreuse4", "cyan4")[as.numeric(pred$SUPPL)]
+
+bplot <- barplot(pred$NS,
+                 space = c(rep(c(0.2, 0), 2), rep(c(0.4, 0, 0.2, 0), 2)),
+                 ylim = c(0, 1),
+                 las = 1,
+                 col = color,
+                 border = color.2,
+                 cex.axis = 1.2)
+axis(1,
+     at = bplot,
+     rep(c("MES", "WET"), 6),
+     lty = 0,
+     cex.axis = 0.8,
+     las = 1)
+
+legend(bplot[length(bplot)-2],
+       1.020,
+       legend = c("Control", "Water"),
+       pch = 15,
+       pt.cex = 2,
+       col = c("chartreuse3", "cyan3"),
+       bty = "n",
+       cex = 1.2)
+
+arrows(x0 = bplot,
+       y0 = pred$NS,
+       x1 = bplot,
+       y1 = pred$IC_high_NS,
+       angle = 90,
+       length = 0,
+       col = c("chartreuse4", "chartreuse4", "cyan4", "cyan4"),
+       lwd = 2)
+arrows(x0 = bplot,
+       y0 = pred$NS,
+       x1 = bplot,
+       y1 = pred$IC_low_NS,
+       angle = 90,
+       length = 0,
+       col = c("chartreuse4", "chartreuse4", "cyan4", "cyan4"),
+       lwd = 2)
+
+mtext(c("2015", "2016", "2017"),
+      side = 1,
+      line = 3.5,
+      at = c(mean(c(bplot[[2]], bplot[[3]])), mean(c(bplot[[6]], bplot[[7]])), mean(c(bplot[[10]], bplot[[11]]))),
+      cex = 2)
+mtext("Goose nesting success",
+      side = 2,
+      line = -7,
+      las = 1,
+      at = 1.05,
+      cex = 1.2)
+
+text(x = bplot,
+     y = 0.2,
+     labels = paste("(", pred$N, ")", sep = ""),
+     cex = 1.2)
+dev.off()
+
+
+# -------------------------- #
+#### For only one figure ####
+# ------------------------- #
+# WATER
+pred.wat <- data.frame(NestAge = mean(d.wat$NestAge),
+                   HAB2 = factor(rep(c("MES", "WET"), 6), levels = c("MES", "WET")),
+                   YEAR = factor(c(rep("2015", 4), rep("2016", 4), rep("2017", 4)), levels = c("2015", "2016", "2017")),
+                   SUPPL = factor(rep(c(rep("TEM", 2), rep("W", 2)), 3), levels = c("TEM", "W")))
+
+pp <- predict(wat[[3]], newdata = pred.wat, se.fit = TRUE)
+pp
+
+pred.wat <- cbind(pred.wat, FIT = pp$fit, SE = pp$se.fit, N = group.size$n[!group.size$suppl == "F"])
+pred.wat
+
+pred.wat$IC_low <- pred.wat$FIT - 1.96*(pred.wat$SE/sqrt(pred.wat$N))
+pred.wat$IC_high <- pred.wat$FIT + 1.96*(pred.wat$SE/sqrt(pred.wat$N))
+
+
+
+pred.wat$FIT <- plogis(pred.wat$FIT)
+pred.wat$IC_low <- plogis(pred.wat$IC_low)
+pred.wat$IC_high <- plogis(pred.wat$IC_high)
+
+pred.wat$NS <- pred.wat$FIT^27
+pred.wat$IC_low_NS <- pred.wat$IC_low^27
+pred.wat$IC_high_NS <- pred.wat$IC_high^27
+
+# FOOD
+pred.foo <- data.frame(NestAge = mean(d.foo$NestAge),
+                       HAB2 = factor(rep(c("MES", "WET"), 6), levels = c("MES", "WET")),
+                       YEAR = factor(c(rep("2015", 4), rep("2016", 4), rep("2017", 4)), levels = c("2015", "2016", "2017")),
+                       SUPPL = factor(rep(c(rep("TEM", 2), rep("F", 2)), 3), levels = c("TEM", "F")))
+
+pp <- predict(foo[[4]], newdata = pred.foo, se.fit = TRUE)
+pp
+
+pred.foo <- cbind(pred.foo, FIT = pp$fit, SE = pp$se.fit, N = group.size$n[!group.size$suppl == "W"])
+pred.foo
+
+pred.foo$IC_low <- pred.foo$FIT - 1.96*(pred.foo$SE/sqrt(pred.foo$N))
+pred.foo$IC_high <- pred.foo$FIT + 1.96*(pred.foo$SE/sqrt(pred.foo$N))
+
+
+
+pred.foo$FIT <- plogis(pred.foo$FIT)
+pred.foo$IC_low <- plogis(pred.foo$IC_low)
+pred.foo$IC_high <- plogis(pred.foo$IC_high)
+
+pred.foo$NS <- pred.foo$FIT^27
+pred.foo$IC_low_NS <- pred.foo$IC_low^27
+pred.foo$IC_high_NS <- pred.foo$IC_high^27
+
+PRED <- rbind(pred.foo, pred.wat)
+PRED <- split(PRED, paste(PRED$YEAR))
+PRED[[1]]
+PRED <- lapply(PRED, function(x){
+  x <- x[-c(5,6),]
+  x
+})
+PRED <- do.call("rbind", PRED)
+
+x11()
+
+ png("C:/Users/HP_9470m/Dropbox/PHD. Claire/Chapitres de thèse/CHAPTER 1 - Geese nesting success & supplemented nests/PAPER_V2/Figures/Figure_1_version_2.tiff",
+     res=300,
+     width=30,
+     height=25,
+     pointsize=12,
+     unit="cm",
+     bg="transparent")
+
+color <- c("chartreuse3", "darkorange2", "cyan3")[as.numeric(PRED$SUPPL)] 
+color.2 <- c("chartreuse4", "darkorange3", "cyan4")[as.numeric(PRED$SUPPL)] 
+bplot <- barplot(PRED$NS,
+                 space = c(rep(c(0.2, 0), 3), rep(c(0.4, 0, 0.2, 0, 0.2, 0), 2)),
+                 ylim = c(0, 1),
+                 las = 1,
+                 col = color,
+                 border = color.2,
+                 cex.axis = 1.2)
+axis(1,
+     at = bplot,
+     rep(c("MES", "WET"), 9),
+     lty = 0,
+     cex.axis = 0.8,
+     las = 1)
+
+legend(bplot[length(bplot)-2],
+       1.020,
+       legend = c("Control", "Food", "Water"),
+       pch = 15,
+       pt.cex = 2,
+       col = c("chartreuse3", "darkorange2", "cyan3"),
+       bty = "n",
+       cex = 1.2)
+
+arrows(x0 = bplot,
+       y0 = PRED$NS,
+       x1 = bplot,
+       y1 = PRED$IC_high_NS,
+       angle = 90,
+       length = 0,
+       col = c("chartreuse4", "chartreuse4", "darkorange3", "darkorange3", "cyan4", "cyan4"),
+       lwd = 2)
+arrows(x0 = bplot,
+       y0 = PRED$NS,
+       x1 = bplot,
+       y1 = PRED$IC_low_NS,
+       angle = 90,
+       length = 0,
+       col = c("chartreuse4", "chartreuse4", "darkorange3", "darkorange3", "cyan4", "cyan4"),
+       lwd = 2)
+
+mtext(c("2015", "2016", "2017"),
+      side = 1,
+      line = 3.5,
+      at = c(mean(c(bplot[[3]], bplot[[4]])), mean(c(bplot[[9]], bplot[[10]])), mean(c(bplot[[15]], bplot[[16]]))),
+      cex = 2)
+mtext("Goose nesting success",
+      side = 2,
+      line = -7,
+      las = 1,
+      at = 1.05,
+      cex = 1.2)
+
+text(x = bplot,
+     y = 0.2,
+     labels = paste("(", PRED$N, ")", sep = ""),
+     cex = 1.2)
+
+dev.off()
