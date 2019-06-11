@@ -27,6 +27,15 @@ data$YEAR <- as.factor(data$YEAR)
 data$SUPPL <- relevel(data$SUPPL, "TEM")
 data$HAB2 <- relevel(data$HAB2, "MES")
 
+# Supplementation date
+for(i in 1:length(data)){
+  if(data$SUPPL[i] %in% c("W", "F")){
+    data$SUPPL_DATE_V2[i] <- data$SUPPL_DATE[i]
+  } else{
+    data$SUPPL_DATE_V2[i] <- data$FirstFound[i]
+  }
+}
+
 d.foo <- data[!data$SUPPL == "W",]
 d.wat <- data[!data$SUPPL == "F",]
 
@@ -125,6 +134,14 @@ foo[[6]] <- glm(NIDIF ~ NestAge + HAB2*SUPPL + YEAR*SUPPL,
 
 summary(foo[[6]])
 
+foo[[7]] <- glm(NIDIF ~ NestAge + HAB2 + YEAR + SUPPL + SUPPL_DATE_V2,
+                family = binomial(link = logexp(d.foo$EXPO)),
+                data = d.foo)
+
+foo[[8]] <- glm(NIDIF ~ NestAge + HAB2 + YEAR*SUPPL + YEAR*SUPPL_DATE_V2,
+                family = binomial(link = logexp(d.foo$EXPO)),
+                data = d.foo)
+
 # -------------------- #
 #### AIC comparison ####
 # -------------------- #
@@ -182,7 +199,7 @@ pred$IC_high_NS <- pred$IC_high^27
 
 x11()
 
-# png("C:/Users/HP_9470m/Dropbox/PHD. Claire/Chapitres de thèse/CHAPTER 1 - Geese nesting success & supplemented nests/PAPER_V2/Figures/GOOSE_DSR_int_conf.tiff",
+# png("C:/Users/HP_9470m/Dropbox/PHD. Claire/Chapitres de thèse/CHAPTER 2 - Geese nesting success & supplemented nests/PAPER_V2/Figures/GOOSE_DSR_int_conf.tiff",
 #     res=300,
 #     width=30,
 #     height=25,
@@ -298,6 +315,13 @@ wat[[6]] <- glm(NIDIF ~ NestAge + HAB2*SUPPL + YEAR*SUPPL,
 
 summary(wat[[6]])
 
+wat[[7]] <- glm(NIDIF ~ NestAge + HAB2 + YEAR + SUPPL + SUPPL_DATE_V2,
+                family = binomial(link = logexp(d.wat$EXPO)),
+                data = d.wat)
+wat[[8]] <- glm(NIDIF ~ NestAge + HAB2 + YEAR + SUPPL + YEAR*SUPPL_DATE_V2,
+                family = binomial(link = logexp(d.wat$EXPO)),
+                data = d.wat)
+
 # -------------------- #
 #### AIC comparison ####
 # -------------------- #
@@ -357,7 +381,7 @@ pred$IC_high_NS <- pred$IC_high^27
 
 x11()
 
-# png("C:/Users/HP_9470m/Dropbox/PHD. Claire/Chapitres de thèse/CHAPTER 1 - Geese nesting success & supplemented nests/PAPER_V2/Figures/GOOSE_DSR_int_conf.tiff",
+# png("C:/Users/HP_9470m/Dropbox/PHD. Claire/Chapitres de thèse/CHAPTER 2 - Geese nesting success & supplemented nests/PAPER_V2/Figures/GOOSE_DSR_int_conf.tiff",
 #     res=300,
 #     width=30,
 #     height=25,
@@ -490,13 +514,13 @@ PRED <- do.call("rbind", PRED)
 
 x11()
 
- png("C:/Users/HP_9470m/Dropbox/PHD. Claire/Chapitres de thèse/CHAPTER 1 - Geese nesting success & supplemented nests/PAPER_V2/Figures/Figure_1_version_2.tiff",
-     res=300,
-     width=30,
-     height=25,
-     pointsize=12,
-     unit="cm",
-     bg="transparent")
+ # png("C:/Users/HP_9470m/Dropbox/PHD. Claire/Chapitres de thèse/CHAPTER 2 - Geese nesting success & supplemented nests/PAPER_V2/Figures/Figure_1_version_2.tiff",
+ #     res=300,
+ #     width=30,
+ #     height=25,
+ #     pointsize=12,
+ #     unit="cm",
+ #     bg="transparent")
 
 color <- c("chartreuse3", "darkorange2", "cyan3")[as.numeric(PRED$SUPPL)] 
 color.2 <- c("chartreuse4", "darkorange3", "cyan4")[as.numeric(PRED$SUPPL)] 
@@ -558,3 +582,5 @@ text(x = bplot,
      cex = 1.2)
 
 dev.off()
+
+graphics.off() 
