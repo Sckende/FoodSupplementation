@@ -584,3 +584,12 @@ text(x = bplot,
 dev.off()
 
 graphics.off() 
+
+#### ------------------------------- ####
+#### Effects of supplementation date ###
+#### ----------------------------- ####
+
+d.supl <- data[data$SUPPL %in% c("W", "F"),]
+summary(d.supl)
+d.supl <- droplevels(d.supl)
+d.supl$SUPPL_DATE <- as.factor(as.character(d.supl$SUPPL_DATE))
