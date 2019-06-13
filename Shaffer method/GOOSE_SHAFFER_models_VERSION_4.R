@@ -28,14 +28,9 @@ data$SUPPL <- relevel(data$SUPPL, "TEM")
 data$HAB2 <- relevel(data$HAB2, "MES")
 
 # Supplementation date
-for(i in 1:length(data)){
-  if(data$SUPPL[i] %in% c("W", "F")){
-    data$SUPPL_DATE_V2[i] <- data$SUPPL_DATE[i]
-  } else{
-    data$SUPPL_DATE_V2[i] <- data$FirstFound[i]
-  }
-}
+d.suppl <- data[!data$SUPPL == "TEM",]; d.suppl <- droplevels(d.suppl); summary(d.suppl)
 
+# Supplementation type
 d.foo <- data[!data$SUPPL == "W",]
 d.wat <- data[!data$SUPPL == "F",]
 
@@ -585,11 +580,77 @@ dev.off()
 
 graphics.off() 
 
-#### ------------------------------- ####
-#### Effects of supplementation date ###
-#### ----------------------------- ####
+# -------------------------------------- #
+#### Effects of supplementation date ####
+# ------------------------------------ #
+#d.suppl$SUPPL_DATE <- as.factor(d.suppl$SUPPL_DATE)
+d.suppl$NIDIF <- as.factor(d.suppl$NIDIF)
+# suppl.split <- split(d.suppl, paste(d.suppl$YEAR, d.suppl$ID))
+# suppl.split <- lapply(suppl.split, function(x){
+#   x[nrow(x),]
+# })
+# head(suppl.split)
+# 
+# d.suppl <- as.data.frame(do.call("rbind", suppl.split))
+# table(d.suppl$SUPPL_DATE, d.suppl$YEAR)
+# d.suppl$NIDIF <- as.factor(d.suppl$NIDIF)
+# d.suppl$SUPPL_DATE <- as.factor(d.suppl$SUPPL_DATE)
 
-d.supl <- data[data$SUPPL %in% c("W", "F"),]
-summary(d.supl)
-d.supl <- droplevels(d.supl)
-d.supl$SUPPL_DATE <- as.factor(as.character(d.supl$SUPPL_DATE))
+summary(d.suppl)
+
+suppl <- list()
+
+# Null model
+suppl[[1]] <- glm(NIDIF ~ 1,
+                family = binomial(link = logexp(d.suppl$EXPO)),
+                data = d.suppl)
+
+# Known effects
+suppl[[2]] <- glm(NIDIF ~ NestAge + HAB2 + YEAR,
+                family = binomial(link = logexp(d.suppl$EXPO)),
+                data = d.suppl)
+
+# Additive supplementation effects
+suppl[[3]] <- glm(NIDIF ~ NestAge + HAB2 + YEAR + SUPPL,
+                family = binomial(link = logexp(d.suppl$EXPO)),
+                data = d.suppl)
+
+summary(suppl[[3]])
+
+# Supplementation dates effects
+suppl[[4]] <- glm(NIDIF ~ NestAge + HAB2 + YEAR + SUPPL + SUPPL_DATE,
+                family = binomial(link = logexp(d.suppl$EXPO)),
+                data = d.suppl)
+summary(suppl[[4]])
+
+suppl[[5]] <- glm(NIDIF ~ NestAge + HAB2 + YEAR + SUPPL + SUPPL_DATE*YEAR,
+                family = binomial(link = logexp(d.suppl$EXPO)),
+                data = d.suppl)
+
+summary(suppl[[5]])
+
+suppl[[6]] <- glm(NIDIF ~ NestAge + HAB2 + YEAR + SUPPL + SUPPL_DATE*SUPPL,
+                family = binomial(link = logexp(d.suppl$EXPO)),
+                data = d.suppl)
+
+summary(suppl[[6]])
+
+suppl[[7]] <- glm(NIDIF ~ NestAge + HAB2 + YEAR + SUPPL + SUPPL_DATE*SUPPL + SUPPL_DATE*YEAR,
+                family = binomial(link = logexp(d.suppl$EXPO)),
+                data = d.suppl)
+
+summary(suppl[[7]])
+
+# -------------------- #
+#### AIC comparison ####
+# -------------------- #
+h <- lapply(suppl, function(x){
+  j <- print(x$formula)
+  j
+})
+h <- as.vector(as.character(h))
+
+
+Modnames <- paste(paste("mod", 1:length(suppl), sep = " "), h, sep = "-")
+AIC <- aictab(cand.set = suppl, modnames = Modnames, sort = TRUE)
+print(AIC, digit = 2)
