@@ -654,3 +654,6 @@ h <- as.vector(as.character(h))
 Modnames <- paste(paste("mod", 1:length(suppl), sep = " "), h, sep = "-")
 AIC <- aictab(cand.set = suppl, modnames = Modnames, sort = TRUE)
 print(AIC, digit = 2)
+
+confint(suppl[[3]])
+Anova(suppl[[3]])
