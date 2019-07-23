@@ -580,9 +580,9 @@ dev.off()
 
 graphics.off() 
 
-# -------------------------------------- #
-#### Effects of supplementation date ####
-# ------------------------------------ #
+# ------------------------------------------ #
+#### Effects of raw supplementation date ####
+# ---------------------------------------- #
 #d.suppl$SUPPL_DATE <- as.factor(d.suppl$SUPPL_DATE)
 d.suppl$NIDIF <- as.factor(d.suppl$NIDIF)
 # suppl.split <- split(d.suppl, paste(d.suppl$YEAR, d.suppl$ID))
@@ -657,3 +657,188 @@ print(AIC, digit = 2)
 
 confint(suppl[[3]])
 Anova(suppl[[3]])
+
+
+# --------------------------------------------------------------- #
+#### Effects of transformed variable for supplementation date ####
+# ------------------------------------------------------------- #
+
+summary(d.suppl) # data with supplemented nests only
+# New value for testing supplementation date effect
+# Number of days between initiation date and supplementation date
+d.suppl$suppl.days <- d.suppl$SUPPL_DATE - d.suppl$INITIATION
+summary(d.suppl$suppl.days)
+cor.test(d.suppl$suppl.days, d.suppl$NestAge)
+plot(d.suppl$suppl.days, d.suppl$NestAge)
+
+# ----- #
+# 2015 #
+# --- #
+sup.2015 <- d.suppl[d.suppl$YEAR == 2015,]
+suppl.2015 <- list()
+
+# Null model
+suppl.2015[[1]] <- glm(NIDIF ~ 1,
+                  family = binomial(link = logexp(sup.2015$EXPO)),
+                  data = sup.2015)
+
+# Known effects
+suppl.2015[[2]] <- glm(NIDIF ~ NestAge + HAB2,
+                  family = binomial(link = logexp(sup.2015$EXPO)),
+                  data = sup.2015)
+
+# Additive supplementation effects
+suppl.2015[[3]] <- glm(NIDIF ~ NestAge + HAB2 + SUPPL,
+                  family = binomial(link = logexp(sup.2015$EXPO)),
+                  data = sup.2015)
+
+summary(suppl.2015[[3]])
+
+# Supplementation dates effects
+suppl.2015[[4]] <- glm(NIDIF ~ NestAge + HAB2 + SUPPL + suppl.days,
+                  family = binomial(link = logexp(sup.2015$EXPO)),
+                  data = sup.2015)
+summary(suppl.2015[[4]])
+
+
+suppl.2015[[5]] <- glm(NIDIF ~ NestAge + HAB2 + SUPPL + suppl.days*SUPPL,
+                  family = binomial(link = logexp(sup.2015$EXPO)),
+                  data = sup.2015)
+
+summary(suppl.2015[[5]])
+
+# -------------------- #
+#### AIC comparison ####
+# -------------------- #
+h <- lapply(suppl.2015, function(x){
+  j <- print(x$formula)
+  j
+})
+h <- as.vector(as.character(h))
+
+
+Modnames <- paste(paste("mod", 1:length(suppl.2015), sep = " "), h, sep = "-")
+AIC <- aictab(cand.set = suppl.2015, modnames = Modnames, sort = TRUE)
+print(AIC, digit = 2)
+
+confint(suppl.2015[[4]])
+Anova(suppl.2015[[4]])
+
+confint(suppl.2015[[5]])
+Anova(suppl.2015[[5]])
+
+# ----- #
+# 2016 #
+# --- #
+sup.2016 <- d.suppl[d.suppl$YEAR == 2016,]
+suppl.2016 <- list()
+
+# Null model
+suppl.2016[[1]] <- glm(NIDIF ~ 1,
+                       family = binomial(link = logexp(sup.2016$EXPO)),
+                       data = sup.2016)
+
+# Known effects
+suppl.2016[[2]] <- glm(NIDIF ~ NestAge + HAB2,
+                       family = binomial(link = logexp(sup.2016$EXPO)),
+                       data = sup.2016)
+
+# Additive supplementation effects
+suppl.2016[[3]] <- glm(NIDIF ~ NestAge + HAB2 + SUPPL,
+                       family = binomial(link = logexp(sup.2016$EXPO)),
+                       data = sup.2016)
+
+summary(suppl.2016[[3]])
+
+# Supplementation dates effects
+suppl.2016[[4]] <- glm(NIDIF ~ NestAge + HAB2 + SUPPL + suppl.days,
+                       family = binomial(link = logexp(sup.2016$EXPO)),
+                       data = sup.2016)
+summary(suppl.2016[[4]])
+
+
+suppl.2016[[5]] <- glm(NIDIF ~ NestAge + HAB2 + SUPPL + suppl.days*SUPPL,
+                       family = binomial(link = logexp(sup.2016$EXPO)),
+                       data = sup.2016)
+
+summary(suppl.2016[[5]])
+
+# -------------------- #
+#### AIC comparison ####
+# -------------------- #
+h <- lapply(suppl.2016, function(x){
+  j <- print(x$formula)
+  j
+})
+h <- as.vector(as.character(h))
+
+
+Modnames <- paste(paste("mod", 1:length(suppl.2016), sep = " "), h, sep = "-")
+AIC <- aictab(cand.set = suppl.2016, modnames = Modnames, sort = TRUE)
+print(AIC, digit = 2)
+
+confint(suppl.2016[[4]])
+Anova(suppl.2016[[4]])
+
+confint(suppl.2016[[3]])
+Anova(suppl.2016[[3]])
+
+confint(suppl.2016[[5]])
+Anova(suppl.2016[[5]])
+
+# ----- #
+# 2017 #
+# --- #
+sup.2017 <- d.suppl[d.suppl$YEAR == 2017,]
+suppl.2017 <- list()
+
+# Null model
+suppl.2017[[1]] <- glm(NIDIF ~ 1,
+                       family = binomial(link = logexp(sup.2017$EXPO)),
+                       data = sup.2017)
+
+# Known effects
+suppl.2017[[2]] <- glm(NIDIF ~ NestAge + HAB2,
+                       family = binomial(link = logexp(sup.2017$EXPO)),
+                       data = sup.2017)
+
+# Additive supplementation effects
+suppl.2017[[3]] <- glm(NIDIF ~ NestAge + HAB2 + SUPPL,
+                       family = binomial(link = logexp(sup.2017$EXPO)),
+                       data = sup.2017)
+
+summary(suppl.2017[[3]])
+
+# Supplementation dates effects
+suppl.2017[[4]] <- glm(NIDIF ~ NestAge + HAB2 + SUPPL + suppl.days,
+                       family = binomial(link = logexp(sup.2017$EXPO)),
+                       data = sup.2017)
+summary(suppl.2017[[4]])
+
+
+suppl.2017[[5]] <- glm(NIDIF ~ NestAge + HAB2 + SUPPL + suppl.days*SUPPL,
+                       family = binomial(link = logexp(sup.2017$EXPO)),
+                       data = sup.2017)
+
+summary(suppl.2017[[5]])
+
+# -------------------- #
+#### AIC comparison ####
+# -------------------- #
+h <- lapply(suppl.2017, function(x){
+  j <- print(x$formula)
+  j
+})
+h <- as.vector(as.character(h))
+
+
+Modnames <- paste(paste("mod", 1:length(suppl.2017), sep = " "), h, sep = "-")
+AIC <- aictab(cand.set = suppl.2017, modnames = Modnames, sort = TRUE)
+print(AIC, digit = 2)
+
+confint(suppl.2017[[1]])
+Anova(suppl.2017[[1]])
+
+confint(suppl.2017[[2]])
+Anova(suppl.2017[[2]])
+
