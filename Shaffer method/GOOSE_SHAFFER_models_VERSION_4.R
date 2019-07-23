@@ -671,6 +671,79 @@ summary(d.suppl$suppl.days)
 cor.test(d.suppl$suppl.days, d.suppl$NestAge)
 plot(d.suppl$suppl.days, d.suppl$NestAge)
 
+# -------------- #
+# For all years #
+# ------------ #
+
+suppl <- list()
+
+# Null model
+suppl[[1]] <- glm(NIDIF ~ 1,
+                  family = binomial(link = logexp(d.suppl$EXPO)),
+                  data = d.suppl)
+
+# Known effects
+suppl[[2]] <- glm(NIDIF ~ NestAge + HAB2 + YEAR,
+                  family = binomial(link = logexp(d.suppl$EXPO)),
+                  data = d.suppl)
+
+# Additive supplementation effects
+suppl[[3]] <- glm(NIDIF ~ NestAge + HAB2 + YEAR + SUPPL,
+                  family = binomial(link = logexp(d.suppl$EXPO)),
+                  data = d.suppl)
+
+summary(suppl[[3]])
+
+# Supplementation dates effects
+suppl[[4]] <- glm(NIDIF ~ NestAge + HAB2 + YEAR + SUPPL + suppl.days,
+                  family = binomial(link = logexp(d.suppl$EXPO)),
+                  data = d.suppl)
+summary(suppl[[4]])
+
+suppl[[5]] <- glm(NIDIF ~ NestAge + HAB2 + YEAR + SUPPL + suppl.days*YEAR,
+                  family = binomial(link = logexp(d.suppl$EXPO)),
+                  data = d.suppl)
+
+summary(suppl[[5]])
+
+suppl[[6]] <- glm(NIDIF ~ NestAge + HAB2 + YEAR + SUPPL + suppl.days*SUPPL,
+                  family = binomial(link = logexp(d.suppl$EXPO)),
+                  data = d.suppl)
+
+summary(suppl[[6]])
+
+suppl[[7]] <- glm(NIDIF ~ NestAge + HAB2 + YEAR + SUPPL + suppl.days*SUPPL + suppl.days*YEAR,
+                  family = binomial(link = logexp(d.suppl$EXPO)),
+                  data = d.suppl)
+
+summary(suppl[[7]])
+
+# -------------------- #
+#### AIC comparison ####
+# -------------------- #
+h <- lapply(suppl, function(x){
+  j <- print(x$formula)
+  j
+})
+h <- as.vector(as.character(h))
+
+
+Modnames <- paste(paste("mod", 1:length(suppl), sep = " "), h, sep = "-")
+AIC <- aictab(cand.set = suppl, modnames = Modnames, sort = TRUE)
+print(AIC, digit = 2)
+
+confint(suppl[[3]])
+Anova(suppl[[3]])
+
+confint(suppl[[4]])
+Anova(suppl[[4]])
+
+confint(suppl[[5]])
+Anova(suppl[[5]])
+
+confint(suppl[[6]])
+Anova(suppl[[6]])
+
 # ----- #
 # 2015 #
 # --- #
