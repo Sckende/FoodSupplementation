@@ -5,7 +5,7 @@ list.files()
 
 #### Annual cumulative precipitation ####
 # Trends between 1995 and 2017 -  Specific dates for each goose nidification period ***
-rain <- read.table("PREC_precipitation_Bylot_1995-2017.txt", sep = "\t", dec = ",", h = T)
+rain <- read.table("PREC_precipitation_Bylot_1995-2017.txt", sep = "\t", dec = ".", h = T)
 summary(rain)
 rain <- na.omit(rain)
 nidi <- read.table("GOOSE_jour_moy_ponte_eclos.txt", sep = "\t", dec = ".", h = T)
@@ -40,13 +40,13 @@ summary(WEA)
 
 
 # Plot
-png("C:/Users/HP_9470m/Dropbox/PHD. Claire/Chapitres de thèse/CHAPTER 1 - Geese nesting success & supplemented nests/PAPER/Figures/GOOSE_prec_temp.tiff",
-res=300,
-width=20,
-height=25,
-pointsize=12,
-unit="cm",
-bg="transparent")
+# png("C:/Users/HP_9470m/Dropbox/PHD. Claire/Chapitres de thèse/CHAPTER 1 - Geese nesting success & supplemented nests/PAPER/Figures/GOOSE_prec_temp.tiff",
+# res=300,
+# width=20,
+# height=25,
+# pointsize=12,
+# unit="cm",
+# bg="transparent")
 
 #x11()
 par(mfrow = c(2, 1), mar=c(5,5,1,5)) # inner margin - default parameter is par("mar") <- 5.1 4.1 4.1 2.1
@@ -143,13 +143,13 @@ dev.off()
 
 #### Figures SQEBC ####
 # Cum prec plot
-png("C:/Users/HP_9470m/OneDrive - Université de Moncton/Doc doc doc/Ph.D. - ADMIN, COURSES & PRESENTATION/Colloques & congrès - Présentations orales & affiches/2018 SQEBC/2018_SQEBC_Presentation/Figures/GOOSE_prec.tiff",
-    res=300,
-    width=25,
-    height=20,
-    pointsize=12,
-    unit="cm",
-    bg="transparent")
+# png("C:/Users/HP_9470m/OneDrive - Université de Moncton/Doc doc doc/Ph.D. - ADMIN, COURSES & PRESENTATION/Colloques & congrès - Présentations orales & affiches/2018 SQEBC/2018_SQEBC_Presentation/Figures/GOOSE_prec.tiff",
+#     res=300,
+#     width=25,
+#     height=20,
+#     pointsize=12,
+#     unit="cm",
+#     bg="transparent")
 my_vector <- cum2$cumRAIN
 names(my_vector) <- cum2$YEAR
 cols <- c("springgreen4", "springgreen3", "olivedrab2")[as.numeric(cum2$RAINFALL)]

@@ -355,14 +355,17 @@ pred <- data.frame(NestAge = mean(d.wat$NestAge),
                    YEAR = factor(c(rep("2015", 4), rep("2016", 4), rep("2017", 4)), levels = c("2015", "2016", "2017")),
                    SUPPL = factor(rep(c(rep("TEM", 2), rep("W", 2)), 3), levels = c("TEM", "W")))
 
-pp <- predict(wat[[3]], newdata = pred, se.fit = TRUE)
+pp <- predict(wat[[3]], newdata = pred, se.fit = TRUE, type = "link")
 pp
 
 pred <- cbind(pred, FIT = pp$fit, SE = pp$se.fit, N = group.size$n[!group.size$suppl == "F"])
 pred
 
-pred$IC_low <- pred$FIT - 1.96*(pred$SE/sqrt(pred$N))
-pred$IC_high <- pred$FIT + 1.96*(pred$SE/sqrt(pred$N))
+# pred$IC_low <- pred$FIT - 1.96*(pred$SE/sqrt(pred$N))
+# pred$IC_high <- pred$FIT + 1.96*(pred$SE/sqrt(pred$N))
+
+pred$IC_low <- pred$FIT - 1.96*(pred$SE)
+pred$IC_high <- pred$FIT + 1.96*(pred$SE)
 
 
 
