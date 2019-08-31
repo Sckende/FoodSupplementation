@@ -129,13 +129,13 @@ foo[[6]] <- glm(NIDIF ~ NestAge + HAB2*SUPPL + YEAR*SUPPL,
 
 summary(foo[[6]])
 
-foo[[7]] <- glm(NIDIF ~ NestAge + HAB2 + YEAR + SUPPL + SUPPL_DATE_V2,
-                family = binomial(link = logexp(d.foo$EXPO)),
-                data = d.foo)
+# foo[[7]] <- glm(NIDIF ~ NestAge + HAB2 + YEAR + SUPPL + SUPPL_DATE_V2,
+#                 family = binomial(link = logexp(d.foo$EXPO)),
+#                 data = d.foo)
 
-foo[[8]] <- glm(NIDIF ~ NestAge + HAB2 + YEAR*SUPPL + YEAR*SUPPL_DATE_V2,
-                family = binomial(link = logexp(d.foo$EXPO)),
-                data = d.foo)
+# foo[[8]] <- glm(NIDIF ~ NestAge + HAB2 + YEAR*SUPPL + YEAR*SUPPL_DATE_V2,
+#                 family = binomial(link = logexp(d.foo$EXPO)),
+#                 data = d.foo)
 
 # -------------------- #
 #### AIC comparison ####
@@ -171,7 +171,7 @@ x11();plot(simulateResiduals(foo[[4]]))
 pred <- data.frame(NestAge = mean(d.foo$NestAge),
                    HAB2 = factor(rep(c("MES", "WET"), 6), levels = c("MES", "WET")),
                    YEAR = factor(c(rep("2015", 4), rep("2016", 4), rep("2017", 4)), levels = c("2015", "2016", "2017")),
-                   SUPPL = factor(rep(c(rep("TEM", 2), rep("W", 2)), 3), levels = c("TEM", "W")))
+                   SUPPL = factor(rep(c(rep("TEM", 2), rep("F", 2)), 3), levels = c("TEM", "F")))
 
 pp <- predict(foo[[4]], newdata = pred, se.fit = TRUE)
 pp
@@ -179,8 +179,11 @@ pp
 pred <- cbind(pred, FIT = pp$fit, SE = pp$se.fit, N = group.size$n[!group.size$suppl == "F"])
 pred
 
-pred$IC_low <- pred$FIT - 1.96*(pred$SE/sqrt(pred$N))
-pred$IC_high <- pred$FIT + 1.96*(pred$SE/sqrt(pred$N))
+# pred$IC_low <- pred$FIT - 1.96*(pred$SE/sqrt(pred$N))
+# pred$IC_high <- pred$FIT + 1.96*(pred$SE/sqrt(pred$N))
+
+pred$IC_low <- pred$FIT - 1.96*(pred$SE)
+pred$IC_high <- pred$FIT + 1.96*(pred$SE)
 
 
 
@@ -221,7 +224,7 @@ axis(1,
 
 legend(bplot[length(bplot)-2],
        1.020,
-       legend = c("Control", "Water"),
+       legend = c("Control", "Food"),
        pch = 15,
        pt.cex = 2,
        col = c("chartreuse3", "darkorange3"),
@@ -310,12 +313,12 @@ wat[[6]] <- glm(NIDIF ~ NestAge + HAB2*SUPPL + YEAR*SUPPL,
 
 summary(wat[[6]])
 
-wat[[7]] <- glm(NIDIF ~ NestAge + HAB2 + YEAR + SUPPL + SUPPL_DATE_V2,
-                family = binomial(link = logexp(d.wat$EXPO)),
-                data = d.wat)
-wat[[8]] <- glm(NIDIF ~ NestAge + HAB2 + YEAR + SUPPL + YEAR*SUPPL_DATE_V2,
-                family = binomial(link = logexp(d.wat$EXPO)),
-                data = d.wat)
+# wat[[7]] <- glm(NIDIF ~ NestAge + HAB2 + YEAR + SUPPL + SUPPL_DATE_V2,
+#                 family = binomial(link = logexp(d.wat$EXPO)),
+#                 data = d.wat)
+# wat[[8]] <- glm(NIDIF ~ NestAge + HAB2 + YEAR + SUPPL + YEAR*SUPPL_DATE_V2,
+#                 family = binomial(link = logexp(d.wat$EXPO)),
+#                 data = d.wat)
 
 # -------------------- #
 #### AIC comparison ####
@@ -463,8 +466,10 @@ pp
 pred.wat <- cbind(pred.wat, FIT = pp$fit, SE = pp$se.fit, N = group.size$n[!group.size$suppl == "F"])
 pred.wat
 
-pred.wat$IC_low <- pred.wat$FIT - 1.96*(pred.wat$SE/sqrt(pred.wat$N))
-pred.wat$IC_high <- pred.wat$FIT + 1.96*(pred.wat$SE/sqrt(pred.wat$N))
+# pred.wat$IC_low <- pred.wat$FIT - 1.96*(pred.wat$SE/sqrt(pred.wat$N))
+# pred.wat$IC_high <- pred.wat$FIT + 1.96*(pred.wat$SE/sqrt(pred.wat$N))
+pred.wat$IC_low <- pred.wat$FIT - 1.96*(pred.wat$SE)
+pred.wat$IC_high <- pred.wat$FIT + 1.96*(pred.wat$SE)
 
 
 
@@ -488,8 +493,10 @@ pp
 pred.foo <- cbind(pred.foo, FIT = pp$fit, SE = pp$se.fit, N = group.size$n[!group.size$suppl == "W"])
 pred.foo
 
-pred.foo$IC_low <- pred.foo$FIT - 1.96*(pred.foo$SE/sqrt(pred.foo$N))
-pred.foo$IC_high <- pred.foo$FIT + 1.96*(pred.foo$SE/sqrt(pred.foo$N))
+# pred.foo$IC_low <- pred.foo$FIT - 1.96*(pred.foo$SE/sqrt(pred.foo$N))
+# pred.foo$IC_high <- pred.foo$FIT + 1.96*(pred.foo$SE/sqrt(pred.foo$N))
+pred.foo$IC_low <- pred.foo$FIT - 1.96*(pred.foo$SE)
+pred.foo$IC_high <- pred.foo$FIT + 1.96*(pred.foo$SE)
 
 
 
