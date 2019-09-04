@@ -519,7 +519,7 @@ PRED <- do.call("rbind", PRED)
 
 x11()
 
- # png("C:/Users/HP_9470m/Dropbox/PHD. Claire/Chapitres de thèse/CHAPTER 2 - Geese nesting success & supplemented nests/PAPER_V2/Figures/Figure_1_version_2.tiff",
+ # png("C:/Users/HP_9470m/Dropbox/PHD. Claire/Chapitres de thèse/CHAPTER 2 - Geese nesting success & supplemented nests/PAPER_V2/Figures/Figure_1_version_4.tiff",
  #     res=300,
  #     width=30,
  #     height=25,
