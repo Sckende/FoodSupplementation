@@ -28,7 +28,12 @@ data$SUPPL <- relevel(data$SUPPL, "TEM")
 data$HAB2 <- relevel(data$HAB2, "MES")
 
 # Supplementation date
-d.suppl <- data[!data$SUPPL == "TEM",]; d.suppl <- droplevels(d.suppl); summary(d.suppl)
+# d.suppl <- data[!data$SUPPL == "TEM",]; d.suppl <- droplevels(d.suppl); summary(d.suppl)
+
+# Creation of supplementation date variable in day number between initiation date and the first visit for the control nests and the supplementation date for the supplemented nests
+
+data$SUPPL_JJ[data$SUPPL == "TEM"] <- data$FirstFound[data$SUPPL == "TEM"] - data$INITIATION[data$SUPPL == "TEM"]
+data$SUPPL_JJ[data$SUPPL %in% c("F", "W")] <- data$SUPPL_DATE[data$SUPPL %in% c("F", "W")] - data$INITIATION[data$SUPPL %in% c("F", "W")]
 
 # Supplementation type
 d.foo <- data[!data$SUPPL == "W",]
@@ -129,6 +134,24 @@ foo[[6]] <- glm(NIDIF ~ NestAge + HAB2*SUPPL + YEAR*SUPPL,
 
 summary(foo[[6]])
 
+foo[[7]] <- glm(NIDIF ~ NestAge + HAB2 + YEAR*SUPPL + YEAR*SUPPL_JJ,
+                family = binomial(link = logexp(d.foo$EXPO)),
+                data = d.foo)
+
+summary(foo[[7]])
+
+foo[[8]] <- glm(NIDIF ~ NestAge + HAB2 + YEAR*SUPPL + SUPPL_JJ,
+                family = binomial(link = logexp(d.foo$EXPO)),
+                data = d.foo)
+
+summary(foo[[8]])
+
+foo[[9]] <- glm(NIDIF ~ NestAge + HAB2 + YEAR*SUPPL + SUPPL_JJ*SUPPL,
+                family = binomial(link = logexp(d.foo$EXPO)),
+                data = d.foo)
+
+summary(foo[[9]])
+
 # foo[[7]] <- glm(NIDIF ~ NestAge + HAB2 + YEAR + SUPPL + SUPPL_DATE_V2,
 #                 family = binomial(link = logexp(d.foo$EXPO)),
 #                 data = d.foo)
@@ -153,6 +176,7 @@ AIC
 
 summary(foo[[4]])
 summary(foo[[6]])
+summary(foo[[8]])
 
 # ---------------------------------- #
 #### ANOVA & Confident intervals ####
@@ -312,6 +336,24 @@ wat[[6]] <- glm(NIDIF ~ NestAge + HAB2*SUPPL + YEAR*SUPPL,
                 data = d.wat)
 
 summary(wat[[6]])
+
+wat[[7]] <- glm(NIDIF ~ NestAge + HAB2 + YEAR*SUPPL + YEAR*SUPPL_JJ,
+                family = binomial(link = logexp(d.wat$EXPO)),
+                data = d.wat)
+
+summary(wat[[7]])
+
+wat[[8]] <- glm(NIDIF ~ NestAge + HAB2 + YEAR*SUPPL + SUPPL_JJ,
+                family = binomial(link = logexp(d.wat$EXPO)),
+                data = d.wat)
+
+summary(wat[[8]])
+
+wat[[9]] <- glm(NIDIF ~ NestAge + HAB2 + YEAR*SUPPL + SUPPL_JJ*SUPPL,
+                family = binomial(link = logexp(d.wat$EXPO)),
+                data = d.wat)
+
+summary(wat[[9]])
 
 # wat[[7]] <- glm(NIDIF ~ NestAge + HAB2 + YEAR + SUPPL + SUPPL_DATE_V2,
 #                 family = binomial(link = logexp(d.wat$EXPO)),
