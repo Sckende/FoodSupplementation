@@ -628,6 +628,11 @@ text(x = bplot,
      labels = paste("(", PRED$N, ")", sep = ""),
      cex = 1.2)
 
+text(x = bplot,
+     y = 0.3,
+     labels = round(PRED$NS, digits = 2),
+     cex = 1.2)
+
 dev.off()
 
 graphics.off() 
