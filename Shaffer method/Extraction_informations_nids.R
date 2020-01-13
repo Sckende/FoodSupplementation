@@ -22,6 +22,21 @@ food <- data[data$SUPPL == "F",]
 water <- data[data$SUPPL == "W",]
 temoin <- data[data$SUPPL == "TEM",]
 
+treat <- data[data$SUPPL %in% c("W", "F"),]
+
+#### TREATED NESTS ####
+# Information extraction for food nest
+t <- split(treat, paste(treat$YEAR, treat$ID))
+tt <- lapply(t, function(x) {
+  x <- x[1,]
+  x
+})
+
+tt <- do.call("rbind", tt)
+
+table(tt$SUPPL_DATE[tt$YEAR == 2015], useNA = "always")
+table(tt$SUPPL_DATE[tt$YEAR == 2016], useNA = "always")
+table(tt$SUPPL_DATE[tt$YEAR == 2017], useNA = "always")
 #### FOOD NESTS ####
 # Information extraction for food nest
 f <- split(food, paste(food$YEAR, food$ID))
@@ -40,6 +55,8 @@ sd(ff$INITIATION[ff$YEAR == "2015" & ff$HAB2 == "MES"], na.rm = T)
 mean(ff$CLUTCH[ff$YEAR == "2015" & ff$HAB2 == "MES"], na.rm = T)
 sd(ff$CLUTCH[ff$YEAR == "2015" & ff$HAB2 == "MES"], na.rm = T)
 
+table(ff$SUPPL_DATE[ff$YEAR == "2015" & ff$HAB2 == "MES"], useNA = "always")
+
 # 2015 - WET
 dim(ff[ff$YEAR == "2015" & ff$HAB2 == "WET",])
 mean(ff$INITIATION[ff$YEAR == "2015" & ff$HAB2 == "WET"], na.rm = T)
@@ -47,6 +64,8 @@ sd(ff$INITIATION[ff$YEAR == "2015" & ff$HAB2 == "WET"], na.rm = T)
 
 mean(ff$CLUTCH[ff$YEAR == "2015" & ff$HAB2 == "WET"], na.rm = T)
 sd(ff$CLUTCH[ff$YEAR == "2015" & ff$HAB2 == "WET"], na.rm = T)
+
+table(ff$SUPPL_DATE[ff$YEAR == "2015" & ff$HAB2 == "WET"], useNA = "always")
 
 # 2016 - MES
 dim(ff[ff$YEAR == "2016" & ff$HAB2 == "MES",])
@@ -56,6 +75,9 @@ sd(ff$INITIATION[ff$YEAR == "2016" & ff$HAB2 == "MES"], na.rm = T)
 mean(ff$CLUTCH[ff$YEAR == "2016" & ff$HAB2 == "MES"], na.rm = T)
 sd(ff$CLUTCH[ff$YEAR == "2016" & ff$HAB2 == "MES"], na.rm = T)
 
+table(ff$SUPPL_DATE[ff$YEAR == "2016" & ff$HAB2 == "MES"], useNA = "always")
+
+
 # 2016 - WET
 dim(ff[ff$YEAR == "2016" & ff$HAB2 == "WET",])
 mean(ff$INITIATION[ff$YEAR == "2016" & ff$HAB2 == "WET"], na.rm = T)
@@ -63,6 +85,8 @@ sd(ff$INITIATION[ff$YEAR == "2016" & ff$HAB2 == "WET"], na.rm = T)
 
 mean(ff$CLUTCH[ff$YEAR == "2016" & ff$HAB2 == "WET"], na.rm = T)
 sd(ff$CLUTCH[ff$YEAR == "2016" & ff$HAB2 == "WET"], na.rm = T)
+
+table(ff$SUPPL_DATE[ff$YEAR == "2016" & ff$HAB2 == "WET"], useNA = "always")
 
 # 2017 - MES
 dim(ff[ff$YEAR == "2017" & ff$HAB2 == "MES",])
@@ -72,6 +96,8 @@ sd(ff$INITIATION[ff$YEAR == "2017" & ff$HAB2 == "MES"], na.rm = T)
 mean(ff$CLUTCH[ff$YEAR == "2017" & ff$HAB2 == "MES"], na.rm = T)
 sd(ff$CLUTCH[ff$YEAR == "2017" & ff$HAB2 == "MES"], na.rm = T)
 
+table(ff$SUPPL_DATE[ff$YEAR == "2017" & ff$HAB2 == "MES"], useNA = "always")
+
 # 2017 - WET
 dim(ff[ff$YEAR == "2017" & ff$HAB2 == "WET",])
 mean(ff$INITIATION[ff$YEAR == "2017" & ff$HAB2 == "WET"], na.rm = T)
@@ -79,6 +105,8 @@ sd(ff$INITIATION[ff$YEAR == "2017" & ff$HAB2 == "WET"], na.rm = T)
 
 mean(ff$CLUTCH[ff$YEAR == "2017" & ff$HAB2 == "WET"], na.rm = T)
 sd(ff$CLUTCH[ff$YEAR == "2017" & ff$HAB2 == "WET"], na.rm = T)
+
+table(ff$SUPPL_DATE[ff$YEAR == "2017" & ff$HAB2 == "WET"], useNA = "always")
 
 
 
@@ -100,6 +128,8 @@ sd(ww$INITIATION[ww$YEAR == "2015" & ww$HAB2 == "MES"], na.rm = T)
 mean(ww$CLUTCH[ww$YEAR == "2015" & ww$HAB2 == "MES"], na.rm = T)
 sd(ww$CLUTCH[ww$YEAR == "2015" & ww$HAB2 == "MES"], na.rm = T)
 
+table(ww$SUPPL_DATE[ww$YEAR == "2015" & ww$HAB2 == "MES"], useNA = "always")
+
 # 2015 - WET
 dim(ww[ww$YEAR == "2015" & ww$HAB2 == "WET",])
 mean(ww$INITIATION[ww$YEAR == "2015" & ww$HAB2 == "WET"], na.rm = T)
@@ -107,6 +137,8 @@ sd(ww$INITIATION[ww$YEAR == "2015" & ww$HAB2 == "WET"], na.rm = T)
 
 mean(ww$CLUTCH[ww$YEAR == "2015" & ww$HAB2 == "WET"], na.rm = T)
 sd(ww$CLUTCH[ww$YEAR == "2015" & ww$HAB2 == "WET"], na.rm = T)
+
+table(ww$SUPPL_DATE[ww$YEAR == "2015" & ww$HAB2 == "WET"], useNA = "always")
 
 # 2016 - MES
 dim(ww[ww$YEAR == "2016" & ww$HAB2 == "MES",])
@@ -116,6 +148,8 @@ sd(ww$INITIATION[ww$YEAR == "2016" & ww$HAB2 == "MES"], na.rm = T)
 mean(ww$CLUTCH[ww$YEAR == "2016" & ww$HAB2 == "MES"], na.rm = T)
 sd(ww$CLUTCH[ww$YEAR == "2016" & ww$HAB2 == "MES"], na.rm = T)
 
+table(ww$SUPPL_DATE[ww$YEAR == "2016" & ww$HAB2 == "MES"], useNA = "always")
+
 # 2016 - WET
 dim(ww[ww$YEAR == "2016" & ww$HAB2 == "WET",])
 mean(ww$INITIATION[ww$YEAR == "2016" & ww$HAB2 == "WET"], na.rm = T)
@@ -123,6 +157,8 @@ sd(ww$INITIATION[ww$YEAR == "2016" & ww$HAB2 == "WET"], na.rm = T)
 
 mean(ww$CLUTCH[ww$YEAR == "2016" & ww$HAB2 == "WET"], na.rm = T)
 sd(ww$CLUTCH[ww$YEAR == "2016" & ww$HAB2 == "WET"], na.rm = T)
+
+table(ww$SUPPL_DATE[ww$YEAR == "2016" & ww$HAB2 == "WET"], useNA = "always")
 
 # 2017 - MES
 dim(ww[ww$YEAR == "2017" & ww$HAB2 == "MES",])
@@ -132,6 +168,8 @@ sd(ww$INITIATION[ww$YEAR == "2017" & ww$HAB2 == "MES"], na.rm = T)
 mean(ww$CLUTCH[ww$YEAR == "2017" & ww$HAB2 == "MES"], na.rm = T)
 sd(ww$CLUTCH[ww$YEAR == "2017" & ww$HAB2 == "MES"], na.rm = T)
 
+table(ww$SUPPL_DATE[ww$YEAR == "2017" & ww$HAB2 == "MES"], useNA = "always")
+
 # 2017 - WET
 dim(ww[ww$YEAR == "2017" & ww$HAB2 == "WET",])
 mean(ww$INITIATION[ww$YEAR == "2017" & ww$HAB2 == "WET"], na.rm = T)
@@ -139,6 +177,8 @@ sd(ww$INITIATION[ww$YEAR == "2017" & ww$HAB2 == "WET"], na.rm = T)
 
 mean(ww$CLUTCH[ww$YEAR == "2017" & ww$HAB2 == "WET"], na.rm = T)
 sd(ww$CLUTCH[ww$YEAR == "2017" & ww$HAB2 == "WET"], na.rm = T)
+
+table(ww$SUPPL_DATE[ww$YEAR == "2017" & ww$HAB2 == "WET"], useNA = "always")
 
 
 
