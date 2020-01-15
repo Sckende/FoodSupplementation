@@ -17,6 +17,30 @@ data$HAB2 <- relevel(data$HAB2, "MES")
 data$SUPPL_JJ[data$SUPPL == "TEM"] <- data$FirstFound[data$SUPPL == "TEM"] - data$INITIATION[data$SUPPL == "TEM"]
 data$SUPPL_JJ[data$SUPPL %in% c("F", "W")] <- data$SUPPL_DATE[data$SUPPL %in% c("F", "W")] - data$INITIATION[data$SUPPL %in% c("F", "W")]
 
+d <- split(data, paste(data$YEAR, data$ID))
+dd <- lapply(d, function(x) {
+  x <- x[1,]
+  x
+})
+dd <- do.call("rbind", dd)
+
+#### Comparability among groups ####
+# Laying date - 2015 - 2016 - 2017
+kruskal.test(dd$INITIATION[dd$YEAR == 2015], factor(paste(dd$SUPPL[dd$YEAR == 2015], dd$HAB2[dd$YEAR == 2015], sep = "")))
+kruskal.test(dd$INITIATION[dd$YEAR == 2016], factor(paste(dd$SUPPL[dd$YEAR == 2016], dd$HAB2[dd$YEAR == 2016], sep = "")))
+kruskal.test(dd$INITIATION[dd$YEAR == 2017], factor(paste(dd$SUPPL[dd$YEAR == 2017], dd$HAB2[dd$YEAR == 2017], sep = "")))
+
+# Clutch size - 2015 - 2016 - 2017
+kruskal.test(dd$CLUTCH[dd$YEAR == 2015], factor(paste(dd$SUPPL[dd$YEAR == 2015], dd$HAB2[dd$YEAR == 2015], sep = "")))
+kruskal.test(dd$CLUTCH[dd$YEAR == 2016], factor(paste(dd$SUPPL[dd$YEAR == 2016], dd$HAB2[dd$YEAR == 2016], sep = "")))
+    # Significant difference between group
+    # Use of pairwise wilcox test to determine which group is different
+      pairwise.wilcox.test(dd$CLUTCH[dd$YEAR == 2016], factor(paste(dd$SUPPL[dd$YEAR == 2016], dd$HAB2[dd$YEAR == 2016], sep = "")),
+                     p.adjust.method = "bonferroni")
+
+
+kruskal.test(dd$CLUTCH[dd$YEAR == 2017], factor(paste(dd$SUPPL[dd$YEAR == 2017], dd$HAB2[dd$YEAR == 2017], sep = "")))
+
 
 food <- data[data$SUPPL == "F",]
 water <- data[data$SUPPL == "W",]
