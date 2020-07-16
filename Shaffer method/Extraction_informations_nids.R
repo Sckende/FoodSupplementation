@@ -6,6 +6,9 @@ summary(data)
 
 data <- data[!data$YEAR == 2005,]
 data$YEAR <- as.factor(data$YEAR)
+data$HAB2 <- as.factor(data$HAB2)
+data$SUPPL <- as.factor(data$SUPPL)
+
 data$SUPPL <- relevel(data$SUPPL, "TEM")
 data$HAB2 <- relevel(data$HAB2, "MES")
 
@@ -26,20 +29,58 @@ dd <- do.call("rbind", dd)
 
 #### Comparability among groups ####
 # Laying date - 2015 - 2016 - 2017
-kruskal.test(dd$INITIATION[dd$YEAR == 2015], factor(paste(dd$SUPPL[dd$YEAR == 2015], dd$HAB2[dd$YEAR == 2015], sep = "")))
+
+# Assumptions - normality
+for (i in unique(dd$YEAR)){
+  data.test <- dd[dd$YEAR == i,]
+  sha <- shapiro.test(data.test$INITIATION)
+  show(i)
+  show(sha)
+} # ===> non normal ===> non-parametric tests !
+# non-parametric
+kruskal.test(dd$INITIATION[dd$YEAR == 2015], factor(paste(dd$SUPPL[dd$YEAR == 2015], dd$HAB2[dd$YEAR == 2015], sep = ""))) # parametric
+#dd2015 <- dd[dd$YEAR == 2015,]
+#Anova(lm(INITIATION ~ paste(HAB2, SUPPL, sep = ""), data = dd2015))
+
+# non-parametric
 kruskal.test(dd$INITIATION[dd$YEAR == 2016], factor(paste(dd$SUPPL[dd$YEAR == 2016], dd$HAB2[dd$YEAR == 2016], sep = "")))
+# parametric
+#dd2016 <- dd[dd$YEAR == 2016,]
+#Anova(lm(INITIATION ~ paste(HAB2, SUPPL, sep = ""), data = dd2016))
+
+# non-parametric
 kruskal.test(dd$INITIATION[dd$YEAR == 2017], factor(paste(dd$SUPPL[dd$YEAR == 2017], dd$HAB2[dd$YEAR == 2017], sep = "")))
+# parametric
+#dd2017 <- dd[dd$YEAR == 2017,]
+#Anova(lm(INITIATION ~ paste(HAB2, SUPPL, sep = ""), data = dd2017))
 
 # Clutch size - 2015 - 2016 - 2017
+# Assumptions - normality
+for (i in unique(dd$YEAR)){
+  data.test <- dd[dd$YEAR == i,]
+  sha <- shapiro.test(data.test$CLUTCH)
+  show(i)
+  show(sha)
+} # ===> non normal ===> non-parametric tests !
+
+# non-parametric
 kruskal.test(dd$CLUTCH[dd$YEAR == 2015], factor(paste(dd$SUPPL[dd$YEAR == 2015], dd$HAB2[dd$YEAR == 2015], sep = "")))
+# parametric
+#Anova(lm(CLUTCH ~ paste(HAB2, SUPPL, sep = ""), data = dd2015))
+
+# non-parametric
 kruskal.test(dd$CLUTCH[dd$YEAR == 2016], factor(paste(dd$SUPPL[dd$YEAR == 2016], dd$HAB2[dd$YEAR == 2016], sep = "")))
+# parametric
+#Anova(lm(CLUTCH ~ paste(HAB2, SUPPL, sep = ""), data = dd2016))
     # Significant difference between group
     # Use of pairwise wilcox test to determine which group is different
       pairwise.wilcox.test(dd$CLUTCH[dd$YEAR == 2016], factor(paste(dd$SUPPL[dd$YEAR == 2016], dd$HAB2[dd$YEAR == 2016], sep = "")),
                      p.adjust.method = "bonferroni")
 
-
+# non-parametric
 kruskal.test(dd$CLUTCH[dd$YEAR == 2017], factor(paste(dd$SUPPL[dd$YEAR == 2017], dd$HAB2[dd$YEAR == 2017], sep = "")))
+# parametric
+#Anova(lm(CLUTCH ~ paste(HAB2, SUPPL, sep = ""), data = dd2017))
 
 
 food <- data[data$SUPPL == "F",]
