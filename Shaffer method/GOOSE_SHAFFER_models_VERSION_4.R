@@ -3,8 +3,8 @@
 
 #### Models with logistic-exposure link ####
 
-setwd("C:/Users/HP_9470m/OneDrive - Université de Moncton/Doc doc doc/Ph.D. - ANALYSES/R analysis/Data")
-rm(list = ls())
+# setwd("C:/Users/HP_9470m/OneDrive - Université de Moncton/Doc doc doc/Ph.D. - ANALYSES/R analysis/Data")
+# rm(list = ls())
 
 #### Packages ####
 library("lme4") # For generalised linear models
@@ -19,16 +19,19 @@ library("emmeans") # For the contrast analysis
 library("modEvA") # For the variance explained
 
 #### Import data ####
+# data <- read.table("GOOSE_SHAFFER_database_all_nests_2005_2015-2017.csv", h = T, sep = " ")
 data <- read.table("GOOSE_SHAFFER_database_all_nests_2005_2015-2017.csv", h = T, sep = " ")
 summary(data)
 
 data <- data[!data$YEAR == 2005,]
 data$YEAR <- as.factor(data$YEAR)
+data$SUPPL <- as.factor(data$SUPPL)
+data$HAB2 <- as.factor(data$HAB2)
 data$SUPPL <- relevel(data$SUPPL, "TEM")
 data$HAB2 <- relevel(data$HAB2, "MES")
 
 # Supplementation date
-# d.suppl <- data[!data$SUPPL == "TEM",]; d.suppl <- droplevels(d.suppl); summary(d.suppl)
+d.suppl <- data[!data$SUPPL == "TEM",]; d.suppl <- droplevels(d.suppl); summary(d.suppl)
 
 # Creation of supplementation date variable in day number between initiation date and the first visit for the control nests and the supplementation date for the supplemented nests
 
@@ -82,7 +85,8 @@ group.size$V4 <- as.numeric(as.character(group.size$V4))
 summary(group.size)
 levels(group.size$V3)
 
-group.size$V3 <- factor(group.size$V3,levels(group.size$V3)[c(2, 1, 3)])
+group.size$V3 <- factor(group.size$V3 , levels = c("TEM", "F", "W"))
+
 
 group.size <- group.size[with(group.size, order(V1, V3, V2)),]
 names(group.size) <- c("year", "hab", "suppl", "n")
@@ -971,4 +975,3 @@ Anova(suppl.2017[[1]])
 
 confint(suppl.2017[[2]])
 Anova(suppl.2017[[2]])
-
